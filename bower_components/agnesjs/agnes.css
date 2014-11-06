@@ -1,0 +1,59 @@
+	#logo { float:right;}
+	html,body {height:100%;background-color:#333;color:#FEE;font-family:serif;}
+	h1,h2,h3,h4,h5,h6 { font-family:sans-serif;color:#FF8}
+	h3,h4,h5,h6 { color:#FF8}
+	.tagline { font-style:italic;margin-top:-10px;color:#333}
+	textarea { height:200px;width:99%}
+	.debug { display:block}
+	blockquote{ background: #BDF;padding:10px;color:#333 }
+	input[type=button] {
+	  background-color:#DDD;
+	  float:right;
+	  border:0px solid #000;
+	  -moz-box-shadow: 0 0 12px #333;
+      -webkit-box-shadow: 0 0 12px #333;
+	  box-shadow: 0 0 12px #333;
+	  border-radius:5px;
+	  width:100px;
+    }
+	input[type=button]:hover {
+	 background-color:#FFF;
+	 -moz-box-shadow: 0 0 12px #333;
+      -webkit-box-shadow: 0 0 12px #333;
+	  box-shadow: 0 0 12px #333;
+	  cursor:pointer;
+    }
+	blockquote.example{ background: #FDB;padding:10px; }
+	.result {border:1px dashed #48F;margin:0px 40px;padding:10px}
+	a:active {color:#F88}
+	a:hover {color:#FFF}
+	a:link {color:#FFF}
+	a:visited {color:#FFF}
+	a{color:#FFF}
+	
+	a.download {
+	font-size:x-large; 
+	background-color:#777;
+	color:#333;
+	font-weight:bold;
+	margin:20px;
+	padding:10px;
+	margin-left:45px;
+	-moz-border-radius:15px;
+	border-radius: 15px;
+	text-decoration:none;
+	-moz-box-shadow: 1px 1px 2px #666;
+    -webkit-box-shadow: 1px 1px 2px #666;
+	box-shadow: 1px 1px 2px #666; 
+    }
+
+	a.download:hover {
+	  background-color:#AAA;
+	  color:#333;
+	  -moz-box-shadow: 0 0 12px #FF7;
+      -webkit-box-shadow: 0 0 12px #FF7;
+	  box-shadow: 0 0 12px #FF7;
+      text-shadow: 1 1 1px #222;
+	}
+textarea { height:350px}
+#testButton { float:none;}

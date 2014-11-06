@@ -1,0 +1,14 @@
+{
+  "name": "completely",
+  "homepage": "https://github.com/lorenzoongithub/completely",
+  "_release": "a7db4de5fd",
+  "_resolution": {
+    "type": "branch",
+    "branch": "master",
+    "commit": "a7db4de5fd8a30e36ebeabe1b29762b1b9bdeba6"
+  },
+  "_source": "git://github.com/lorenzoongithub/completely.git",
+  "_target": "*",
+  "_originalSource": "completely",
+  "_direct": true
+}

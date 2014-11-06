@@ -1,0 +1,50 @@
+<!doctype html>
+<html>
+<head>
+    <title>agnes sample: two way Csv to Json</title>
+    <script type="text/javascript" src="agnes.js"></script>
+    <link rel="stylesheet" type="text/css" href="agnes.css" />
+    <script type='text/javascript'>
+
+        // the poor man's jQuery
+        function $(id) {
+            return document.getElementById(id);
+        }
+
+    </script>
+</head>
+<body>
+    <img src='logo_r_t_s.png' id='logo' />
+    <h1>
+        agnes sample: two way Csv to Json</h1>
+    <p>
+        Here's a form for converting CSV to Json and vice-versa.</p>
+    <table>
+        <tr>
+            <td>
+                <h3>
+                    csv</h3>
+                <textarea rows='8' cols='100' id='txtCsv'>a,b
+1,2
+3,4</textarea>
+            </td>
+            <td>
+                <input type='button' onclick="$('txtJson').value = JSON.stringify(agnes.csvToJson($('txtCsv').value),null,' ');"
+                    value='To Json &rarr;' /><br />
+                <input type='button' onclick="$('txtCsv').value = agnes.jsonToCsv(eval($('txtJson').value));"
+                    value='&larr; To Csv' />
+            </td>
+            <td>
+                <h3>
+                    json</h3>
+                <textarea rows='8' cols='100' id='txtJson'>
+</textarea>
+            </td>
+        </tr>
+    </table>
+    <input type='button' onclick="alert('agnes.settings() == ' + JSON.stringify(agnes.settings(),null,'\t'));"
+        value='settings...' />
+<a href='readme.html'>API readme</a>
+    
+</body>
+</html>
