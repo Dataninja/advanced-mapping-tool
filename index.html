@@ -40,37 +40,27 @@
         <meta property="twitter:site" content="" />
         <meta property="twitter:creator" content="" />
         <!-- End Twitter Card Metas -->
-        <script src="bower_components/headjs/dist/1.0.0/head.js"></script>
-        <script type="text/javascript">
-            //var JSTERS = {};
-            var MYDEBUG;
-            head.load("bower_components/queue-async/queue.js")
-                .load("bower_components/d3/d3.js")
-                .load("bower_components/geostats/lib/geostats.js")
-                .load("bower_components/colorbrewer2/colorbrewer.js")
-                .load([
-                    "bower_components/leaflet/dist/leaflet-src.js", "bower_components/leaflet/dist/leaflet.css",
-                    "bower_components/spin.js/spin.js", "bower_components/Leaflet.Spin/leaflet.spin.js", 
-                    "bower_components/leaflet-control-osm-geocoder/Control.OSMGeocoder.js", "bower_components/leaflet-control-osm-geocoder/Control.OSMGeocoder.css",
-                    "bower_components/Leaflet.label/dist/leaflet.label-src.js", "bower_components/Leaflet.label/dist/leaflet.label.css",
-                    "bower_components/leaflet-fullscreen/Control.FullScreen.js", "bower_components/leaflet-fullscreen/Control.FullScreen.css",
-                    "bower_components/leaflet.markercluster/dist/leaflet.markercluster-src.js", "bower_components/leaflet.markercluster/dist/MarkerCluster.Default.css", "bower_components/leaflet.markercluster/dist/MarkerCluster.css"
-                ])
-                .load("bower_components/completely/complete.ly.1.0.1.js")
-                .load("bower_components/agnesjs/agnes.js")
-                .load("bower_components/argjs/src/arg.js")
-                .load("bower_components/Blob.js/Blob.js", "bower_components/canvas-toBlob.js/canvas-toBlob.js", "bower_components/FileSaver/FileSaver.js")
-                .load("bower_components/canvg/dist/canvg.bundle.js")
-                .load("bower_components/html2canvas/build/html2canvas.js")
-                .load("bower_components/JavaScript-MD5/js/md5.js")
-                .load("bower_components/yourls-api/yourls.js")
-                .load("css/main.css", "css/layout.css", "css/table.css")
-                .load("dataninja-advanced-mapping-tool.js");
-        </script>
+        <!-- CSS -->
+        <link rel="stylesheet" type="text/css" href="dataninja-advanced-mapping-tool.min.css">
+        <!-- Javascript -->
+        <script src="dataninja-advanced-mapping-tool.lib.min.js"></script>
+        <script src="dataninja-advanced-mapping-tool.min.js"></script>
     </head>
     <body>
         <div id="fb-root"></div>
         <div id="map"></div>
+        <!--
+        <script>
+          (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+          (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+          m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+          })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+          ga('create', 'UA-90058-82', 'auto');
+          ga('send', 'pageview');
+
+        </script>
+        -->
     </body>
 </html>
 
