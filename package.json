@@ -1,0 +1,59 @@
+{
+  "name": "dataninja-advanced-mapping-tool",
+  "version": "0.0.1",
+  "description": "Another advanced mapping tool by Dataninja",
+  "keywords": "map leaflet choropleth dataninja",
+  "homepage": "https://github.com/Dataninja/advanced-mapping-tool",
+  "bugs": {
+    "url": "https://github.com/Dataninja/advanced-mapping-tool/issues",
+    "email": "jenkin@dataninja.it"
+  },
+  "license": "Apache 2.0",
+  "author": {
+    "name": "Alessio Cimarelli",
+    "email": "jenkin@dataninja.it",
+    "url": "http://www.dataninja.it"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Dataninja/advanced-mapping-tool"
+  },
+  "files": [
+    "bower_components/headjs/dist/1.0.0/head.js",
+    "bower_components/queue-async/queue.js",
+    "bower_components/d3/d3.js",
+    "bower_components/geostats/lib/geostats.js",
+    "bower_components/colorbrewer2/colorbrewer.js",
+    "bower_components/leaflet/dist/leaflet-src.js",
+    "bower_components/spin.js/spin.js",
+    "bower_components/Leaflet.Spin/leaflet.spin.js",
+    "bower_components/leaflet-control-osm-geocoder/Control.OSMGeocoder.js",
+    "bower_components/Leaflet.label/dist/leaflet.label-src.js",
+    "bower_components/leaflet-fullscreen/Control.FullScreen.js",
+    "bower_components/leaflet.markercluster/dist/leaflet.markercluster-src.js",
+    "bower_components/completely/complete.ly.1.0.1.js",
+    "bower_components/agnesjs/agnes.js",
+    "bower_components/argjs/src/arg.js",
+    "bower_components/Blob.js/Blob.js",
+    "bower_components/canvas-toBlob.js/canvas-toBlob.js",
+    "bower_components/FileSaver/FileSaver.js",
+    "bower_components/canvg/dist/canvg.bundle.js",
+    "bower_components/html2canvas/build/html2canvas.js",
+    "bower_components/JavaScript-MD5/js/md5.js",
+    "bower_components/yourls-api/yourls.js"
+  ],
+  "devDependencies": {
+    "apache-server-configs": "^2.7.1",
+    "grunt": "^0.4.5",
+    "grunt-contrib-copy": "^0.7.0",
+    "grunt-contrib-concat": "^0.5.0",
+    "grunt-concat-css": "^0.3.1",
+    "grunt-contrib-uglify": "^0.5.1",
+    "grunt-contrib-jshint": "^0.10.0",
+    "grunt-contrib-cssmin": "^0.10.0",
+    "grunt-contrib-htmlmin": "^0.3.0"
+  },
+  "engines": {
+    "node": ">=0.10.0"
+  }
+}

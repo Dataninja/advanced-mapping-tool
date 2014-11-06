@@ -1,0 +1,406 @@
+/*** Body ***/
+
+html, body, #map {
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+  margin: 0;
+  padding: 0;
+}
+
+
+/*** Leaflet map ***/
+
+/* Sidebar */
+
+.leaflet-sidebar {
+  z-index: 1020;
+}
+
+.leaflet-sidebar > .leaflet-control {
+  padding: 0px;
+}
+
+.leaflet-sidebar .close {
+  display: none;
+}
+
+/* Navbar for typeahead */
+
+.navbar .navbar-brand {
+  font-weight: bold;
+  font-size: 25px;
+  color: white;
+}
+
+.navbar-collapse.in {
+  overflow-y: hidden;
+}
+
+.typeahead {
+  background-color: #FFFFFF;
+}
+
+.tt-dropdown-menu {
+  background-color: #FFFFFF;
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  border-radius: 4px 4px 4px 4px;
+  box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+  margin-top: 4px;
+  padding: 4px 0;
+  width: 100%;
+  max-height: 300px;
+  overflow: auto;
+}
+
+.tt-suggestion {
+  font-size: 14px;
+  line-height: 20px;
+  padding: 3px 10px;
+}
+
+.tt-suggestion.tt-cursor {
+  background-color: #0097CF;
+  color: #FFFFFF;
+  cursor: pointer;
+}
+
+.tt-suggestion p {
+  margin: 0;
+}
+
+.tt-suggestion + .tt-suggestion {
+  border-top: 1px solid #ccc;
+}
+
+.typeahead-header {
+  margin: 0 5px 5px 5px;
+  padding: 3px 0;
+  border-bottom: 2px solid #333;
+}
+
+.has-feedback .form-control-feedback {
+  position: absolute;
+  top: 0;
+  right: 0;
+  display: block;
+  width: 34px;
+  height: 34px;
+  line-height: 34px;
+  text-align: center;
+}
+
+@media (max-width: 992px) {
+  .navbar .navbar-brand {
+    font-size: 18px;
+  }
+}
+
+@media (max-width: 767px){
+  .url-break {
+    word-break: break-all;
+    word-break: break-word;
+    -webkit-hyphens: auto;
+    hyphens: auto;
+  }
+}
+
+/* Control */
+
+.leaflet-control-container > div {
+    max-width: 100%;
+}
+
+.leaflet-left .leaflet-control,
+.leaflet-right .leaflet-control {
+    float: none;
+}
+
+.leaflet-control-layers label {
+  font-weight: normal;
+  margin-bottom: 0px;
+}
+
+.leaflet-control-layers-group-name {
+  font-weight: bold;
+  margin-bottom: .2em;
+  display: block;
+}
+
+.leaflet-control-layers-group {
+  margin-bottom: .5em;
+}
+
+.leaflet-control-layers-group label {
+  padding-left: .5em;
+}
+
+/* Map corners */
+
+.leaflet-bottom {
+    bottom: 2em;
+}
+
+.leaflet-bottom .leaflet-control {
+    margin-bottom: 0;
+    vertical-align: bottom;
+}
+
+.leaflet-top {
+    top: 1em;
+}
+
+.leaflet-top .leaflet-control {
+    margin-top: 0;
+    vertical-align: middle;
+}
+
+.leaflet-control { 
+    display: inline-block;
+}
+
+.leaflet-left {
+    text-align: left;
+}
+
+.leaflet-right {
+    text-align: right;
+}
+
+.leaflet-top.leaflet-right {
+    z-index: 1010;
+}
+
+/* Attribution */
+
+.leaflet-control-attribution {
+    position: fixed;
+    bottom: 0;
+    right: 0;
+    margin: 0 !important;
+    max-width: 100%;
+    overflow: hidden;
+    white-space: nowrap;
+}
+
+/* Menu */
+
+.menu-ui {
+	background: #fff;
+	border-radius: 3px;
+	width: 70px;
+	border: 1px solid rgba(0,0,0,0.4);
+}
+
+.menu-ui a {
+	font-size: 13px;
+	font: 13px Arial, Helvetica, sans-serif;
+	color: #404040;
+	display: block;
+	margin: 0;padding: 0;
+	padding: 2px;
+	text-decoration: none;
+	border-bottom: 1px solid rgba(0,0,0,0.25);
+	text-align: center;
+}
+
+.menu-ui a.disabled {
+    color: #b0b0b0;
+    cursor: default;
+}
+
+.menu-ui a: first-child {
+	border-radius: 3px 3px 0 0;
+}
+
+.menu-ui a: last-child {
+	border: none;
+	border-radius: 0 0 3px 3px;
+}
+
+.menu-ui a: hover {
+	background: #f8f8f8;
+	color: #404040;
+}
+
+.menu-ui a.disabled: hover {
+	background: #fff;
+    color: #b0b0b0;
+}
+
+.menu-ui a.active {
+	background: #3887BE;
+	color: #FFF;
+}
+
+.menu-ui a.active: hover {
+	background: #3074a4;
+}
+
+/* Infowindow */
+
+.info {
+	padding: 6px 8px;
+	font: 12px/14px Arial, Helvetica, sans-serif;
+	background: white;
+	background: rgba(255,255,255,0.8);
+	box-shadow: 0 0 15px rgba(0,0,0,0.2);
+	border-radius: 5px;
+    overflow: auto;
+    overflow-x: hidden;
+    overflow-y: auto;
+    max-height: 350px;
+    text-align: left;
+}
+
+.info.closed {
+    max-width: 25%;
+}
+
+.info.closed ul {
+    padding-left: 0;
+    list-style-position: inside;
+}
+
+.info h4 {
+	margin: 0 0 5px;
+	color: #777;
+}
+
+.info a.ssb img, 
+.info a.dnl img, 
+.info a#close-cross img {
+    width: 20px;
+}
+
+.table {
+  margin-bottom: 0px;
+}
+
+/* Logo */
+
+#logo {
+    height: 55px;
+}
+
+/* Legend */
+
+.legend {
+	text-align: left;
+	line-height: 18px;
+	color: #555;
+}
+
+.legend i {
+	width: 18px;
+	height: 18px;
+	float: left;
+	margin-right: 8px;
+	opacity: 0.7;
+}
+
+/* Geocoder */
+
+.leaflet-control-geocoder .completely-wrapper {
+    display: inline-block;
+}
+
+/* Action icons */
+
+img.reset, 
+img.detach, 
+img.embed,
+img.screenshot {
+    height: 36px;
+    cursor: pointer;
+    border: 1px solid rgba(0,0,0,0.25);
+    border-radius: 5px;
+    background-color: white;
+}
+
+a.detach {
+    margin-top: 5px !important;
+}
+
+img.reset: hover, 
+img.detach: hover, 
+img.embed: hover,
+img.screenshot: hover {
+    background-color: whitesmoke;
+}
+
+.embed-inputarea {
+    display: block;
+    color: #404040;
+    padding: 0px 15px;
+    margin-top: 1em !important;
+    text-align: right;
+}
+
+.embed-inputarea .svg > * {
+    vertical-align: middle;
+}
+
+.embed-inputarea .svg textarea {
+    height: 3em;
+    width: 7em;
+}
+
+.embed-inputarea .svg img {
+    height: 4em;
+    cursor: pointer;
+}
+
+.screenshot-container {
+    display: block;
+    margin-top: 1em !important;
+}
+
+.screenshot-container canvas {
+    width: 30%;
+}
+
+
+/*** Sharing buttons ***/
+
+#buttons > * {
+    margin-left: 5px !important;
+    margin-right: 5px !important;
+}
+
+
+/*** Marker infowindow ***/
+
+.leaflet-popup-content {
+    max-height: 350px;
+    overflow: auto;
+}
+
+.leaflet-popup-content p {
+    margin-top: 0;
+    margin-bottom: 5px;
+}
+
+.leaflet-popup-content img {
+    width: 150px;
+    height: auto;
+}
+
+
+/*** Print Handling ***/
+
+@media print {
+  .navbar {
+    display: none !important;
+  }
+  .leaflet-control-container {
+    display: none !important;
+  }
+}
+
+
+/*** Colors ***/
+
+.rossobc{
+	color: #EB593C;
+}

@@ -1,0 +1,87 @@
+body.widget {
+    height: 755px;
+    width: 100%;
+    max-width: 350px;
+    margin: auto;
+}
+
+body.widget #map {
+    height: 350px;
+}
+
+body.widget .leaflet-right .leaflet-control {
+    float: right;
+}
+
+body.widget .leaflet-left .leaflet-control {
+    float: left;
+}
+
+body.widget #infowindow {
+    height: 350px;
+    border-radius: 5px;
+    padding: 0;
+}
+
+body.widget .info.closed {
+    max-width: none;
+}
+
+body.widget #logo-widget {
+    text-align: center;
+}
+
+body.widget #logo {
+    width: auto;
+    height: 50px;
+}
+
+body.widget .legend {
+    line-height: 14px;
+}
+
+body.widget .legend i {
+    width: 14px;
+    height: 14px;
+    margin-right: 0;
+}
+
+body.mobile .menu-ui a {
+    padding: 5px;
+}
+
+body.widget img.reset, 
+body.widget img.detach, 
+body.widget img.embed {
+    height: 24px;
+}
+
+body.widget .leaflet-bar a, 
+body.widget .leaflet-bar a: hover {
+    width: 20px;
+    height: 20px;
+}
+
+body.widget .leaflet-control-attribution {
+    position: initial;
+    max-width: 80%;
+}
+
+body.widget .leaflet-bottom.leaflet-right {
+    bottom: 0;
+}
+
+body.widget .leaflet-bottom.leaflet-left {
+    bottom: 1em;
+}
+
+body.widget .leaflet-bar a, 
+body.widget .leaflet-bar a:hover {
+    width: 22px;
+    height: 22px;
+    line-height: 22px;
+}
+
+body.widget .leaflet-control-zoom-out {
+    font-size: 16px;
+}

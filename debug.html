@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Dataninja/advanced-mapping-tool</title>
+        <link rel="shortcut icon" href="img/favicon.gif" />
+	    <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta name="description" content="" />
+        <!-- Google Rich Snippet: http://www.9lessons.info/2014/01/social-meta-tags-for-google-twitter-and.html -->
+        <meta property="business:contact_data:country_name" content=""/>
+        <meta property="business:contact_data:email" content=""/>
+        <meta property="business:contact_data:website" content=""/>
+        <meta itemprop="name" content=""/>
+        <meta itemprop="description" content=""/>
+        <meta itemprop="image" content=""/>
+        <!-- End Google Rich Snippet -->
+        <!-- Open Graph Protocol: http://ogp.me/ -->
+        <meta property="og:title" content="" />
+        <meta property="og:determiner" content="" />
+        <meta property="og:type" content="" />
+        <meta property="og:image" content="" />
+        <meta property="og:image:type" content="" />
+        <meta property="og:image:width" content="" />
+        <meta property="og:image:height" content="" />
+        <meta property="og:url" content="" />
+        <meta property="og:description" content="" />
+        <meta property="og:site_name" content="" />
+        <meta property="og:see_also" content=""/>
+        <meta property="og:locale" content="" />
+        <!-- End Open Graph Protocol -->
+        <!-- Twitter Card Metas: http://davidwalsh.name/twitter-cards -->
+        <meta property="twitter:card" content="" />
+        <meta property="twitter:url" content="" />
+        <meta property="twitter:title" content="" />
+        <meta property="twitter:description" content="" />
+        <meta property="twitter:image:src" content="" />
+        <meta property="twitter:image:width" content="" />
+        <meta property="twitter:image:height" content="" />
+        <meta property="twitter:domain" content="" />
+        <meta property="twitter:site" content="" />
+        <meta property="twitter:creator" content="" />
+        <!-- End Twitter Card Metas -->
+        <script src="bower_components/headjs/dist/1.0.0/head.js"></script>
+        <script type="text/javascript">
+            //var JSTERS = {};
+            var MYDEBUG;
+            head.load("bower_components/queue-async/queue.js")
+                .load("bower_components/d3/d3.js")
+                .load("bower_components/geostats/lib/geostats.js")
+                .load("bower_components/colorbrewer2/colorbrewer.js")
+                .load([
+                    "bower_components/leaflet/dist/leaflet-src.js", "bower_components/leaflet/dist/leaflet.css",
+                    "bower_components/spin.js/spin.js", "bower_components/Leaflet.Spin/leaflet.spin.js", 
+                    "bower_components/leaflet-control-osm-geocoder/Control.OSMGeocoder.js", "bower_components/leaflet-control-osm-geocoder/Control.OSMGeocoder.css",
+                    "bower_components/Leaflet.label/dist/leaflet.label-src.js", "bower_components/Leaflet.label/dist/leaflet.label.css",
+                    "bower_components/leaflet-fullscreen/Control.FullScreen.js", "bower_components/leaflet-fullscreen/Control.FullScreen.css",
+                    "bower_components/leaflet.markercluster/dist/leaflet.markercluster-src.js", "bower_components/leaflet.markercluster/dist/MarkerCluster.Default.css", "bower_components/leaflet.markercluster/dist/MarkerCluster.css"
+                ])
+                .load("bower_components/completely/complete.ly.1.0.1.js")
+                .load("bower_components/agnesjs/agnes.js")
+                .load("bower_components/argjs/src/arg.js")
+                .load("bower_components/Blob.js/Blob.js", "bower_components/canvas-toBlob.js/canvas-toBlob.js", "bower_components/FileSaver/FileSaver.js")
+                .load("bower_components/canvg/dist/canvg.bundle.js")
+                .load("bower_components/html2canvas/build/html2canvas.js")
+                .load("bower_components/JavaScript-MD5/js/md5.js")
+                .load("bower_components/yourls-api/yourls.js")
+                .load("css/main.css", "css/layout.css", "css/table.css")
+                .load("dataninja-advanced-mapping-tool.js");
+        </script>
+    </head>
+    <body>
+        <div id="fb-root"></div>
+        <div id="map"></div>
+    </body>
+</html>
+
