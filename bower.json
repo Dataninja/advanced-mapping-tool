@@ -37,7 +37,6 @@
     "geostats": "~1.2.0",
     "headjs": "~1.0.3",
     "html2canvas": "~0.4.1",
-    "leaflet-control-geocoder": "~0.2.1",
     "leaflet-fullscreen": "~1.1.3",
     "leaflet.markercluster": "~0.4.0",
     "leaflet": "~0.7.3",
@@ -47,6 +46,7 @@
     "completely": "jenkin/completely",
     "Blob.js": "eligrey/Blob.js",
     "canvas-toBlob.js": "eligrey/canvas-toBlob.js",
-    "yourls-api": "jenkin/yourls-api#~1.0.0"
+    "yourls-api": "jenkin/yourls-api#~1.0.0",
+    "leaflet-control-osm-geocoder": "k4r573n/leaflet-control-osm-geocoder"
   }
 }

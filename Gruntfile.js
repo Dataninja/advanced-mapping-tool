@@ -6,7 +6,7 @@ module.exports = function(grunt) {
         copy: {
             main: {
                 src: [
-                    'bower_components/leaflet-control-geocoder/images/*',
+                    'bower_components/leaflet-control-osm-geocoder/images/*',
                     'bower_components/leaflet-fullscreen/*.png',
                     'bower_components/leaflet/dist/images/*'
 
@@ -47,7 +47,7 @@ module.exports = function(grunt) {
                 files: {
                     '<%= pkg.name %>.min.css': [
                         'bower_components/leaflet/dist/leaflet.css', 
-                        'bower_components/leaflet-control-geocoder/Control.Geocoder.css',
+                        'bower_components/leaflet-control-osm-geocoder/Control.OSMGeocoder.css',
                         'bower_components/Leaflet.label/dist/leaflet.label.css',
                         'bower_components/leaflet-fullscreen/Control.FullScreen.css',
                         'bower_components/leaflet.markercluster/dist/MarkerCluster.Default.css',
