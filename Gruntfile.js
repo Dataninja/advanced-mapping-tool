@@ -3,6 +3,17 @@
 module.exports = function(grunt) {
     grunt.initConfig({
         pkg: grunt.file.readJSON('package.json'),
+        copy: {
+            main: {
+                src: [
+                    'bower_components/leaflet-control-geocoder/images/*',
+                    'bower_components/leaflet-fullscreen/*.png',
+                    'bower_components/leaflet/dist/images/*'
+
+                ],
+                dest: 'img/',
+            },
+        },
         concat: {
             options: {
                 // define a string to put between each file in the concatenated output
@@ -35,14 +46,14 @@ module.exports = function(grunt) {
             combine: {
                 files: {
                     '<%= pkg.name %>.min.css': [
-                        'js/leaflet/leaflet.css', 
-                        'js/osm-geocoder/Control.OSMGeocoder.css',
-                        'js/label/leaflet.label.css',
-                        'js/fullscreen/Control.FullScreen.css',
-                        'js/markerclusters/MarkerCluster.Default.css',
-                        'js/markerclusters/MarkerCluster.css',
-                        'css/cb.css', 
-                        'css/cb-layout.css', 
+                        'bower_components/leaflet/dist/leaflet.css', 
+                        'bower_components/leaflet-control-geocoder/Control.Geocoder.css',
+                        'bower_components/Leaflet.label/dist/leaflet.label.css',
+                        'bower_components/leaflet-fullscreen/Control.FullScreen.css',
+                        'bower_components/leaflet.markercluster/dist/MarkerCluster.Default.css',
+                        'bower_components/leaflet.markercluster/dist/MarkerCluster.css',
+                        'css/main.css', 
+                        'css/layout.css', 
                         'css/table.css'
                     ]
                 }
@@ -54,11 +65,12 @@ module.exports = function(grunt) {
         }
     });
 
+    grunt.loadNpmTasks('grunt-contrib-copy');
     grunt.loadNpmTasks('grunt-contrib-concat');
     grunt.loadNpmTasks('grunt-contrib-uglify');
     grunt.loadNpmTasks('grunt-contrib-cssmin');
     grunt.loadNpmTasks('grunt-contrib-jshint');
 
     grunt.registerTask('jshint', ['jshint']);
-    grunt.registerTask('default', [/*'jshint',*/ 'concat', 'uglify', 'cssmin']);
+    grunt.registerTask('default', [/*'jshint',*/ 'copy', 'concat', 'uglify', 'cssmin']);
 }
