@@ -7,14 +7,14 @@
                 
                 /*** Gestione dei dati ***/
                 var defaultGeo = {
-                        'regioni': { id: 'COD_REG', name: 'NOME_REG', resource: null, list: [] },
-                        'province': { id: 'COD_PRO', name: 'NOME_PRO', resource: null, list: [] },
-                        'comuni': { id: 'PRO_COM', name: 'NOME_COM', resource: null, list: [] }
+                        'regioni': { id: 'COD_REG', label: 'NOME_REG', resource: null, list: [] },
+                        'province': { id: 'COD_PRO', label: 'NOME_PRO', resource: null, list: [] },
+                        'comuni': { id: 'PRO_COM', label: 'NOME_COM', resource: null, list: [] }
                     },
                     defaultData = {
-                        'regioni': { id: 'IdRegioneISTAT', resourceId: 'e2f0c989-929f-4e4d-87e2-097140f8880f', resource: null, markers: null, binCol: 'Totale beni', bins: [], ranges: [] },
-                        'province': { id: 'IdProvinciaISTAT', resourceId: 'c18fa1ca-971f-4cfa-92e9-869785260dec', resource: null, markers: null, binCol: 'Totale beni', bins: [], ranges: [] },
-                        'comuni': { id: 'IdComuneISTAT', resourceId: '69b2565e-0332-422f-ad57-b11491e33b08', resource: null, markers: null, binCol: 'Totale beni', bins: [], ranges: [] }
+                        'regioni': { id: 'IdRegioneISTAT', resourceId: 'e2f0c989-929f-4e4d-87e2-097140f8880f', resource: null, markers: null, value: 'Totale beni', bins: [], ranges: [] },
+                        'province': { id: 'IdProvinciaISTAT', resourceId: 'c18fa1ca-971f-4cfa-92e9-869785260dec', resource: null, markers: null, value: 'Totale beni', bins: [], ranges: [] },
+                        'comuni': { id: 'IdComuneISTAT', resourceId: '69b2565e-0332-422f-ad57-b11491e33b08', resource: null, markers: null, value: 'Totale beni', bins: [], ranges: [] }
                     },
                     geo = {}, data = {};
 
@@ -129,10 +129,10 @@
                             imResId = 'e5b4d63a-e1e8-40a3-acec-1d351f03ee56',
                             azResId = '8b7e12f1-6484-47f0-9cf6-88b446297dbc';
 
-                        var btnTitle = 'Condividi la situazione' + (territorio == 'regioni' ? ' in ' : ' a ') + props[geo[territorio].name],
+                        var btnTitle = 'Condividi la situazione' + (territorio == 'regioni' ? ' in ' : ' a ') + props[geo[territorio].label],
                             btnUrl = 'http://' + location.hostname + Arg.url(parameters).replace(/&*md=[^&]*/,'').replace(/&{2,}/g,"&"),
                             btnEncUrl = 'http://' + location.hostname + encodeURIComponent(Arg.url(parameters).replace(/&*md=[^&]*/,'').replace(/&{2,}/g,"&")),
-                            btnPlace = props[geo[territorio].name];
+                            btnPlace = props[geo[territorio].label];
                         var buttons = [
                             '<a class="ssb" href="http://twitter.com/share?url=' + btnEncUrl + 
                                 '&via=confiscatibene' + 
@@ -162,7 +162,7 @@
                             '<th>' + '<span id="sdnlBtn">'+dnlBtn.join("&nbsp;")+'</span>' + "&nbsp;&nbsp;" + '<span id="sshrBtn">'+buttons.join("&nbsp;")+'</span>' + '</th>' + 
                             '<th style="text-align:right;"><a id="close-cross" href="#" title="Chiudi"><img src="img/close.png" /></a></th></tr>' + 
                             '<tr>' + 
-                            '<th colspan="2" class="rossobc">' + props[geo[territorio].name] + '</th>' +
+                            '<th colspan="2" class="rossobc">' + props[geo[territorio].label] + '</th>' +
                             '</tr>' + 
                             '</thead>' + 
                             '<tfoot>' + 
@@ -226,13 +226,13 @@
                             });
                         });
                         var azPath = apiPath + 
-                            "?resource_id=i" + azResId + "&limit=5000&filters[" + 
+                            "?resource_id=" + azResId + "&limit=5000&filters[" + 
                             filterKey + 
                             "]=" + 
                             filterValue;
                         d3.select('a#a-aziende').on("click", function() {
                             var that = this;
-                            d3.json(imPath, function(err,res) {
+                            d3.json(azPath, function(err,res) {
                                 if (res.result.records.length > 0) {
                                     var csv = agnes.jsonToCsv(res.result.records, delim),
                                         blob = new Blob([csv], {type: "text/csv;charset=utf-8"}),
@@ -517,7 +517,7 @@
         		function style(feature) {
                     var territorio = parameters.dl,
                         currentStyle = defaultStyle;
-                    currentStyle.fillColor = getColor(parseInt(feature.properties.data[data[territorio].binCol]), data[territorio].bins);
+                    currentStyle.fillColor = getColor(parseInt(feature.properties.data[data[territorio].value]), data[territorio].bins);
 	        		return currentStyle;
         		}
 
@@ -554,7 +554,7 @@
                     osmGeocoder._completely.input.maxLength = 50; // limit the max number of characters in the input text 
                     d3.json((parameters.t ? 'geo/lista_comuni-'+parameters.t+'.json' : 'geo/lista_comuni.json'), function(err,data) {
                         defaultGeo['comuni'].list = data;
-                        osmGeocoder._completely.options = defaultGeo['comuni'].list.map(function(el) { return el[geo['comuni'].name]; });
+                        osmGeocoder._completely.options = defaultGeo['comuni'].list.map(function(el) { return el[geo['comuni'].label]; });
                     });
                 }
                 /*** ***/
@@ -566,7 +566,7 @@
                     var layer = e.target,
                         props = layer.feature.properties;
                     
-                    label.setContent(props[geo[parameters.dl].name]+'<br>Beni confiscati: '+props.data[data[parameters.dl].binCol]);
+                    label.setContent(props[geo[parameters.dl].label]+'<br>Beni confiscati: '+props.data[data[parameters.dl].value]);
                     label.setLatLng(layer.getBounds().getCenter());
                     map.showLabel(label);
     	    	}
@@ -671,7 +671,7 @@
 
                 // Binning della distribuzione dei dati
                 function binData(territorio) {
-                    var serie = data[territorio].resource.result.records.map(function(el) { return parseInt(el[data[territorio].binCol]); });
+                    var serie = data[territorio].resource.result.records.map(function(el) { return parseInt(el[data[territorio].value]); });
                     var gs = new geostats(serie);
                     data[territorio].bins = gs.getJenks(serie.length > 7 ? 7 : serie.length-1);
                     data[territorio].ranges = gs.ranges;
@@ -707,7 +707,7 @@
                             data[territorio].markers = markersjs || null;
                             map.spin(false);
                             /*if (territorio == 'comuni') {
-                                JSTERS['comuni'] = geo['comuni'].resource.features.map(function(el) { var arr = {}; arr[geo['regioni'].id] = el.properties[geo['regioni'].id]; arr[geo['province'].id] = el.properties[geo['province'].id]; arr[geo['comuni'].id] = el.properties[geo['comuni'].id]; arr[geo['comuni'].name] = el.properties[geo['comuni'].name]; return arr; });
+                                JSTERS['comuni'] = geo['comuni'].resource.features.map(function(el) { var arr = {}; arr[geo['regioni'].id] = el.properties[geo['regioni'].id]; arr[geo['province'].id] = el.properties[geo['province'].id]; arr[geo['comuni'].id] = el.properties[geo['comuni'].id]; arr[geo['comuni'].label] = el.properties[geo['comuni'].label]; return arr; });
                             }*/
                             joinData(territorio);
                             binData(territorio);
