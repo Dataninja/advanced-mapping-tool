@@ -15,7 +15,7 @@
             svgViewBox,
             defaultGeo = {}, geo = {},
             defaultData = {}, data = {},
-            menuLayers = $.geoLayers.filter(function(l) { return l.inSelectorControl; }),
+            menuLayers,
             i, k,
             map,
             attrib = L.control.attribution(),
@@ -29,12 +29,13 @@
             share,
             menu,
             osmGeocoder,
-            legend;
+            legend,
+            sourceDef, typeDef;
 
         // Configuration initialization
         for (i=0; i<$.dataSets.length; i++) {
-            var sourceDef = $.dataSources[$.dataSets[i].source],
-                typeDef = $.dataTypes[$.dataSets[i].type];
+            sourceDef = $.dataSources[$.dataSets[i].source],
+            typeDef = $.dataTypes[$.dataSets[i].type];
             for (k in sourceDef) {
                 if (sourceDef.hasOwnProperty(k) && !$.dataSets[i].hasOwnProperty(k)) {
                     $.dataSets[i][k] = sourceDef[k];
@@ -47,9 +48,16 @@
             }
         }
 
+        sourceDef = $.dataSources[$.pointsSet.source];
+        for (k in sourceDef) {
+            if (sourceDef.hasOwnProperty(k) && !$.pointsSet.hasOwnProperty(k)) {
+                $.pointsSet[k] = sourceDef[k];
+            }
+        }
+
         for (i=0; i<$.geoLayers.length; i++) {
-            var sourceDef = $.geoSources[$.geoLayers[i].source],
-                typeDef = $.geoTypes[$.geoLayers[i].type];
+            sourceDef = $.geoSources[$.geoLayers[i].source],
+            typeDef = $.geoTypes[$.geoLayers[i].type];
             for (k in sourceDef) {
                 if (sourceDef.hasOwnProperty(k) && !$.geoLayers[i].hasOwnProperty(k)) {
                     $.geoLayers[i][k] = sourceDef[k];
@@ -85,6 +93,7 @@
                 defaultGeo[$.geoLayers[i].schema.name] = {
                     id: $.geoLayers[i].schema.id,
                     label: $.geoLayers[i].schema.label,
+                    inSelectorControl: $.geoLayers[i].inSelectorControl,
                     resource: null,
                     list: []
                 };
@@ -139,9 +148,6 @@
         if (parameters.mr && parameters.mr.hasOwnProperty('rid')) {
             parameters.mr.lat = parameters.mr.lat || 'lat';
             parameters.mr.lng = parameters.mr.lng || 'lng';
-            if(parameters.mr.mc) {
-                parameters.mr.mc = parseInt(parameters.mr.mc);
-            }
         }
                 
         if ($.debug) console.log("parameters",parameters);
@@ -703,6 +709,7 @@
         /*** ***/
 
         /*** Creazione del menù dei livelli ***/
+        menuLayers = $.geoLayers.filter(function(l) { return l.inSelectorControl; });
         if (menuLayers.length) {
             menu = L.control({position: 'topleft'});
             menu.onAdd = function(map) {
@@ -711,43 +718,31 @@
                 if (parameters.md === 'widget') nav.setAttribute('style','display:none;');
                 return nav;
             };
+            
             menu.addTo(map);
+            
+            d3.select("nav#menu-ui").selectAll("a")
+                .data(d3.keys(defaultGeo))
+                .enter()
+                .append("a")
+                .attr("href", "#")
+                .attr("id", function(d) { return d; })
+                .classed("disabled", function(d) {
+                    return !(geo.hasOwnProperty(d) && geo[d].inSelectorControl);
+                })
+                .on("click", function(d) {
+                    if (geo.hasOwnProperty(d)) {
+                        delete parameters.i;
+                        if (embedControl && embedControl.isAdded) embedControl.removeFrom(map);
+                        info.update();
+                        loadData(d);
+                    }
+                })
+                .text(function(d) { return d; });
         }
        
+        if ($.debug) console.log("menuLayers",menuLayers);
         if ($.debug) console.log("menu",menu);
-
-        /*** ***/
-
-        /*** Stile dei livelli ***/
-        var defaultStyle = {
-            weight: 0.5,
-            opacity: 1,
-            color: 'white',
-            fillOpacity: 0.7,
-            fillColor: 'none'
-        };
-
-        var highlightStyle = {
-            weight: 2,
-            color: '#666'
-        };
-
-        function getColor(d, bins, palette) {
-            var palette = palette || 'Reds',
-                binsNum = (colorbrewer.palette[bins.length-1] ? bins.length-1 : 3);
-            for (var i=1; i<bins.length; i++) {
-                if (d <= bins[i]) {
-                    return colorbrewer.palette[binsNum][i-1];
-                }
-            }
-        }
-
-        function style(feature, l) {
-            var territorio = parameters.dl,
-                currentStyle = defaultStyle;
-            currentStyle.fillColor = getColor(parseInt(feature.properties.data[data[territorio].value]), data[territorio].bins);
-	    	return currentStyle;
-    	}
 
         /*** ***/
 
@@ -816,50 +811,6 @@
 
         /*** ***/
 
-        /*** Gestione degli eventi ***/
-        var geojson, label = new L.Label();
-
-	    function highlightFeature(e) {
-            var layer = e.target,
-                props = layer.feature.properties;
-                    
-            label.setContent(props[geo[parameters.dl].label]+'<br>Beni confiscati: '+props.data[data[parameters.dl].value]);
-            label.setLatLng(layer.getBounds().getCenter());
-            map.showLabel(label);
-	    }
-                
-        function resetHighlight(e) {
-            var layer = e.target;
-            label.close();
-	    }
-
-	    function openInfoWindow(e, layer) {
-            var layer = layer || e.target;
-            geojson.eachLayer(function(l) { l.highlight = false; geojson.resetStyle(l); });
-            layer.highlight = true;
-            layer.setStyle(highlightStyle);
-            parameters.i = layer.feature.properties[geo[parameters.dl].id];
-            if (embedControl && embedControl.isAdded) embedControl.removeFrom(map);
-            info.update(layer.feature.properties);
-            if (!L.Browser.ie && !L.Browser.opera) {
-	    		layer.bringToFront();
-	        }
-        }
-
-        function onEachFeature(feature, layer) {
-	    	layer.on({
-	        	mouseover: highlightFeature,
-				mouseout: resetHighlight,
-    		    click: openInfoWindow
-    		});
-	    }
-                
-        geojson = L.geoJson("", {
-        	style: style,
-    	    onEachFeature: onEachFeature
-    	}).addTo(map);
-        /*** ***/
-
         /*** Legenda ***/
         if ($.legend.active) {
 		    legend = L.control({position: 'bottomleft'});
@@ -888,30 +839,95 @@
 
         /*** ***/
 
-        // Selettore dei livelli
-        if (menuLayers.length) {
-            d3.select("nav#menu-ui").selectAll("a")
-                .data(d3.keys(defaultGeo))
-                .enter()
-                .append("a")
-                .attr("href", "#")
-                .attr("id", function(d) { return d; })
-                .classed("disabled", function(d) {
-                    return !geo.hasOwnProperty(d);
-                })
-                .on("click", function(d) {
-                    if (geo.hasOwnProperty(d)) {
-                        delete parameters.i;
-                        if (embedControl && embedControl.isAdded) embedControl.removeFrom(map);
-                        info.update();
-                        loadData(d);
-                    }
-                })
-                .text(function(d) { return d; });
+        /*** Stile dei livelli ***/
+        var defaultStyle = {
+            weight: 0.5,
+            opacity: 1,
+            color: 'white',
+            fillOpacity: 0.7,
+            fillColor: 'none'
+        };
+
+        var highlightStyle = {
+            weight: 2,
+            color: '#666'
+        };
+
+        function getColor(d, bins, palette) {
+            if ($.debug) console.log("getColorFunction",arguments);
+            var palette = palette || 'Reds',
+                binsNum = (colorbrewer[palette][bins.length-1] ? bins.length-1 : 3);
+            for (var i=1; i<bins.length; i++) {
+                if (d <= bins[i]) {
+                    return colorbrewer[palette][binsNum][i-1];
+                }
+            }
         }
+
+        function style(feature, l) {
+            if ($.debug) console.log("styleFunction",arguments);
+            var territorio = parameters.dl,
+                currentStyle = defaultStyle;
+            currentStyle.fillColor = getColor(parseInt(feature.properties.data[data[territorio].value]), data[territorio].bins);
+	    	return currentStyle;
+    	}
+
+        /*** ***/
+
+        /*** Gestione degli eventi ***/
+        var geojson, label = new L.Label();
+
+	    function highlightFeature(e) {
+            if ($.debug) console.log("highlightFeatureFunction",arguments);
+            var layer = e.target,
+                props = layer.feature.properties;
+                    
+            label.setContent(props[geo[parameters.dl].label]+'<br>Beni confiscati: '+props.data[data[parameters.dl].value]);
+            label.setLatLng(layer.getBounds().getCenter());
+            map.showLabel(label);
+	    }
+                
+        function resetHighlight(e) {
+            if ($.debug) console.log("resetHighlightFunction",arguments);
+            var layer = e.target;
+            label.close();
+	    }
+
+	    function openInfoWindow(e, layer) {
+            if ($.debug) console.log("openInfoWindowFunction",arguments);
+            var layer = layer || e.target;
+            geojson.eachLayer(function(l) { l.highlight = false; geojson.resetStyle(l); });
+            layer.highlight = true;
+            layer.setStyle(highlightStyle);
+            parameters.i = layer.feature.properties[geo[parameters.dl].id];
+            if (embedControl && embedControl.isAdded) embedControl.removeFrom(map);
+            info.update(layer.feature.properties);
+            if (!L.Browser.ie && !L.Browser.opera) {
+	    		layer.bringToFront();
+	        }
+        }
+
+        function onEachFeature(feature, layer) {
+            if ($.debug) console.log("onEachFeatureFunction",arguments);
+	    	layer.on({
+	        	mouseover: highlightFeature,
+				mouseout: resetHighlight,
+    		    click: openInfoWindow
+    		});
+	    }
+                
+        geojson = L.geoJson("", {
+        	style: style,
+    	    onEachFeature: onEachFeature
+    	}).addTo(map);
+        
+        if ($.debug) console.log("geojson",geojson);
+
+        /*** ***/
 
         // Join tra dati e territori
         function joinData(territorio) {
+            if ($.debug) console.log("joinDataFunction",arguments);
             var numGeo = geo[territorio].resource.features.length,
                 numData = data[territorio].resource.result.records.length,
                 noData = true, numOkData = 0, numNoData = 0;
@@ -938,39 +954,58 @@
 
         // Binning della distribuzione dei dati
         function binData(territorio) {
+            if ($.debug) console.log("binDataFunction",arguments);
+            var geoLayer = $.geoLayers.filter(function(l) { return (l.type === "vector" && l.schema.name === territorio); })[0],
+                dataSet = $.dataSets.filter(function(l) { return l.schema.layer === territorio; })[0];
             var serie = data[territorio].resource.result.records.map(function(el) { return parseInt(el[data[territorio].value]); });
             var gs = new geostats(serie);
-            data[territorio].bins = gs.getJenks(serie.length > 7 ? 7 : serie.length-1);
+            data[territorio].bins = gs.getJenks(serie.length > dataSet.bins ? dataSet.bins : serie.length-1);
             data[territorio].ranges = gs.ranges;
             legend.update(territorio);
         }
 
-        return;
-
         // Caricamento asincrono dei dati
         function loadData(territorio) { // territorio = regioni || province || comuni
+            
+            if ($.debug) console.log("loadDataFunction",arguments);
+            
+            var geoLayer = $.geoLayers.filter(function(l) { return (l.type === "vector" && l.schema.name === territorio); })[0],
+                dataSet = $.dataSets.filter(function(l) { return l.schema.layer === territorio; })[0];
+            
             d3.selectAll("nav#menu-ui a").classed("active", false);
             d3.select("nav#menu-ui a#"+territorio).classed("active", true);
             parameters.dl = territorio;
             geojson.clearLayers();
+
+            if ($.debug) console.log("geoLayer",geoLayer);
+            if ($.debug) console.log("dataSet",dataSet);
+
             if (!geo[territorio].resource || !data[territorio].resource) {
                 var limit = 5000,
-                    geoPath = 'geo/' + 
+                    geoPath = geoLayer.path + 
                         (parameters.t ? (territorio + '-' + parameters.tl + '-' + parameters.t) : territorio) + 
-                        '.json',
-                    dataPath = apiPath + 
-                        '?resource_id=' + data[territorio].resourceId + 
+                        '.' + geoLayer.format,
+                    dataPath = dataSet.path + 
+                        '?resource_id=' + dataSet.resourceId + 
                         (parameters.t ? ('&filters[' + defaultData[parameters.tl].id + ']=' + parameters.t) : ""),
                     q = queue();
                 map.spin(true);
+
+                if ($.debug) console.log("geoPath",geoPath);
+                if ($.debug) console.log("dataPath",dataPath);
+
                 q.defer(d3.json, geoPath); // Geojson
                 q.defer(d3.json, dataPath + '&limit=' + limit); // Dati
+
                 if (parameters.mr && parameters.mr.hasOwnProperty("rid")) {
-                    var markersPath = apiPath +
+                    var markersPath = $.pointsSet.path +
                         '?resource_id=' + parameters.mr.rid; 
+                    if ($.debug) console.log("markersPath",markersPath);
                     q.defer(d3.json, markersPath + '&limit=' + limit);
                 }
+
                 q.await(function(err, geojs, datajs, markersjs) {
+                    if ($.debug) console.log("await",arguments);
                     geo[territorio].resource = geojs;
                     data[territorio].resource = datajs;
                     data[territorio].markers = markersjs || null;
@@ -996,14 +1031,14 @@
                             points = data[territorio].markers.result.records;
                         for (var i=0; i<points.length; i++) {
                             var marker = L.marker();
-                            marker.setIcon(L.icon({iconUrl: 'js/leaflet/marker-icon.png', shadowUrl: 'js/leaflet/marker-shadow.png'}));
+                            marker.setIcon(L.icon({iconUrl: $.pointsSet.icon, shadowUrl: $.pointsSet.shadow}));
                             marker.setLatLng(L.latLng(points[i][parameters.mr.lat],points[i][parameters.mr.lng]));
                             if (parameters.mr.hasOwnProperty('iw')) marker.bindPopup(points[i][parameters.mr.iw]);
                             markers.push(marker);
                             clusters.addLayer(marker);
                         }
                         
-                        if (parameters.mr.mc) {
+                        if ($.pointsSet.clusters) {
                             map.addLayer(clusters);
                         } else {
                             map.addLayer(L.layerGroup(markers));

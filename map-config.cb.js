@@ -5,7 +5,8 @@ var mapConfig = {
     dataSources: {
         dkan: {
             uri: '',
-            path: '', // ie. /api/confiscatibene/action/datastore/search.json
+            path: '/api/confiscatibene/action/datastore/search.json',
+            //path: '', // ie. /api/confiscatibene/action/datastore/search.json
             resourceId: ''
         }
         // ...
@@ -33,6 +34,7 @@ var mapConfig = {
     geoTypes: {
         tile: {
             active: true,
+            inSelectorControl: false,
             uri: '',
             path: '', // ie. /api/geoiq/{s}/{z}/{x}/{y}.png
             attribution: '',
@@ -43,6 +45,8 @@ var mapConfig = {
         vector: {
             active: true,
             inSelectorControl: true,
+            path: '',
+            format: '',
             style: {
                 default: {
 		        	weight: 0.5,
@@ -63,7 +67,6 @@ var mapConfig = {
     dataSets: [
         {
             source: 'dkan', // from dataSources attributes
-            path: '/api/confiscatibene/action/datastore/search.json',
             resourceId: 'e2f0c989-929f-4e4d-87e2-097140f8880f',
             type: 'choropleth', // from dataTypes attributes
             bins: 7,
@@ -102,7 +105,14 @@ var mapConfig = {
             }
         }
         // ...
-    ],   
+    ],
+
+    pointsSet: {
+        source: 'dkan',
+        clusters: true,
+        icon: 'js/leaflet/marker-icon.png',
+        shadow: 'js/leaflet/marker-shadow.png'
+    },
 
     geoLayers: [
         {
@@ -112,6 +122,8 @@ var mapConfig = {
         },
         {
             source: 'local',
+            path: 'geo/',
+            format: 'json',
             type: 'vector', // from geoTypes attributes
             // ... // based on geoTypes attributes for this type
             schema: {
@@ -122,6 +134,8 @@ var mapConfig = {
         },
         {
             source: 'local',
+            path: 'geo/',
+            format: 'json',
             type: 'vector', // from geoTypes attributes
             // ... // based on geoTypes attributes for this type
             schema: {
@@ -132,6 +146,8 @@ var mapConfig = {
         },
         {
             source: 'local',
+            path: 'geo/',
+            format: 'json',
             type: 'vector', // from geoTypes attributes
             // ... // based on geoTypes attributes for this type
             schema: {
