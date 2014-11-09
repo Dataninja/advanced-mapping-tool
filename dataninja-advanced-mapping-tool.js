@@ -592,18 +592,17 @@
                 }
 
                 parameters.md = oldMd;
-                if ($.controls.embed.svg) {
+                if ($.controls.embed.svg.active) {
                     p['svg'] = L.DomUtil.create('p', 'svg', inputarea);
                     p['svg'].innerHTML = '' + 
                         '<label for="embed-svg" title="Copia/incolla il codice o scaricalo cliccando sull\'immagine">Scalable Vector Graphics:</label>&nbsp;' +
                         '<textarea id="embed-svg" readonly>' +
                         d3.select(".leaflet-overlay-pane")[0][0].innerHTML.replace(/\>/g,">\n") + 
                         '</textarea>&nbsp;' + 
-                        '<img src="img/svg.png" title="Scarica l\'immagine in SVG">';
+                        '<img src="' + $.controls.embed.svg.image + '" title="Scarica l\'immagine in SVG">';
                     d3.select(p['svg']).select("img").on("click", function() {
-                        var blob = new Blob([d3.select(".leaflet-overlay-pane")[0][0].innerHTML.replace(/\>/g,">\n")], {type: "image/svg+xml;charset=utf-8"}),
-                            filename = 'confiscatibene_map.svg';
-                        saveAs(blob, filename);
+                        var blob = new Blob([d3.select(".leaflet-overlay-pane")[0][0].innerHTML.replace(/\>/g,">\n")], {type: "image/svg+xml;charset=utf-8"});
+                        saveAs(blob, $.controls.embed.svg.filename);
                     });
                 }
 
@@ -929,9 +928,11 @@
                 highlightStyle = geoLayer.style.highlight;
                     
             if (!layer.selected) layer.setStyle(highlightStyle);
-            label.setContent(props[geo[parameters.dl].label]+'<br>Beni confiscati: '+props.data[data[parameters.dl].value]);
-            label.setLatLng(layer.getBounds().getCenter());
-            map.showLabel(label);
+            if ($.label.active) {
+                label.setContent(props[geo[parameters.dl].label]+'<br>' + $.label.text + ': '+props.data[data[parameters.dl].value]);
+                label.setLatLng(layer.getBounds().getCenter());
+                map.showLabel(label);
+            }
 	    }
                 
         function resetHighlight(e) {
@@ -941,7 +942,7 @@
                 geoLayer = $.geoLayers.filter(function(l) { return (l.type === "vector" && l.schema.name === territorio); })[0],
                 defaultStyle = geoLayer.style.default;
             if (!layer.selected) geojson.eachLayer(function(l) { if (!l.selected) geojson.resetStyle(l); });
-            label.close();
+            if ($.label.active) label.close();
 	    }
 
 	    function openInfoWindow(e, layer) {

@@ -268,15 +268,16 @@ var mapConfig = {
     }, // To do...
 
     label: {
-        active: true
-    }, // To do...
+        active: true,
+        text: 'Beni confiscati'
+    },
 
     legend: {
         active: true,
         title: 'Legenda',
         description: 'Numero totale di beni confiscati',
         itemLabel: 'beni confiscati'
-    }, // To do...
+    },
 
     controls: {
         fullscreen: {
@@ -303,7 +304,11 @@ var mapConfig = {
             iframe: true,
             widget: true,
             shortcode: true,
-            svg: true
+            svg: {
+                active: true,
+                filename: 'confiscatibene_map.svg',
+                image: 'img/svg.png'
+            }
         },
         screenshot: {
             active: true,
