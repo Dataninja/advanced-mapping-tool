@@ -205,11 +205,22 @@ var mapConfig = {
         uri: '', 
         path: '/api/dtnj/yourls-api.php', // ie. /api/dtnj/yourls-api.php
         signature: 'efe758b8d3',
-        prefix: '' // ie. confiscatibene-
+        prefix: 'confiscatibene-' // ie. confiscatibene-
     },
 
     infowindow: {
         active: true,
+        text: {
+            default: '<p>La mappa mostra il numero di beni confiscati per tutti i territori amministrativi italiani, secondo i dati ufficiali dell\'<a href="http://www.benisequestraticonfiscati.it" target="_blank">ANBSC</a> (sono esclusi i beni non confiscati in via autonoma). La corrispondenza tra il gradiente di colore e il numero complessivo di beni confiscati è dato nella legenda in basso a sinistra.</p>' + 
+                '<p>Mediante il selettore in alto a sinistra si possono caricare e visualizzare ulteriori livelli (regioni, province, comuni).</p>' +
+                '<p>Principali funzioni della mappa: <ul>' + 
+                '<li>cerca i dati relativi al tuo territorio cliccando sulla lente e inserendo il nome di un comune;</li>' + 
+                '<li>clicca sul territorio per visualizzare i dati in dettaglio, la composizione dei beni e per scaricarne la lista completa;</li>' + 
+                '<li>includi la vista corrente della mappa sul tuo sito con il codice di embed o scaricane uno screenshot (pulsanti in alto a destra).</li>' +
+                '</ul></p>' +
+                '<p>Tieniti aggiornato sul progetto visitando il sito ufficiale di <a href="http://www.confiscatibene.it" target="_blank">Confiscati Bene</a> o seguendo l\'account Twitter <a href="https://twitter.com/confiscatibene" target="_blank">@confiscatibene</a>, puoi anche scriverci all\'indirizzo <a href="mailto:info@confiscatibene.it" target="_blank">info@confiscatibene.it</a>.</p>',
+            mobile: '<a href="mailto:info@confiscatibene.it" target="_blank" style="margin-right: 30px;">Info</a>',
+        },
         downloads: [
             {
                 source: 'dkan',
@@ -227,7 +238,33 @@ var mapConfig = {
                 title: 'Scarica l\'elenco delle aziende',
                 image: 'img/factory6-dnl.png'
             }
-        ]
+        ],
+        shareButtons: {
+            active: true,
+            title: 'Condividi la situazione',
+            twitter: {
+                active: true,
+                via: 'confiscatibene',
+                text: 'Immobili e aziende #confiscatibene' // ie. Tweet
+            },
+            facebook: {
+                active: true
+            },
+            gplus: {
+                active: true
+            },
+            linkedin: {
+                active: true
+            },
+            email: {
+                active: true,
+                subject: 'Confiscati Bene',
+                body: 'Gli immobili e le aziende #confiscatibene'
+            },
+            permalink: {
+                active: true
+            }
+        }
     }, // To do...
 
     label: {
@@ -262,11 +299,11 @@ var mapConfig = {
             title: 'Embed this map', // ie. Embed this map
             image: 'img/embed.png', // ie. img/embed.png
             permalink: true,
-            shorturl: false,
+            shorturl: true,
             iframe: true,
             widget: true,
-            shortcode: false,
-            svg: false
+            shortcode: true,
+            svg: true
         },
         screenshot: {
             active: true,
@@ -285,7 +322,7 @@ var mapConfig = {
             title: 'Open in new window', // ie. Open in new window
             image: 'img/detach.png', // ie. img/detach.png
         },
-        shareButtons: {
+        socialButtons: {
             active: true,
             twitter: {
                 active: true,

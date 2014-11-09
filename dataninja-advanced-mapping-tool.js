@@ -258,30 +258,56 @@
                         territorio = parameters.dl,
                         filterKey = data[territorio].id,
                         filterValue = props[geo[territorio].id],
+                        buttons = [], btnTitle, btnUrl, btnPlace,
                         dnlBtn = [], dnlPath, dnlFile;
     
-                    var btnTitle = 'Condividi la situazione' + (territorio == 'regioni' ? ' in ' : ' a ') + props[geo[territorio].label],
-                        btnUrl = 'http://' + location.hostname + Arg.url(parameters).replace(/&*md=[^&]*/,'').replace(/&{2,}/g,"&"),
-                        btnEncUrl = 'http://' + location.hostname + encodeURIComponent(Arg.url(parameters).replace(/&*md=[^&]*/,'').replace(/&{2,}/g,"&")),
+                    if ($.infowindow.shareButtons.active) {
+                        btnTitle = $.infowindow.shareButtons.title + (territorio == 'regioni' ? ' in ' : ' a ') + props[geo[territorio].label];
+                        btnUrl = 'http://' + location.hostname + Arg.url(parameters).replace(/&*md=[^&]*/,'').replace(/&{2,}/g,"&");
+                        btnEncUrl = 'http://' + location.hostname + encodeURIComponent(Arg.url(parameters).replace(/&*md=[^&]*/,'').replace(/&{2,}/g,"&"));
                         btnPlace = props[geo[territorio].label];
                     
-                    var buttons = [
-                        '<a class="ssb" href="http://twitter.com/share?url=' + btnEncUrl + 
-                        '&via=confiscatibene' + 
-                        '&text=' + encodeURIComponent(btnPlace + ', immobili e aziende #confiscatibene ') + 
-                        '" target="_blank" title="'+btnTitle+' su Twitter"><img src="img/twitter.png" id="ssb-twitter"></a>',
-                        '<a class="ssb" href="http://www.facebook.com/sharer.php?u=' + btnEncUrl + 
-                        '" target="_blank" title="'+btnTitle+' su Facebook"><img src="img/facebook.png" id="ssb-facebook"></a>',
-                        '<a class="ssb" href="https://plus.google.com/share?url=' + btnEncUrl + 
-                        '" target="_blank" title="'+btnTitle+' su Google Plus"><img src="img/gplus.png" id="ssb-gplus"></a>',
-                        '<a class="ssb" href="http://www.linkedin.com/shareArticle?mini=true&url=' + btnEncUrl + 
-                        '" target="_blank" title="'+btnTitle+' su LinkedIn"><img src="img/linkedin.png" id="ssb-linkedin"></a>',
-                        '<a class="ssb" href="mailto:?Subject=' + encodeURIComponent('Confiscati Bene | ' + btnPlace) + 
-                        '&Body=' + encodeURIComponent(btnPlace + ', gli immobili e le aziende #confiscatibene: ') + btnEncUrl + 
-                        '" target="_blank" title="'+btnTitle+' per email"><img src="img/email.png" id="ssb-email"></a>',
-                        '<a class="ssb" href="' + btnUrl + 
-                        '" target="_blank" title="Permalink"><img src="img/link.png" id="ssb-link"></a>'
-                    ];
+                        if ($.infowindow.shareButtons.twitter.active) {
+                            buttons.push('<a class="ssb" href="http://twitter.com/share?url=' + btnEncUrl + 
+                                '&via=' + $.infowindow.shareButtons.twitter.via + 
+                                '&text=' + encodeURIComponent(btnPlace + ' - ' + $.infowindow.shareButtons.twitter.text + ' ') + 
+                                '" target="_blank" title="'+btnTitle+' su Twitter"><img src="img/twitter.png" id="ssb-twitter"></a>'
+                            );
+                        }
+
+                        if ($.infowindow.shareButtons.facebook.active) {
+                            buttons.push('<a class="ssb" href="http://www.facebook.com/sharer.php?u=' + btnEncUrl + 
+                                '" target="_blank" title="'+btnTitle+' su Facebook"><img src="img/facebook.png" id="ssb-facebook"></a>'
+                            );
+                        }
+
+                        if ($.infowindow.shareButtons.gplus.active) {
+                            buttons.push('<a class="ssb" href="https://plus.google.com/share?url=' + btnEncUrl + 
+                                '" target="_blank" title="'+btnTitle+' su Google Plus"><img src="img/gplus.png" id="ssb-gplus"></a>'
+                            );
+                        }
+
+                        if ($.infowindow.shareButtons.linkedin.active) {
+                            buttons.push('<a class="ssb" href="http://www.linkedin.com/shareArticle?mini=true&url=' + btnEncUrl + 
+                                '" target="_blank" title="'+btnTitle+' su LinkedIn"><img src="img/linkedin.png" id="ssb-linkedin"></a>'
+                            );
+                        }
+
+                        if ($.infowindow.shareButtons.email.active) {
+                            buttons.push('<a class="ssb" href="mailto:?Subject=' + encodeURIComponent($.infowindow.shareButtons.email.subject + ' | ' + btnPlace) + 
+                                '&Body=' + encodeURIComponent(btnPlace + ' - ' + $.infowindow.shareButtons.email.body + ': ') + btnEncUrl + 
+                                '" target="_blank" title="'+btnTitle+' per email"><img src="img/email.png" id="ssb-email"></a>'
+                            );
+                        }
+
+                        if ($.infowindow.shareButtons.permalink.active) {
+                            buttons.push('<a class="ssb" href="' + btnUrl + 
+                                '" target="_blank" title="Permalink"><img src="img/link.png" id="ssb-link"></a>'
+                            );
+                        }
+                    }
+
+                    if ($.debug) console.log("shareButtons",buttons);
 
                     for (i=0; i<$.infowindow.downloads.length; i++) {
                         dnlBtn.push('<a id="a-' + 
@@ -293,6 +319,8 @@
                             '" /></a>'
                         );
                     }
+                    
+                    if ($.debug) console.log("downloadButtons",dnlBtn);
 
                     var table = '<table class="zebra">' + 
                         '<thead>' + 
@@ -325,27 +353,52 @@
 
                     this._div.innerHTML += table;
 
-                    if ($.urlShortener.active) {
-                        dtnj.shorten(btnEncUrl, 'confiscatibene-'+md5(btnUrl), function(data) {
+                    if ($.infowindow.shareButtons.active && $.urlShortener.active) {
+                        dtnj.shorten(btnEncUrl, $.urlShortener.prefix+md5(btnUrl), function(data) {
                             var btnEncUrl = data.shorturl,
-                                buttons = [
-                                    '<a class="ssb" href="http://twitter.com/share?url=' + btnEncUrl + 
-                                    '&via=confiscatibene' + 
-                                    '&text=' + encodeURIComponent(btnPlace + ', immobili e aziende #confiscatibene ') + 
-                                    '" target="_blank" title="'+btnTitle+' su Twitter"><img src="img/twitter.png" id="ssb-twitter"></a>',
-                                    '<a class="ssb" href="http://www.facebook.com/sharer.php?u=' + btnEncUrl + 
-                                    '" target="_blank" title="'+btnTitle+' su Facebook"><img src="img/facebook.png" id="ssb-facebook"></a>',
-                                    '<a class="ssb" href="https://plus.google.com/share?url=' + btnEncUrl + 
-                                    '" target="_blank" title="'+btnTitle+' su Google Plus"><img src="img/gplus.png" id="ssb-gplus"></a>',
-                                    '<a class="ssb" href="http://www.linkedin.com/shareArticle?mini=true&url=' + btnEncUrl + 
-                                    '" target="_blank" title="'+btnTitle+' su LinkedIn"><img src="img/linkedin.png" id="ssb-linkedin"></a>',
-                                    '<a class="ssb" href="mailto:?Subject=' + encodeURIComponent('Confiscati Bene | ' + btnPlace) + 
-                                    '&Body=' + encodeURIComponent(btnPlace + ', gli immobili e le aziende #confiscatibene: ') + btnEncUrl + 
-                                    '" target="_blank" title="'+btnTitle+' per email"><img src="img/email.png" id="ssb-email"></a>',
-                                    '<a class="ssb" href="' + btnUrl + 
+                                buttons = [];
+
+                            if ($.infowindow.shareButtons.twitter.active) {
+                                buttons.push('<a class="ssb" href="http://twitter.com/share?url=' + btnEncUrl + 
+                                    '&via=' + $.infowindow.shareButtons.twitter.via + 
+                                    '&text=' + encodeURIComponent(btnPlace + ' - ' + $.infowindow.shareButtons.twitter.text + ' ') + 
+                                    '" target="_blank" title="'+btnTitle+' su Twitter"><img src="img/twitter.png" id="ssb-twitter"></a>'
+                                );
+                            }
+
+                            if ($.infowindow.shareButtons.facebook.active) {
+                                buttons.push('<a class="ssb" href="http://www.facebook.com/sharer.php?u=' + btnEncUrl + 
+                                    '" target="_blank" title="'+btnTitle+' su Facebook"><img src="img/facebook.png" id="ssb-facebook"></a>'
+                                );
+                            }
+
+                            if ($.infowindow.shareButtons.gplus.active) {
+                                buttons.push('<a class="ssb" href="https://plus.google.com/share?url=' + btnEncUrl + 
+                                    '" target="_blank" title="'+btnTitle+' su Google Plus"><img src="img/gplus.png" id="ssb-gplus"></a>'
+                                );
+                            }
+
+                            if ($.infowindow.shareButtons.linkedin.active) {
+                                buttons.push('<a class="ssb" href="http://www.linkedin.com/shareArticle?mini=true&url=' + btnEncUrl + 
+                                    '" target="_blank" title="'+btnTitle+' su LinkedIn"><img src="img/linkedin.png" id="ssb-linkedin"></a>'
+                                );
+                            }
+    
+                            if ($.infowindow.shareButtons.email.active) {
+                                buttons.push('<a class="ssb" href="mailto:?Subject=' + encodeURIComponent($.infowindow.shareButtons.email.subject + ' | ' + btnPlace) + 
+                                    '&Body=' + encodeURIComponent(btnPlace + ' - ' + $.infowindow.shareButtons.email.body + ': ') + btnEncUrl + 
+                                    '" target="_blank" title="'+btnTitle+' per email"><img src="img/email.png" id="ssb-email"></a>'
+                                );
+                            }
+
+                            if ($.infowindow.shareButtons.permalink.active) {
+                                buttons.push('<a class="ssb" href="' + btnUrl + 
                                     '" target="_blank" title="Permalink"><img src="img/link.png" id="ssb-link"></a>'
-                                ];
+                                );
+                            }
+                            
                             d3.select("#sshrBtn").node().innerHTML = buttons.join("&nbsp;"); 
+
                         });
                     }
             
@@ -392,17 +445,9 @@
                     d3.select(this._div).classed("closed", true);
                     if (parameters.md === 'mobile') {
                         map.dragging.enable();
-                        this._div.innerHTML += '<a href="mailto:info@confiscatibene.it" target="_blank" style="margin-right: 30px;">Info</a>';
+                        this._div.innerHTML += $.infowindow.text.mobile;
                     } else {
-                        this._div.innerHTML += '' + 
-                            '<p>La mappa mostra il numero di beni confiscati per tutti i territori amministrativi italiani, secondo i dati ufficiali dell\'<a href="http://www.benisequestraticonfiscati.it" target="_blank">ANBSC</a> (sono esclusi i beni non confiscati in via autonoma). La corrispondenza tra il gradiente di colore e il numero complessivo di beni confiscati è dato nella legenda in basso a sinistra.</p>' + 
-                            '<p>Mediante il selettore in alto a sinistra si possono caricare e visualizzare ulteriori livelli (regioni, province, comuni).</p>' +
-                            '<p>Principali funzioni della mappa: <ul>' + 
-                            '<li>cerca i dati relativi al tuo territorio cliccando sulla lente e inserendo il nome di un comune;</li>' + 
-                            '<li>clicca sul territorio per visualizzare i dati in dettaglio, la composizione dei beni e per scaricarne la lista completa;</li>' + 
-                            '<li>includi la vista corrente della mappa sul tuo sito con il codice di embed o scaricane uno screenshot (pulsanti in alto a destra).</li>' +
-                            '</ul></p>' +
-                            '<p>Tieniti aggiornato sul progetto visitando il sito ufficiale di <a href="http://www.confiscatibene.it" target="_blank">Confiscati Bene</a> o seguendo l\'account Twitter <a href="https://twitter.com/confiscatibene" target="_blank">@confiscatibene</a>, puoi anche scriverci all\'indirizzo <a href="mailto:info@confiscatibene.it" target="_blank">info@confiscatibene.it</a>.</p>'
+                        this._div.innerHTML += $.infowindow.text.default;
                     }
                 }
     	    };
@@ -507,7 +552,7 @@
                     p['shorturl'].innerHTML = '' + 
                         '<label for="embed-shorturl" title="Clicca per selezionare">Short URL:</label>&nbsp;' + 
                         '<input type="text" id="embed-shorturl" value="Not available..." disabled readonly></input>';
-                    dtnj.shorten(encUrl, 'confiscatibene-'+md5(url), function(data) {
+                    dtnj.shorten(encUrl, $.urlShortener.prefix+md5(url), function(data) {
                         d3.select("input#embed-shorturl").attr("value",data.shorturl).attr("disabled",null);
                     });
                 }
@@ -659,7 +704,7 @@
         /*** ***/
 
         /*** Pulsanti di condivisione ***/
-        if ($.controls.shareButtons.active) {
+        if ($.controls.socialButtons.active) {
             if (!parameters.md) {
                 share = L.control({position: 'bottomleft'});
                 share.onAdd = function(map) {
@@ -669,41 +714,41 @@
                     div.setAttribute('id','buttons');
                     div.innerHTML = '';
 
-                    if ($.controls.shareButtons.twitter.active) {
+                    if ($.controls.socialButtons.twitter.active) {
                         twitter = '<a ' + 
                             'href="https://twitter.com/share" ' + 
                             'class="twitter-share-button" ' + 
                             'data-url="http://' + location.hostname + location.pathname + '" ' + 
-                            'data-via="' + $.controls.shareButtons.twitter.via + '" ' + 
-                            'data-lang="' + $.controls.shareButtons.twitter.lang + '" ' + 
-                            'data-related="' + $.controls.shareButtons.twitter.related + '" ' + 
-                            'data-hashtags="' + $.controls.shareButtons.twitter.hashtags + '" ' + 
-                            'data-count="' + $.controls.shareButtons.twitter.count + '"' + 
-                            '>' + $.controls.shareButtons.twitter.text + '</a>';
+                            'data-via="' + $.controls.socialButtons.twitter.via + '" ' + 
+                            'data-lang="' + $.controls.socialButtons.twitter.lang + '" ' + 
+                            'data-related="' + $.controls.socialButtons.twitter.related + '" ' + 
+                            'data-hashtags="' + $.controls.socialButtons.twitter.hashtags + '" ' + 
+                            'data-count="' + $.controls.socialButtons.twitter.count + '"' + 
+                            '>' + $.controls.socialButtons.twitter.text + '</a>';
                         div.innerHTML += twitter;
                         head.load("https://platform.twitter.com/widgets.js");
                     }
 
-                    if ($.controls.shareButtons.facebook.active) {
+                    if ($.controls.socialButtons.facebook.active) {
                         facebook = '<div ' + 
                             'class="fb-like" ' + 
                             'style="overflow:hidden;" ' + 
                             'data-href="http://' + location.hostname + location.pathname + '" ' + 
-                            'data-layout="' + $.controls.shareButtons.facebook.layout + '" ' + 
-                            'data-action="' + $.controls.shareButtons.facebook.action + '" ' + 
-                            'data-show-faces="' + $.controls.shareButtons.facebook["show-faces"] + '" ' + 
-                            'data-share="' + $.controls.shareButtons.facebook.share + '">' + 
+                            'data-layout="' + $.controls.socialButtons.facebook.layout + '" ' + 
+                            'data-action="' + $.controls.socialButtons.facebook.action + '" ' + 
+                            'data-show-faces="' + $.controls.socialButtons.facebook["show-faces"] + '" ' + 
+                            'data-share="' + $.controls.socialButtons.facebook.share + '">' + 
                             '</div>';
                         div.innerHTML += facebook;
-                        head.load("http://connect.facebook.net/it_IT/sdk.js#xfbml=1&appId=" + $.controls.shareButtons.facebook.appId + "&version=v2.0");
+                        head.load("http://connect.facebook.net/it_IT/sdk.js#xfbml=1&appId=" + $.controls.socialButtons.facebook.appId + "&version=v2.0");
                     }
                     
-                    if ($.controls.shareButtons.gplus.active) {
+                    if ($.controls.socialButtons.gplus.active) {
                         gplus = '<div ' + 
                             'class="g-plusone" ' + 
-                            'data-size="' + $.controls.shareButtons.gplus.size + '" ' + 
+                            'data-size="' + $.controls.socialButtons.gplus.size + '" ' + 
                             'data-href="http://' + location.hostname + location.pathname + '" ' + 
-                            'data-annotation="' + $.controls.shareButtons.gplus.annotation + '"' + 
+                            'data-annotation="' + $.controls.socialButtons.gplus.annotation + '"' + 
                             '></div>';
                         div.innerHTML += gplus;
                         head.load("https://apis.google.com/js/plusone.js");
