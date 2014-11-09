@@ -34,7 +34,7 @@ module.exports = function(grunt) {
             dist: {
                 files: {
                     '<%= pkg.name %>.lib.min.js': ['<%= concat.lib.dest %>'],
-                    '<%= pkg.name %>.min.js': ['<%= pkg.name %>.js']
+                    '<%= pkg.name %>.min.js': ['<%= pkg.name %>.config.js', '<%= pkg.name %>.js']
                 }
             }
         },
