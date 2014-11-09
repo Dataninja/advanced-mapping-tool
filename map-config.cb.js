@@ -49,6 +49,7 @@ var mapConfig = {
             format: '',
             style: {
                 default: {
+                    palette: 'Reds',
 		        	weight: 0.5,
 			    	opacity: 1,
 			        color: 'white',
@@ -56,6 +57,8 @@ var mapConfig = {
         			fillColor: 'none'
                 },
                 highlight: { // Overrides default style attributes
+                },
+                selected: { // Overrides default style attributes
                     weight: 2,
                     color: '#666' 
                 }
@@ -108,6 +111,7 @@ var mapConfig = {
     ],
 
     pointsSet: {
+        active: true,
         source: 'dkan',
         clusters: true,
         icon: 'js/leaflet/marker-icon.png',
@@ -205,7 +209,25 @@ var mapConfig = {
     },
 
     infowindow: {
-        active: true
+        active: true,
+        downloads: [
+            {
+                source: 'dkan',
+                resourceId: 'e5b4d63a-e1e8-40a3-acec-1d351f03ee56',
+                name: 'immobili',
+                filebase: 'confiscatibene',
+                title: 'Scarica l\'elenco degli immobili',
+                image: 'img/house109-dnl.png'
+            },
+            {
+                source: 'dkan',
+                resourceId: '8b7e12f1-6484-47f0-9cf6-88b446297dbc',
+                name: 'aziende',
+                filebase: 'confiscatibene',
+                title: 'Scarica l\'elenco delle aziende',
+                image: 'img/factory6-dnl.png'
+            }
+        ]
     }, // To do...
 
     label: {

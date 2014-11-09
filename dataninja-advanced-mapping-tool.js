@@ -48,10 +48,23 @@
             }
         }
 
-        sourceDef = $.dataSources[$.pointsSet.source];
-        for (k in sourceDef) {
-            if (sourceDef.hasOwnProperty(k) && !$.pointsSet.hasOwnProperty(k)) {
-                $.pointsSet[k] = sourceDef[k];
+        if ($.infowindow.active) {
+            for (i=0; i<$.infowindow.downloads.length; i++) {
+                sourceDef = $.dataSources[$.infowindow.downloads[i].source];
+                for (k in sourceDef) {
+                    if (sourceDef.hasOwnProperty(k) && !$.infowindow.downloads[i].hasOwnProperty(k)) {
+                        $.infowindow.downloads[i][k] = sourceDef[k];
+                    }
+                }
+            }
+        }
+
+        if ($.pointsSet.active) {
+            sourceDef = $.dataSources[$.pointsSet.source];
+            for (k in sourceDef) {
+                if (sourceDef.hasOwnProperty(k) && !$.pointsSet.hasOwnProperty(k)) {
+                    $.pointsSet[k] = sourceDef[k];
+                }
             }
         }
 
@@ -211,200 +224,198 @@
         /*** ***/
 
         /*** Gestione dell'infowindow al click ***/
-        if (parameters.md === 'widget') {
-            info = {};
-            info._div = d3.select('body').append('div').attr('id','infowindow').classed("info", true).node();
-        } else {
-            info = L.control({position: 'bottomright'});
-            info.onAdd = function (map) {
-                this._div = L.DomUtil.create('div', 'info '+parameters.md);
-                this._div.setAttribute('id','infowindow');
-                this._div.setAttribute('style','max-height:'+(head.screen.innerHeight-100)+'px;');
-                d3.select(this._div)
-                    .on("mouseenter", function() {
-                        map.scrollWheelZoom.disable();
-                    })
-                    .on("mouseleave", function() {
-                        map.scrollWheelZoom.enable();
-                    });
-    		    this.update();
-	            return this._div;
-            };
+        if ($.infowindow.active) {
+            if (parameters.md === 'widget') {
+                info = {};
+                info._div = d3.select('body').append('div').attr('id','infowindow').classed("info", true).node();
+            } else {
+                info = L.control({position: 'bottomright'});
+                info.onAdd = function (map) {
+                    this._div = L.DomUtil.create('div', 'info '+parameters.md);
+                    this._div.setAttribute('id','infowindow');
+                    this._div.setAttribute('style','max-height:'+(head.screen.innerHeight-100)+'px;');
+                    d3.select(this._div)
+                        .on("mouseenter", function() {
+                            map.scrollWheelZoom.disable();
+                        })
+                        .on("mouseleave", function() {
+                            map.scrollWheelZoom.enable();
+                        });
+    	    	    this.update();
+	                return this._div;
+                };
+            }
+        
+            info.update = function (props) {
+                var that = this;
+                this._div.innerHTML = '';
+                if (props) {
+                    d3.select(this._div).classed("closed", false);
+                    if (parameters.md === 'mobile') map.dragging.disable();
+                    var delim = agnes.rowDelimiter(),
+                        today = new Date(),
+                        stoday = d3.time.format('%Y%m%d')(today),
+                        territorio = parameters.dl,
+                        filterKey = data[territorio].id,
+                        filterValue = props[geo[territorio].id],
+                        dnlBtn = [], dnlPath, dnlFile;
+    
+                    var btnTitle = 'Condividi la situazione' + (territorio == 'regioni' ? ' in ' : ' a ') + props[geo[territorio].label],
+                        btnUrl = 'http://' + location.hostname + Arg.url(parameters).replace(/&*md=[^&]*/,'').replace(/&{2,}/g,"&"),
+                        btnEncUrl = 'http://' + location.hostname + encodeURIComponent(Arg.url(parameters).replace(/&*md=[^&]*/,'').replace(/&{2,}/g,"&")),
+                        btnPlace = props[geo[territorio].label];
+                    
+                    var buttons = [
+                        '<a class="ssb" href="http://twitter.com/share?url=' + btnEncUrl + 
+                        '&via=confiscatibene' + 
+                        '&text=' + encodeURIComponent(btnPlace + ', immobili e aziende #confiscatibene ') + 
+                        '" target="_blank" title="'+btnTitle+' su Twitter"><img src="img/twitter.png" id="ssb-twitter"></a>',
+                        '<a class="ssb" href="http://www.facebook.com/sharer.php?u=' + btnEncUrl + 
+                        '" target="_blank" title="'+btnTitle+' su Facebook"><img src="img/facebook.png" id="ssb-facebook"></a>',
+                        '<a class="ssb" href="https://plus.google.com/share?url=' + btnEncUrl + 
+                        '" target="_blank" title="'+btnTitle+' su Google Plus"><img src="img/gplus.png" id="ssb-gplus"></a>',
+                        '<a class="ssb" href="http://www.linkedin.com/shareArticle?mini=true&url=' + btnEncUrl + 
+                        '" target="_blank" title="'+btnTitle+' su LinkedIn"><img src="img/linkedin.png" id="ssb-linkedin"></a>',
+                        '<a class="ssb" href="mailto:?Subject=' + encodeURIComponent('Confiscati Bene | ' + btnPlace) + 
+                        '&Body=' + encodeURIComponent(btnPlace + ', gli immobili e le aziende #confiscatibene: ') + btnEncUrl + 
+                        '" target="_blank" title="'+btnTitle+' per email"><img src="img/email.png" id="ssb-email"></a>',
+                        '<a class="ssb" href="' + btnUrl + 
+                        '" target="_blank" title="Permalink"><img src="img/link.png" id="ssb-link"></a>'
+                    ];
+
+                    for (i=0; i<$.infowindow.downloads.length; i++) {
+                        dnlBtn.push('<a id="a-' + 
+                            $.infowindow.downloads[i].name + 
+                            '" class="dnl" href="#" title="' + 
+                            $.infowindow.downloads[i].title + 
+                            '"><img src="' + 
+                            $.infowindow.downloads[i].image + 
+                            '" /></a>'
+                        );
+                    }
+
+                    var table = '<table class="zebra">' + 
+                        '<thead>' + 
+                        '<tr>' + 
+                        '<th>' + 
+                        '<span id="sdnlBtn">'+dnlBtn.join("&nbsp;")+'</span>' + "&nbsp;&nbsp;" + 
+                        '<span id="sshrBtn">'+buttons.join("&nbsp;")+'</span>' + '</th>' + 
+                        '<th style="text-align:right;"><a id="close-cross" href="#" title="Chiudi"><img src="img/close.png" /></a></th></tr>' + 
+                        '<tr>' + 
+                        '<th colspan="2" class="rossobc">' + props[geo[territorio].label] + '</th>' +
+                        '</tr>' + 
+                        '</thead>' + 
+                        '<tfoot>' + 
+                        '<tr><td colspan="2" style="text-align:right;font-size: smaller;">' + 
+                        'Creative Commons Attribution <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank">CC-BY 4.0 International</a>.' + 
+                        '</td></tr>' + 
+                        '</tfoot>' + 
+                        '<tbody>';
+
+                    for (var k in props.data) {
+                        if (props.data.hasOwnProperty(k) && props.data[k] != '0' && k.charAt(0) == k.charAt(0).toUpperCase() && k.slice(0,2) != "Id") {
+                            table += '<tr>' + 
+                                '<td>' + (k.indexOf('Totale') > -1 ? '<b>'+k+'</b>' : k) + '</td>' +
+                                '<td>' + (k.indexOf('Totale') > -1 ? '<b>'+parseInt(props.data[k])+'</b>' : (parseInt(props.data[k]) || props.data[k])) + '</td>' + 
+                                '</tr>';
+                        }
+                    }
+
+                    table += '</tbody></table>';
+
+                    this._div.innerHTML += table;
+
+                    if ($.urlShortener.active) {
+                        dtnj.shorten(btnEncUrl, 'confiscatibene-'+md5(btnUrl), function(data) {
+                            var btnEncUrl = data.shorturl,
+                                buttons = [
+                                    '<a class="ssb" href="http://twitter.com/share?url=' + btnEncUrl + 
+                                    '&via=confiscatibene' + 
+                                    '&text=' + encodeURIComponent(btnPlace + ', immobili e aziende #confiscatibene ') + 
+                                    '" target="_blank" title="'+btnTitle+' su Twitter"><img src="img/twitter.png" id="ssb-twitter"></a>',
+                                    '<a class="ssb" href="http://www.facebook.com/sharer.php?u=' + btnEncUrl + 
+                                    '" target="_blank" title="'+btnTitle+' su Facebook"><img src="img/facebook.png" id="ssb-facebook"></a>',
+                                    '<a class="ssb" href="https://plus.google.com/share?url=' + btnEncUrl + 
+                                    '" target="_blank" title="'+btnTitle+' su Google Plus"><img src="img/gplus.png" id="ssb-gplus"></a>',
+                                    '<a class="ssb" href="http://www.linkedin.com/shareArticle?mini=true&url=' + btnEncUrl + 
+                                    '" target="_blank" title="'+btnTitle+' su LinkedIn"><img src="img/linkedin.png" id="ssb-linkedin"></a>',
+                                    '<a class="ssb" href="mailto:?Subject=' + encodeURIComponent('Confiscati Bene | ' + btnPlace) + 
+                                    '&Body=' + encodeURIComponent(btnPlace + ', gli immobili e le aziende #confiscatibene: ') + btnEncUrl + 
+                                    '" target="_blank" title="'+btnTitle+' per email"><img src="img/email.png" id="ssb-email"></a>',
+                                    '<a class="ssb" href="' + btnUrl + 
+                                    '" target="_blank" title="Permalink"><img src="img/link.png" id="ssb-link"></a>'
+                                ];
+                            d3.select("#sshrBtn").node().innerHTML = buttons.join("&nbsp;"); 
+                        });
+                    }
+            
+                    for (i=0; i<$.infowindow.downloads.length; i++) {
+                        dnlPath = $.infowindow.downloads[i].path + 
+                            "?resource_id=" + $.infowindow.downloads[i].resourceId + "&limit=5000&filters[" + 
+                            filterKey + 
+                            "]=" + 
+                            filterValue;
+
+                        dnlFile = stoday + 
+                            '_' + $.infowindow.downloads[i].filebase + 
+                            '-' + $.infowindow.downloads[i].name + 
+                            '_' + filterKey + 
+                            '-' + filterValue + 
+                            '.csv';
+
+                        d3.select('a#a-'+$.infowindow.downloads[i].name).on("click", function() {
+                            var that = this;
+                            d3.json(dnlPath, function(err,res) {
+                                if (res.result.records.length > 0) {
+                                    var csv = agnes.jsonToCsv(res.result.records, delim),
+                                        blob = new Blob([csv], {type: "text/csv;charset=utf-8"});
+                                    saveAs(blob, dnlFile);
+                                } else {
+                                    alert("No data!");
+                                }
+                            });
+                        });
+                    }
+    
+                    d3.select(this._div).select("a#close-cross")
+                        .on("click", function() {
+                            if ($.debug) console.log("clickCloseCross",arguments);;
+                            geojson.eachLayer(function(l) { l.selected = false; geojson.resetStyle(l); });
+                            delete parameters.i;
+                            if (embedControl && embedControl.isAdded) embedControl.removeFrom(map);
+                            info.update();
+                            return false;
+                        });
+
+                } else { // if (props) 
+                        
+                    d3.select(this._div).classed("closed", true);
+                    if (parameters.md === 'mobile') {
+                        map.dragging.enable();
+                        this._div.innerHTML += '<a href="mailto:info@confiscatibene.it" target="_blank" style="margin-right: 30px;">Info</a>';
+                    } else {
+                        this._div.innerHTML += '' + 
+                            '<p>La mappa mostra il numero di beni confiscati per tutti i territori amministrativi italiani, secondo i dati ufficiali dell\'<a href="http://www.benisequestraticonfiscati.it" target="_blank">ANBSC</a> (sono esclusi i beni non confiscati in via autonoma). La corrispondenza tra il gradiente di colore e il numero complessivo di beni confiscati è dato nella legenda in basso a sinistra.</p>' + 
+                            '<p>Mediante il selettore in alto a sinistra si possono caricare e visualizzare ulteriori livelli (regioni, province, comuni).</p>' +
+                            '<p>Principali funzioni della mappa: <ul>' + 
+                            '<li>cerca i dati relativi al tuo territorio cliccando sulla lente e inserendo il nome di un comune;</li>' + 
+                            '<li>clicca sul territorio per visualizzare i dati in dettaglio, la composizione dei beni e per scaricarne la lista completa;</li>' + 
+                            '<li>includi la vista corrente della mappa sul tuo sito con il codice di embed o scaricane uno screenshot (pulsanti in alto a destra).</li>' +
+                            '</ul></p>' +
+                            '<p>Tieniti aggiornato sul progetto visitando il sito ufficiale di <a href="http://www.confiscatibene.it" target="_blank">Confiscati Bene</a> o seguendo l\'account Twitter <a href="https://twitter.com/confiscatibene" target="_blank">@confiscatibene</a>, puoi anche scriverci all\'indirizzo <a href="mailto:info@confiscatibene.it" target="_blank">info@confiscatibene.it</a>.</p>'
+                    }
+                }
+    	    };
+                
+            if (parameters.md === 'widget') {
+                info.update();
+            } else {
+                info.addTo(map);
+            }
         }
         
         if ($.debug) console.log("info",info);
 
-        info.update = function (props) {
-            var that = this;
-            this._div.innerHTML = '';
-            if (props) {
-                d3.select(this._div).classed("closed", false);
-                if (parameters.md === 'mobile') map.dragging.disable();
-                var delim = agnes.rowDelimiter(),
-                    today = new Date(),
-                    stoday = d3.time.format('%Y%m%d')(today),
-                    territorio = parameters.dl,
-                    filterKey = data[territorio].id,
-                    filterValue = props[geo[territorio].id],
-                    imResId = 'e5b4d63a-e1e8-40a3-acec-1d351f03ee56',
-                    azResId = '8b7e12f1-6484-47f0-9cf6-88b446297dbc';
-
-                var btnTitle = 'Condividi la situazione' + (territorio == 'regioni' ? ' in ' : ' a ') + props[geo[territorio].label],
-                    btnUrl = 'http://' + location.hostname + Arg.url(parameters).replace(/&*md=[^&]*/,'').replace(/&{2,}/g,"&"),
-                    btnEncUrl = 'http://' + location.hostname + encodeURIComponent(Arg.url(parameters).replace(/&*md=[^&]*/,'').replace(/&{2,}/g,"&")),
-                    btnPlace = props[geo[territorio].label];
-                    
-                var buttons = [
-                    '<a class="ssb" href="http://twitter.com/share?url=' + btnEncUrl + 
-                    '&via=confiscatibene' + 
-                    '&text=' + encodeURIComponent(btnPlace + ', immobili e aziende #confiscatibene ') + 
-                    '" target="_blank" title="'+btnTitle+' su Twitter"><img src="img/twitter.png" id="ssb-twitter"></a>',
-                    '<a class="ssb" href="http://www.facebook.com/sharer.php?u=' + btnEncUrl + 
-                    '" target="_blank" title="'+btnTitle+' su Facebook"><img src="img/facebook.png" id="ssb-facebook"></a>',
-                    '<a class="ssb" href="https://plus.google.com/share?url=' + btnEncUrl + 
-                    '" target="_blank" title="'+btnTitle+' su Google Plus"><img src="img/gplus.png" id="ssb-gplus"></a>',
-                    '<a class="ssb" href="http://www.linkedin.com/shareArticle?mini=true&url=' + btnEncUrl + 
-                    '" target="_blank" title="'+btnTitle+' su LinkedIn"><img src="img/linkedin.png" id="ssb-linkedin"></a>',
-                    '<a class="ssb" href="mailto:?Subject=' + encodeURIComponent('Confiscati Bene | ' + btnPlace) + 
-                    '&Body=' + encodeURIComponent(btnPlace + ', gli immobili e le aziende #confiscatibene: ') + btnEncUrl + 
-                    '" target="_blank" title="'+btnTitle+' per email"><img src="img/email.png" id="ssb-email"></a>',
-                    '<a class="ssb" href="' + btnUrl + 
-                    '" target="_blank" title="Permalink"><img src="img/link.png" id="ssb-link"></a>'
-                ];
-
-                var dnlBtn = [
-                    '<a id="a-immobili" class="dnl" href="#" title="Scarica l\'elenco degli immobili"><img src="img/house109-dnl.png" /></a>',
-                    '<a id="a-aziende" class="dnl" href="#" title="Scarica l\'elenco delle aziende"><img src="img/factory6-dnl.png" /></a>'
-                ];
-
-                var table = '<table class="zebra">' + 
-                    '<thead>' + 
-                    '<tr>' + 
-                    '<th>' + '<span id="sdnlBtn">'+dnlBtn.join("&nbsp;")+'</span>' + "&nbsp;&nbsp;" + '<span id="sshrBtn">'+buttons.join("&nbsp;")+'</span>' + '</th>' + 
-                    '<th style="text-align:right;"><a id="close-cross" href="#" title="Chiudi"><img src="img/close.png" /></a></th></tr>' + 
-                    '<tr>' + 
-                    '<th colspan="2" class="rossobc">' + props[geo[territorio].label] + '</th>' +
-                    '</tr>' + 
-                    '</thead>' + 
-                    '<tfoot>' + 
-                    '<tr><td colspan="2" style="text-align:right;font-size: smaller;">' + 
-                    'Creative Commons Attribution <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank">CC-BY 4.0 International</a>.' + 
-                    '</td></tr>' + 
-                    '</tfoot>' + 
-                    '<tbody>';
-
-                for (var k in props.data) {
-                    if (props.data.hasOwnProperty(k) && props.data[k] != '0' && k.charAt(0) == k.charAt(0).toUpperCase() && k.slice(0,2) != "Id") {
-                        table += '<tr>' + 
-                            '<td>' + (k.indexOf('Totale') > -1 ? '<b>'+k+'</b>' : k) + '</td>' +
-                            '<td>' + (k.indexOf('Totale') > -1 ? '<b>'+parseInt(props.data[k])+'</b>' : (parseInt(props.data[k]) || props.data[k])) + '</td>' + 
-                            '</tr>';
-                    }
-                }
-
-                table += '</tbody></table>';
-
-                this._div.innerHTML += table;
-
-                if ($.urlShortener.active) {
-                    dtnj.shorten(btnEncUrl, 'confiscatibene-'+md5(btnUrl), function(data) {
-                        var btnEncUrl = data.shorturl,
-                            buttons = [
-                                '<a class="ssb" href="http://twitter.com/share?url=' + btnEncUrl + 
-                                '&via=confiscatibene' + 
-                                '&text=' + encodeURIComponent(btnPlace + ', immobili e aziende #confiscatibene ') + 
-                                '" target="_blank" title="'+btnTitle+' su Twitter"><img src="img/twitter.png" id="ssb-twitter"></a>',
-                                '<a class="ssb" href="http://www.facebook.com/sharer.php?u=' + btnEncUrl + 
-                                '" target="_blank" title="'+btnTitle+' su Facebook"><img src="img/facebook.png" id="ssb-facebook"></a>',
-                                '<a class="ssb" href="https://plus.google.com/share?url=' + btnEncUrl + 
-                                '" target="_blank" title="'+btnTitle+' su Google Plus"><img src="img/gplus.png" id="ssb-gplus"></a>',
-                                '<a class="ssb" href="http://www.linkedin.com/shareArticle?mini=true&url=' + btnEncUrl + 
-                                '" target="_blank" title="'+btnTitle+' su LinkedIn"><img src="img/linkedin.png" id="ssb-linkedin"></a>',
-                                '<a class="ssb" href="mailto:?Subject=' + encodeURIComponent('Confiscati Bene | ' + btnPlace) + 
-                                '&Body=' + encodeURIComponent(btnPlace + ', gli immobili e le aziende #confiscatibene: ') + btnEncUrl + 
-                                '" target="_blank" title="'+btnTitle+' per email"><img src="img/email.png" id="ssb-email"></a>',
-                                '<a class="ssb" href="' + btnUrl + 
-                                '" target="_blank" title="Permalink"><img src="img/link.png" id="ssb-link"></a>'
-                            ];
-                        d3.select("#sshrBtn").node().innerHTML = buttons.join("&nbsp;"); 
-                    });
-                }
-
-                var imPath = apiPath + 
-                        "?resource_id=" + imResId + "&limit=5000&filters[" + 
-                        filterKey + 
-                        "]=" + 
-                        filterValue;
-                
-                d3.select('a#a-immobili').on("click", function() {
-                    var that = this;
-                    d3.json(imPath, function(err,res) {
-                        if (res.result.records.length > 0) {
-                            var csv = agnes.jsonToCsv(res.result.records, delim),
-                                blob = new Blob([csv], {type: "text/csv;charset=utf-8"}),
-                                filename = stoday + '_confiscatibene_immobili_' + filterKey + '-' + filterValue + '.csv';
-                            saveAs(blob, filename);
-                        } else {
-                            alert("No data!");
-                        }
-                    });
-                });
-
-                var azPath = apiPath + 
-                        "?resource_id=" + azResId + "&limit=5000&filters[" + 
-                        filterKey + 
-                        "]=" + 
-                        filterValue;
-                        
-                d3.select('a#a-aziende').on("click", function() {
-                    var that = this;
-                    d3.json(azPath, function(err,res) {
-                        if (res.result.records.length > 0) {
-                            var csv = agnes.jsonToCsv(res.result.records, delim),
-                                blob = new Blob([csv], {type: "text/csv;charset=utf-8"}),
-                                filename = stoday + '_confiscatibene_aziende_' + filterKey + '-' + filterValue + '.csv';
-                            saveAs(blob, filename);
-                        } else {
-                            alert("No data!");
-                        }
-                    });
-                });
-                
-                d3.select(this._div).select("a#close-cross")
-                    .on("click", function() {
-                        geojson.eachLayer(function(l) { l.highlight = false; geojson.resetStyle(l); });
-                        delete parameters.i;
-                        if (embedControl.isAdded) embedControl.removeFrom(map);
-                        info.update();
-                        return false;
-                    });
-
-            } else { // if (props) 
-                        
-                d3.select(this._div).classed("closed", true);
-                if (parameters.md === 'mobile') {
-                    map.dragging.enable();
-                    this._div.innerHTML += '<a href="mailto:info@confiscatibene.it" target="_blank" style="margin-right: 30px;">Info</a>';
-                } else {
-                    this._div.innerHTML += '' + 
-                        '<p>La mappa mostra il numero di beni confiscati per tutti i territori amministrativi italiani, secondo i dati ufficiali dell\'<a href="http://www.benisequestraticonfiscati.it" target="_blank">ANBSC</a> (sono esclusi i beni non confiscati in via autonoma). La corrispondenza tra il gradiente di colore e il numero complessivo di beni confiscati è dato nella legenda in basso a sinistra.</p>' + 
-                        '<p>Mediante il selettore in alto a sinistra si possono caricare e visualizzare ulteriori livelli (regioni, province, comuni).</p>' +
-                        '<p>Principali funzioni della mappa: <ul>' + 
-                        '<li>cerca i dati relativi al tuo territorio cliccando sulla lente e inserendo il nome di un comune;</li>' + 
-                        '<li>clicca sul territorio per visualizzare i dati in dettaglio, la composizione dei beni e per scaricarne la lista completa;</li>' + 
-                        '<li>includi la vista corrente della mappa sul tuo sito con il codice di embed o scaricane uno screenshot (pulsanti in alto a destra).</li>' +
-                        '</ul></p>' +
-                        '<p>Tieniti aggiornato sul progetto visitando il sito ufficiale di <a href="http://www.confiscatibene.it" target="_blank">Confiscati Bene</a> o seguendo l\'account Twitter <a href="https://twitter.com/confiscatibene" target="_blank">@confiscatibene</a>, puoi anche scriverci all\'indirizzo <a href="mailto:info@confiscatibene.it" target="_blank">info@confiscatibene.it</a>.</p>'
-                }
-            }
-	    };
-                
-        if (parameters.md === 'widget') {
-            info.update();
-        } else {
-            info.addTo(map);
-        }
-        
         /*** ***/
 
         /*** Fullscreen ***/
@@ -570,7 +581,7 @@
                     if (!embedControl.isAdded) {
                         embedControl.addTo(map);
                     } else {
-                        if (embedControl.isAdded) embedControl.removeFrom(map);
+                        if (embedControl && embedControl.isAdded) embedControl.removeFrom(map);
                     }
                 });
                 return img;
@@ -839,20 +850,6 @@
 
         /*** ***/
 
-        /*** Stile dei livelli ***/
-        var defaultStyle = {
-            weight: 0.5,
-            opacity: 1,
-            color: 'white',
-            fillOpacity: 0.7,
-            fillColor: 'none'
-        };
-
-        var highlightStyle = {
-            weight: 2,
-            color: '#666'
-        };
-
         function getColor(d, bins, palette) {
             if ($.debug) console.log("getColorFunction",arguments);
             var palette = palette || 'Reds',
@@ -864,11 +861,12 @@
             }
         }
 
-        function style(feature, l) {
+        function style(feature) {
             if ($.debug) console.log("styleFunction",arguments);
-            var territorio = parameters.dl,
-                currentStyle = defaultStyle;
-            currentStyle.fillColor = getColor(parseInt(feature.properties.data[data[territorio].value]), data[territorio].bins);
+            var territorio = feature.properties._layer,
+                geoLayer = $.geoLayers.filter(function(l) { return (l.type === "vector" && l.schema.name === territorio); })[0],
+                currentStyle = geoLayer.style.default;
+            currentStyle.fillColor = getColor(parseInt(feature.properties.data[data[territorio].value]), data[territorio].bins, geoLayer.style.default.palette);
 	    	return currentStyle;
     	}
 
@@ -880,8 +878,12 @@
 	    function highlightFeature(e) {
             if ($.debug) console.log("highlightFeatureFunction",arguments);
             var layer = e.target,
-                props = layer.feature.properties;
+                props = layer.feature.properties,
+                territorio = layer.feature.properties._layer,
+                geoLayer = $.geoLayers.filter(function(l) { return (l.type === "vector" && l.schema.name === territorio); })[0],
+                highlightStyle = geoLayer.style.highlight;
                     
+            if (!layer.selected) layer.setStyle(highlightStyle);
             label.setContent(props[geo[parameters.dl].label]+'<br>Beni confiscati: '+props.data[data[parameters.dl].value]);
             label.setLatLng(layer.getBounds().getCenter());
             map.showLabel(label);
@@ -889,16 +891,23 @@
                 
         function resetHighlight(e) {
             if ($.debug) console.log("resetHighlightFunction",arguments);
-            var layer = e.target;
+            var layer = e.target,
+                territorio = layer.feature.properties._layer,
+                geoLayer = $.geoLayers.filter(function(l) { return (l.type === "vector" && l.schema.name === territorio); })[0],
+                defaultStyle = geoLayer.style.default;
+            if (!layer.selected) geojson.eachLayer(function(l) { if (!l.selected) geojson.resetStyle(l); });
             label.close();
 	    }
 
 	    function openInfoWindow(e, layer) {
             if ($.debug) console.log("openInfoWindowFunction",arguments);
-            var layer = layer || e.target;
-            geojson.eachLayer(function(l) { l.highlight = false; geojson.resetStyle(l); });
-            layer.highlight = true;
-            layer.setStyle(highlightStyle);
+            var layer = layer || e.target,
+                territorio = layer.feature.properties._layer,
+                geoLayer = $.geoLayers.filter(function(l) { return (l.type === "vector" && l.schema.name === territorio); })[0],
+                selectedStyle = geoLayer.style.selected;
+            geojson.eachLayer(function(l) { l.selected = false; geojson.resetStyle(l); });
+            layer.selected = true;
+            layer.setStyle(selectedStyle);
             parameters.i = layer.feature.properties[geo[parameters.dl].id];
             if (embedControl && embedControl.isAdded) embedControl.removeFrom(map);
             info.update(layer.feature.properties);
@@ -938,6 +947,7 @@
                     if (dataID == geoID) {
                         numOkData++;
                         geo[territorio].resource.features[i].properties.data = data[territorio].resource.result.records[j];
+                        geo[territorio].resource.features[i].properties._layer = territorio;
                         noData = false;
                         break;
                     }
