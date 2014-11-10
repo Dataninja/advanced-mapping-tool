@@ -67,6 +67,49 @@ var mapConfig = {
         // ...
     },
 
+    viewTypes: {
+        table: function(data, options) {
+            console.log(arguments);
+            if (!data) return '';
+            var defaultOptions = {
+                    include: [],
+                    exclude: [],
+                    bold: function(key, value) { return false; },
+                    filter: function(key, value) { return true; },
+                    transform: function(key, value) { return value; }
+                },
+                options = options || {},
+                tbody = '',
+                k;
+
+            for (k in defaultOptions) {
+                if (defaultOptions.hasOwnProperty(k) && !options.hasOwnProperty(k)) {
+                    options[k] = defaultOptions[k];
+                }
+            }
+
+            console.log(options);
+            for (k in data) {
+                if (data.hasOwnProperty(k)) {
+                    if (!options.include.length || options.include.indexOf(k) > -1) {
+                        if (!options.exclude.length || !(options.exclude.indexOf(k) > -1)) {
+                            if (options.filter(k,data[k])) {
+                                var val = options.transform(k,data[k]),
+                                    isBold = options.bold(k,data[k]);
+                                tbody += '<tr>' + 
+                                    '<td>' + (isBold ? '<b>'+k+'</b>' : k) + '</td>' +
+                                    '<td>' + (isBold ? '<b>'+val+'</b>' : val) + '</td>' +
+                                    '</tr>';
+                            }
+                        }
+                    }
+                }
+            }
+
+            return tbody;
+        }
+    },
+
     dataSets: [
         {
             source: 'dkan', // from dataSources attributes
@@ -156,7 +199,7 @@ var mapConfig = {
             // ... // based on geoTypes attributes for this type
             schema: {
                 name: 'comuni', // keyname of layer
-                id: 'COD_COM',
+                id: 'PRO_COM',
                 label: 'NOME_COM'
             }
         }
@@ -221,24 +264,28 @@ var mapConfig = {
                 '<p>Tieniti aggiornato sul progetto visitando il sito ufficiale di <a href="http://www.confiscatibene.it" target="_blank">Confiscati Bene</a> o seguendo l\'account Twitter <a href="https://twitter.com/confiscatibene" target="_blank">@confiscatibene</a>, puoi anche scriverci all\'indirizzo <a href="mailto:info@confiscatibene.it" target="_blank">info@confiscatibene.it</a>.</p>',
             mobile: '<a href="mailto:info@confiscatibene.it" target="_blank" style="margin-right: 30px;">Info</a>',
         },
-        downloads: [
-            {
-                source: 'dkan',
-                resourceId: 'e5b4d63a-e1e8-40a3-acec-1d351f03ee56',
-                name: 'immobili',
-                filebase: 'confiscatibene',
-                title: 'Scarica l\'elenco degli immobili',
-                image: 'img/house109-dnl.png'
-            },
-            {
-                source: 'dkan',
-                resourceId: '8b7e12f1-6484-47f0-9cf6-88b446297dbc',
-                name: 'aziende',
-                filebase: 'confiscatibene',
-                title: 'Scarica l\'elenco delle aziende',
-                image: 'img/factory6-dnl.png'
-            }
-        ],
+        download: {
+            active: true,
+            license: 'Creative Commons Attribution <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank">CC-BY 4.0 International</a>.',
+            files: [
+                {
+                    source: 'dkan',
+                    resourceId: 'e5b4d63a-e1e8-40a3-acec-1d351f03ee56',
+                    name: 'immobili',
+                    filebase: 'confiscatibene',
+                    title: 'Scarica l\'elenco degli immobili',
+                    image: 'img/house109-dnl.png'
+                },
+                {
+                    source: 'dkan',
+                    resourceId: '8b7e12f1-6484-47f0-9cf6-88b446297dbc',
+                    name: 'aziende',
+                    filebase: 'confiscatibene',
+                    title: 'Scarica l\'elenco delle aziende',
+                    image: 'img/factory6-dnl.png'
+                }
+            ]
+        },
         shareButtons: {
             active: true,
             title: 'Condividi la situazione',
@@ -263,6 +310,21 @@ var mapConfig = {
             },
             permalink: {
                 active: true
+            }
+        },
+        view: {
+            active: true,
+            type: 'table',
+            options: {
+                bold: function(k,v) {
+                    return (k.indexOf('Totale') > -1);
+                },
+                filter: function(k,v) {
+                    return (v != '0' && k.charAt(0) == k.charAt(0).toUpperCase() && k.slice(0,2) != "Id");
+                },
+                transform: function(k,v) {
+                    return parseInt(v) || v;
+                }
             }
         }
     }, // To do...
@@ -328,7 +390,7 @@ var mapConfig = {
             image: 'img/detach.png', // ie. img/detach.png
         },
         socialButtons: {
-            active: true,
+            active: false,
             twitter: {
                 active: true,
                 via: 'confiscatibene',

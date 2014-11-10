@@ -49,11 +49,11 @@
         }
 
         if ($.infowindow.active) {
-            for (i=0; i<$.infowindow.downloads.length; i++) {
-                sourceDef = $.dataSources[$.infowindow.downloads[i].source];
+            for (i=0; i<$.infowindow.download.files.length; i++) {
+                sourceDef = $.dataSources[$.infowindow.download.files[i].source];
                 for (k in sourceDef) {
-                    if (sourceDef.hasOwnProperty(k) && !$.infowindow.downloads[i].hasOwnProperty(k)) {
-                        $.infowindow.downloads[i][k] = sourceDef[k];
+                    if (sourceDef.hasOwnProperty(k) && !$.infowindow.download.files[i].hasOwnProperty(k)) {
+                        $.infowindow.download.files[i][k] = sourceDef[k];
                     }
                 }
             }
@@ -309,21 +309,22 @@
 
                     if ($.debug) console.log("shareButtons",buttons);
 
-                    for (i=0; i<$.infowindow.downloads.length; i++) {
-                        dnlBtn.push('<a id="a-' + 
-                            $.infowindow.downloads[i].name + 
-                            '" class="dnl" href="#" title="' + 
-                            $.infowindow.downloads[i].title + 
-                            '"><img src="' + 
-                            $.infowindow.downloads[i].image + 
-                            '" /></a>'
-                        );
+                    if ($.infowindow.download.active) {
+                        for (i=0; i<$.infowindow.download.files.length; i++) {
+                            dnlBtn.push('<a id="a-' + 
+                                $.infowindow.download.files[i].name + 
+                                '" class="dnl" href="#" title="' + 
+                                $.infowindow.download.files[i].title + 
+                                '"><img src="' + 
+                                $.infowindow.download.files[i].image + 
+                                '" /></a>'
+                            );
+                        }
                     }
                     
                     if ($.debug) console.log("downloadButtons",dnlBtn);
 
-                    var table = '<table class="zebra">' + 
-                        '<thead>' + 
+                    var thead = '<thead>' + 
                         '<tr>' + 
                         '<th>' + 
                         '<span id="sdnlBtn">'+dnlBtn.join("&nbsp;")+'</span>' + "&nbsp;&nbsp;" + 
@@ -332,26 +333,34 @@
                         '<tr>' + 
                         '<th colspan="2" class="rossobc">' + props[geo[territorio].label] + '</th>' +
                         '</tr>' + 
-                        '</thead>' + 
-                        '<tfoot>' + 
-                        '<tr><td colspan="2" style="text-align:right;font-size: smaller;">' + 
-                        'Creative Commons Attribution <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank">CC-BY 4.0 International</a>.' + 
-                        '</td></tr>' + 
-                        '</tfoot>' + 
-                        '<tbody>';
+                        '</thead>';
 
-                    for (var k in props.data) {
-                        if (props.data.hasOwnProperty(k) && props.data[k] != '0' && k.charAt(0) == k.charAt(0).toUpperCase() && k.slice(0,2) != "Id") {
-                            table += '<tr>' + 
-                                '<td>' + (k.indexOf('Totale') > -1 ? '<b>'+k+'</b>' : k) + '</td>' +
-                                '<td>' + (k.indexOf('Totale') > -1 ? '<b>'+parseInt(props.data[k])+'</b>' : (parseInt(props.data[k]) || props.data[k])) + '</td>' + 
-                                '</tr>';
-                        }
+                    if ($.debug) console.log("Table header",thead);
+
+                    var tfoot;
+                    if ($.infowindow.download.active) {
+                        tfoot = '<tfoot>' + 
+                            '<tr><td colspan="2" style="text-align:right;font-size: smaller;">' + 
+                            ($.infowindow.download.license || '') + 
+                            '</td></tr>' + 
+                            '</tfoot>';
                     }
+                    
+                    if ($.debug) console.log("Table footer",tfoot);
 
-                    table += '</tbody></table>';
+                    var tbody;
+                    if ($.infowindow.view.active && $.viewTypes.hasOwnProperty($.infowindow.view.type)) {
+                        tbody = $.viewTypes[$.infowindow.view.type](props.data, $.infowindow.view.options);
+                        if (!(tbody.indexOf('<tbody>') > -1)) {
+                            tbody = '<tbody>' + tbody + '</tbody>';
+                        }
+                    } else {
+                        tbody = '<tbody></tbody>';
+                    }
+                    
+                    if ($.debug) console.log("Table body",tbody);
 
-                    this._div.innerHTML += table;
+                    this._div.innerHTML += '<table class="zebra">' + thead + tbody + tfoot + '</table>';
 
                     if ($.infowindow.shareButtons.active && $.urlShortener.active) {
                         dtnj.shorten(btnEncUrl, $.urlShortener.prefix+md5(btnUrl), function(data) {
@@ -402,32 +411,34 @@
                         });
                     }
             
-                    for (i=0; i<$.infowindow.downloads.length; i++) {
-                        dnlPath = $.infowindow.downloads[i].path + 
-                            "?resource_id=" + $.infowindow.downloads[i].resourceId + "&limit=5000&filters[" + 
-                            filterKey + 
-                            "]=" + 
-                            filterValue;
+                    if ($.infowindow.download.active) {
+                        for (i=0; i<$.infowindow.download.files.length; i++) {
+                            dnlPath = $.infowindow.download.files[i].path + 
+                                "?resource_id=" + $.infowindow.download.files[i].resourceId + "&limit=5000&filters[" + 
+                                filterKey + 
+                                "]=" + 
+                                filterValue;
 
-                        dnlFile = stoday + 
-                            '_' + $.infowindow.downloads[i].filebase + 
-                            '-' + $.infowindow.downloads[i].name + 
-                            '_' + filterKey + 
-                            '-' + filterValue + 
-                            '.csv';
+                            dnlFile = stoday + 
+                                '_' + $.infowindow.download.files[i].filebase + 
+                                '-' + $.infowindow.download.files[i].name + 
+                                '_' + filterKey + 
+                                '-' + filterValue + 
+                                '.csv';
 
-                        d3.select('a#a-'+$.infowindow.downloads[i].name).on("click", function() {
-                            var that = this;
-                            d3.json(dnlPath, function(err,res) {
-                                if (res.result.records.length > 0) {
-                                    var csv = agnes.jsonToCsv(res.result.records, delim),
-                                        blob = new Blob([csv], {type: "text/csv;charset=utf-8"});
-                                    saveAs(blob, dnlFile);
-                                } else {
-                                    alert("No data!");
-                                }
+                            d3.select('a#a-'+$.infowindow.download.files[i].name).on("click", function() {
+                                var that = this;
+                                d3.json(dnlPath, function(err,res) {
+                                    if (res.result.records.length > 0) {
+                                        var csv = agnes.jsonToCsv(res.result.records, delim),
+                                            blob = new Blob([csv], {type: "text/csv;charset=utf-8"});
+                                        saveAs(blob, dnlFile);
+                                    } else {
+                                        alert("No data!");
+                                    }
+                                });
                             });
-                        });
+                        }
                     }
     
                     d3.select(this._div).select("a#close-cross")
@@ -895,7 +906,7 @@
         /*** ***/
 
         function getColor(d, bins, palette) {
-            if ($.debug) console.log("getColorFunction",arguments);
+            //if ($.debug) console.log("getColorFunction",arguments);
             var palette = palette || 'Reds',
                 binsNum = (colorbrewer[palette][bins.length-1] ? bins.length-1 : 3);
             for (var i=1; i<bins.length; i++) {
@@ -906,7 +917,7 @@
         }
 
         function style(feature) {
-            if ($.debug) console.log("styleFunction",arguments);
+            //if ($.debug) console.log("styleFunction",arguments);
             var territorio = feature.properties._layer,
                 geoLayer = $.geoLayers.filter(function(l) { return (l.type === "vector" && l.schema.name === territorio); })[0],
                 currentStyle = geoLayer.style.default;
@@ -920,7 +931,7 @@
         var geojson, label = new L.Label();
 
 	    function highlightFeature(e) {
-            if ($.debug) console.log("highlightFeatureFunction",arguments);
+            //if ($.debug) console.log("highlightFeatureFunction",arguments);
             var layer = e.target,
                 props = layer.feature.properties,
                 territorio = layer.feature.properties._layer,
@@ -936,7 +947,7 @@
 	    }
                 
         function resetHighlight(e) {
-            if ($.debug) console.log("resetHighlightFunction",arguments);
+            //if ($.debug) console.log("resetHighlightFunction",arguments);
             var layer = e.target,
                 territorio = layer.feature.properties._layer,
                 geoLayer = $.geoLayers.filter(function(l) { return (l.type === "vector" && l.schema.name === territorio); })[0],
@@ -963,7 +974,7 @@
         }
 
         function onEachFeature(feature, layer) {
-            if ($.debug) console.log("onEachFeatureFunction",arguments);
+            //if ($.debug) console.log("onEachFeatureFunction",arguments);
 	    	layer.on({
 	        	mouseover: highlightFeature,
 				mouseout: resetHighlight,
