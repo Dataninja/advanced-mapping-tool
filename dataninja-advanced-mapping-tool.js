@@ -158,7 +158,8 @@
             }
         }
         
-        if (parameters.mr && parameters.mr.hasOwnProperty('rid')) {
+        if ($.pointsSet.active && parameters.mr && parameters.mr.hasOwnProperty('rid')) {
+            $.pointsSet.resourceId = parameters.mr.rid;
             parameters.mr.lat = parameters.mr.lat || 'lat';
             parameters.mr.lng = parameters.mr.lng || 'lng';
         }
@@ -1039,7 +1040,8 @@
             if ($.debug) console.log("loadDataFunction",arguments);
             
             var geoLayer = $.geoLayers.filter(function(l) { return (l.type === "vector" && l.schema.name === territorio); })[0],
-                dataSet = $.dataSets.filter(function(l) { return l.schema.layer === territorio; })[0];
+                dataSet = $.dataSets.filter(function(l) { return l.schema.layer === territorio; })[0],
+                geoPath, dataPath, markersPath, q;
             
             d3.selectAll("nav#menu-ui a").classed("active", false);
             d3.select("nav#menu-ui a#"+territorio).classed("active", true);
@@ -1050,26 +1052,22 @@
             if ($.debug) console.log("dataSet",dataSet);
 
             if (!geo[territorio].resource || !data[territorio].resource) {
-                var geoPath = geoLayer.path + 
-                        (parameters.t ? (territorio + '-' + parameters.tl + '-' + parameters.t) : territorio) + 
-                        '.' + geoLayer.format,
-                    dataPath = dataSet.path + 
-                        '?resource_id=' + dataSet.resourceId + 
-                        (parameters.t ? ('&filters[' + defaultData[parameters.tl].id + ']=' + parameters.t) : ""),
-                    q = queue();
+                geoPath = geoLayer.url.call(geoLayer, territorio, (parameters.t ? parameters.tl : undefined), parameters.t || undefined);
+                dataPath = dataSet.url.call(dataSet, territorio, (parameters.t ? defaultData[parameters.tl].id : undefined), parameters.t || undefined);
+                
                 map.spin(true);
 
                 if ($.debug) console.log("geoPath",geoPath);
                 if ($.debug) console.log("dataPath",dataPath);
 
+                q = queue();
                 q.defer(d3.json, geoPath); // Geojson
-                q.defer(d3.json, dataPath + (dataSet.limit ? '&limit=' + dataSet.limit : '')); // Dati
+                q.defer(d3.json, dataPath); // Dati
 
-                if (parameters.mr && parameters.mr.hasOwnProperty("rid")) {
-                    var markersPath = $.pointsSet.path +
-                        '?resource_id=' + parameters.mr.rid; 
+                if ($.pointsSet.resourceId) {
+                    markersPath = $.pointsSet.url.call($.pointsSet, territorio);
                     if ($.debug) console.log("markersPath",markersPath);
-                    q.defer(d3.json, markersPath + ($.pointsSet.limit ? '&limit=' + $.pointsSet.limit : ''));
+                    q.defer(d3.json, markersPath);
                 }
 
                 q.await(function(err, geojs, datajs, markersjs) {

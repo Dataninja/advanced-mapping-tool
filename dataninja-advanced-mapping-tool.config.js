@@ -3,12 +3,40 @@ var mapConfig = {
     debug: true,
 
     dataSources: {
+        local: {
+            path: '',
+            format: '',
+            url: function(territorio, filterKey, filterValue) {
+                return this.path + 
+                    territorio + 
+                    (filterKey && filterValue ? '_'+filterKey+'-'+filterValue : '') +
+                    "." + this.format;
+            }
+        },
+        remote: {
+            uri: '',
+            path: '',
+            format: '',
+            url: function(territorio, filterKey, filterValue) {
+                return this.uri + 
+                    this.path + 
+                    territorio + 
+                    (filterKey && filterValue ? '_'+filterKey+'-'+filterValue : '') +
+                    "." + this.format;
+            }
+        },
         dkan: {
             uri: '',
             path: '/api/confiscatibene/action/datastore/search.json',
             //path: '', // ie. /api/confiscatibene/action/datastore/search.json
             resourceId: '',
-            limit: 5000
+            limit: 5000,
+            url: function(territorio, filterKey, filterValue) {
+                return this.uri + this.path + 
+                    '?resource_id=' + this.resourceId +
+                    (filterKey && filterValue ? ('&filters[' + filterKey + ']=' + filterValue) : '') + 
+                    (this.limit ? '&limit=' + this.limit : '');
+            }
         }
         // ...
     },
@@ -22,13 +50,26 @@ var mapConfig = {
 
     geoSources: {
         local: {
-            active: true,
-            path: ''
+            path: '',
+            format: '',
+            url: function(territorio, filterKey, filterValue) {
+                return this.path + 
+                    territorio + 
+                    (filterKey && filterValue ? '_'+filterKey+'-'+filterValue : '') + 
+                    '.' + this.format;
+            }
         },
         remote: {
-            active: true,
             uri: '',
-            path: ''
+            path: '',
+            format: '',
+            url: function(territorio, filterKey, filterValue) {
+                return this.uri + 
+                    this.path + 
+                    territorio + 
+                    (filterKey && filterValue ? '_'+filterKey+'-'+filterValue : '') + 
+                    '.' + this.format;
+            }
         }
     },
 
@@ -158,8 +199,8 @@ var mapConfig = {
         active: true,
         source: 'dkan',
         clusters: true,
-        icon: 'js/leaflet/marker-icon.png',
-        shadow: 'js/leaflet/marker-shadow.png'
+        icon: 'img/marker-icon.png',
+        shadow: 'img/marker-shadow.png'
     },
 
     geoLayers: [
