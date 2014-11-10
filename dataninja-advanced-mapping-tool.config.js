@@ -7,7 +7,8 @@ var mapConfig = {
             uri: '',
             path: '/api/confiscatibene/action/datastore/search.json',
             //path: '', // ie. /api/confiscatibene/action/datastore/search.json
-            resourceId: ''
+            resourceId: '',
+            limit: 5000
         }
         // ...
     },

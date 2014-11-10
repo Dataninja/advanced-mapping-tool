@@ -414,7 +414,9 @@
                     if ($.infowindow.download.active) {
                         for (i=0; i<$.infowindow.download.files.length; i++) {
                             dnlPath = $.infowindow.download.files[i].path + 
-                                "?resource_id=" + $.infowindow.download.files[i].resourceId + "&limit=5000&filters[" + 
+                                "?resource_id=" + $.infowindow.download.files[i].resourceId + 
+                                ($.infowindow.download.files[i].limit ? "&limit="+ $.infowindow.download.files[i].limit : "") + 
+                                "&filters[" + 
                                 filterKey + 
                                 "]=" + 
                                 filterValue;
@@ -1048,8 +1050,7 @@
             if ($.debug) console.log("dataSet",dataSet);
 
             if (!geo[territorio].resource || !data[territorio].resource) {
-                var limit = 5000,
-                    geoPath = geoLayer.path + 
+                var geoPath = geoLayer.path + 
                         (parameters.t ? (territorio + '-' + parameters.tl + '-' + parameters.t) : territorio) + 
                         '.' + geoLayer.format,
                     dataPath = dataSet.path + 
@@ -1062,13 +1063,13 @@
                 if ($.debug) console.log("dataPath",dataPath);
 
                 q.defer(d3.json, geoPath); // Geojson
-                q.defer(d3.json, dataPath + '&limit=' + limit); // Dati
+                q.defer(d3.json, dataPath + (dataSet.limit ? '&limit=' + dataSet.limit : '')); // Dati
 
                 if (parameters.mr && parameters.mr.hasOwnProperty("rid")) {
                     var markersPath = $.pointsSet.path +
                         '?resource_id=' + parameters.mr.rid; 
                     if ($.debug) console.log("markersPath",markersPath);
-                    q.defer(d3.json, markersPath + '&limit=' + limit);
+                    q.defer(d3.json, markersPath + ($.pointsSet.limit ? '&limit=' + $.pointsSet.limit : ''));
                 }
 
                 q.await(function(err, geojs, datajs, markersjs) {
