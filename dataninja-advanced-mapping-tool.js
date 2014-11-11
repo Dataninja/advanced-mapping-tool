@@ -553,8 +553,7 @@
                 this.isAdded = true;
                 var textinput = {},
                     p = {},
-                    label = {},
-                    oldMd = parameters.md;
+                    label = {};
 
                 var inputarea = L.DomUtil.create('div', 'info embed-inputarea'),
                     url = 'http://' + location.hostname + Arg.url(parameters).replace(/&*md=[^&]*/,'').replace(/&{2,}/g,"&"),
@@ -577,41 +576,37 @@
                     });
                 }
 
-                parameters.md = 'embed';
                 if ($.controls.embed.iframe) {
                     p['iframe'] = L.DomUtil.create('p', 'iframe', inputarea);
                     p['iframe'].innerHTML = '' + 
                         '<label for="embed-iframe" title="Clicca per selezionare">Embed in post/page:</label>&nbsp;' + 
                         '<input type="text" id="embed-iframe" value="' + 
-                        '<iframe src=&quot;' + url + '&quot; frameborder=&quot;0&quot; allowtransparency=&quot;true&quot; ' +
+                        '<iframe src=&quot;' + url + '&md=embed' + '&quot; frameborder=&quot;0&quot; allowtransparency=&quot;true&quot; ' +
                         'allowfullscreen webkitallowfullscreen mozallowfullscreen oallowfullscreen msallowfullscreen ' +
                         'width=&quot;100%&quot; height=&quot;700&quot;></iframe>' + 
                         '" readonly></input>';
                 }
 
-                parameters.md = 'widget';
                 if ($.controls.embed.widget) {
                     p['widget'] = L.DomUtil.create('p', 'widget', inputarea);
                     p['widget'].innerHTML = '' + 
                         '<label for="embed-widget" title="Clicca per selezionare">Embed in sidebar:</label>&nbsp;' + 
                         '<input type="text" id="embed-widget" value="' + 
-                        '<iframe src=&quot;' + url + '&quot; frameborder=&quot;0&quot; allowtransparency=&quot;true&quot; ' +
+                        '<iframe src=&quot;' + url + '&md=widget' + '&quot; frameborder=&quot;0&quot; allowtransparency=&quot;true&quot; ' +
                         'allowfullscreen webkitallowfullscreen mozallowfullscreen oallowfullscreen msallowfullscreen ' +
                         'width=&quot;100%&quot; height=&quot;755&quot;></iframe>' + 
                         '" readonly></input>';
                 }
 
-                parameters.md = 'embed';
                 if ($.controls.embed.shortcode) {
                     p['shortcode'] = L.DomUtil.create('p', 'shortcode', inputarea);
                     p['shortcode'].innerHTML = '' + 
                         '<label for="embed-shortcode" title="Clicca per selezionare">WP Shortcode (<a href="https://github.com/Dataninja/wp-cbmap-shortcode" target="_blank">?</a>):</label>&nbsp;' +
                         '<input type="text" id="embed-shortcode" value="' +
-                        '[cbmap ' + decodeURIComponent(Arg.url(parameters).replace(/^[^?]+\?/,"").replace(/&/g," ")) + ']' + 
+                        '[cbmap ' + decodeURIComponent(url).replace(/^[^?]+\?/,"").replace(/&/g," ") + ' md=embed]' + 
                         '" readonly></input>';
                 }
 
-                parameters.md = oldMd;
                 if ($.controls.embed.hasOwnProperty('svg') && $.controls.embed.svg.active) {
                     p['svg'] = L.DomUtil.create('p', 'svg', inputarea);
                     p['svg'].innerHTML = '' + 
