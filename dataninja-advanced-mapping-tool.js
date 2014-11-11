@@ -106,7 +106,7 @@
                 defaultGeo[$.geoLayers[i].schema.name] = {
                     id: $.geoLayers[i].schema.id,
                     label: $.geoLayers[i].schema.label,
-                    inSelectorControl: $.geoLayers[i].inSelectorControl,
+                    inMenu: $.geoLayers[i].inMenu,
                     resource: null,
                     list: []
                 };
@@ -125,7 +125,8 @@
                 resource: null,
                 markers: null,
                 bins: [],
-                ranges: []
+                ranges: [],
+                palette: $.dataSets[i].palette
             };
         }
 
@@ -139,8 +140,8 @@
                 dl: [string], // Livello mostrato al caricamento -- DEFAULT LAYER
                 ml: [string], // Livello caricato più alto: regioni, province, comuni -- MAX LAYER
                 tl: [string], // Livello a cui si riferisce t -- TERRITORY LAYER
-                t: [int], // Codice istat del territorio centrato e con infowindow aperta (si riferisce a tl) -- TERRITORY
-                i: [int] // Codice istat del territorio con infowindow aperta -- INFO
+                t: [int], // Codice istat del region centrato e con infowindow aperta (si riferisce a tl) -- TERRITORY
+                i: [int] // Codice istat del region con infowindow aperta -- INFO
             }
         */
         
@@ -150,7 +151,7 @@
         parameters.md = parameters.md || (head.mobile ? 'mobile' : ''); // Layout
         d3.select('body').classed(parameters.md,true); // Tengo traccia del layout come classe del body
 
-        if (parameters.t) { // Focus su un territorio (codice istat che si riferisce a tl)
+        if (parameters.t) { // Focus su un region (codice istat che si riferisce a tl)
             parameters.tl = parameters.tl || parameters.ml; // Livello a cui si riferisce t
             parameters.ml = parameters.ls[parameters.ls.indexOf(parameters.tl)+1]; // Si riferisce ora al livello più alto caricato
             if (parameters.ls.indexOf(parameters.dl) < parameters.ls.indexOf(parameters.tl)+1) {
@@ -254,17 +255,17 @@
                     var delim = agnes.rowDelimiter(),
                         today = new Date(),
                         stoday = d3.time.format('%Y%m%d')(today),
-                        territorio = parameters.dl,
-                        filterKey = data[territorio].id,
-                        filterValue = props[geo[territorio].id],
+                        region = parameters.dl,
+                        filterKey = data[region].id,
+                        filterValue = props[geo[region].id],
                         buttons = [], btnTitle, btnUrl, btnPlace,
                         dnlBtn = [];
     
                     if ($.infowindow.hasOwnProperty('shareButtons') && $.infowindow.shareButtons.active) {
-                        btnTitle = $.infowindow.shareButtons.title + (territorio == 'regioni' ? ' in ' : ' a ') + props[geo[territorio].label];
+                        btnTitle = $.infowindow.shareButtons.title + (region == 'regioni' ? ' in ' : ' a ') + props[geo[region].label];
                         btnUrl = 'http://' + location.hostname + Arg.url(parameters).replace(/&*md=[^&]*/,'').replace(/&{2,}/g,"&");
                         btnEncUrl = 'http://' + location.hostname + encodeURIComponent(Arg.url(parameters).replace(/&*md=[^&]*/,'').replace(/&{2,}/g,"&"));
-                        btnPlace = props[geo[territorio].label];
+                        btnPlace = props[geo[region].label];
                     
                         if ($.infowindow.shareButtons.hasOwnProperty('twitter') && $.infowindow.shareButtons.twitter.active) {
                             buttons.push('<a class="ssb" href="http://twitter.com/share?url=' + btnEncUrl + 
@@ -330,7 +331,7 @@
                         '<span id="sshrBtn">'+buttons.join("&nbsp;")+'</span>' + '</th>' + 
                         '<th style="text-align:right;"><a id="close-cross" href="#" title="Chiudi"><img src="img/close.png" /></a></th></tr>' + 
                         '<tr>' + 
-                        '<th colspan="2" class="rossobc">' + props[geo[territorio].label] + '</th>' +
+                        '<th colspan="2" class="rossobc">' + props[geo[region].label] + '</th>' +
                         '</tr>' + 
                         '</thead>';
 
@@ -414,19 +415,12 @@
                         for (i=0; i<$.infowindow.downloads.files.length; i++) {
                             if ($.infowindow.downloads.files[i].active) {
                                 (function(i) {
-                                     var dnlPath = $.infowindow.downloads.files[i].path + 
-                                        "?resource_id=" + $.infowindow.downloads.files[i].resourceId + 
-                                        ($.infowindow.downloads.files[i].limit ? "&limit="+ $.infowindow.downloads.files[i].limit : "") + 
-                                        "&filters[" + 
-                                        filterKey + 
-                                        "]=" + 
-                                        filterValue;
+                                    var dnlPath = $.infowindow.downloads.files[i].url.call($.infowindow.downloads.files[i], region, filterKey, filterValue);
 
                                     var dnlFile = stoday + 
                                         '_' + $.infowindow.downloads.files[i].filebase + 
                                         '-' + $.infowindow.downloads.files[i].name + 
-                                        '_' + filterKey + 
-                                        '-' + filterValue + 
+                                        (filterKey && filterValue ? '_' + filterKey + '-' + filterValue : '') + 
                                         '.csv';
 
                                     d3.select('a#a-'+$.infowindow.downloads.files[i].name).on("click", function() {
@@ -462,9 +456,9 @@
                     d3.select(this._div).classed("closed", true);
                     if (parameters.md === 'mobile') {
                         map.dragging.enable();
-                        this._div.innerHTML += $.infowindow.text.mobile;
+                        this._div.innerHTML += $.infowindow.content.mobile;
                     } else {
-                        this._div.innerHTML += $.infowindow.text.default;
+                        this._div.innerHTML += $.infowindow.content.default;
                     }
                 }
     	    };
@@ -668,13 +662,13 @@
                         html2canvas(document.body, {
                             onrendered: function(canvas) {
                                 var svg = d3.select(".leaflet-overlay-pane svg"),
-                                    offsetX = $.controls.screenshot.offsetX,
-                                    offsetY = $.controls.screenshot.offsetY;
+                                    offsetX = $.controls.screenshot.offsetX || 'auto',
+                                    offsetY = $.controls.screenshot.offsetY || 'auto';
                                 canvg(canvas, svg.node().outerHTML, {
-                                    ignoreMouse: $.controls.screenshot.ignoreMouse, 
-                                    ignoreAnimation: $.controls.screenshot.ignoreAnimation, 
-                                    ignoreDimensions: $.controls.screenshot.ignoreDimensions, 
-                                    ignoreClear: $.controls.screenshot.ignoreClear, 
+                                    ignoreMouse: $.controls.screenshot.ignoreMouse || true, 
+                                    ignoreAnimation: $.controls.screenshot.ignoreAnimation || true, 
+                                    ignoreDimensions: $.controls.screenshot.ignoreDimensions || true, 
+                                    ignoreClear: $.controls.screenshot.ignoreClear || true, 
                                     offsetX: (typeof offsetX === 'number' ? offsetX : svgViewBox[0]), 
                                     offsetY: (typeof offsetY === 'number' ? offsetY : svgViewBox[1])
                                 });
@@ -752,8 +746,8 @@
                             'data-href="http://' + location.hostname + location.pathname + '" ' + 
                             'data-layout="' + $.controls.socialButtons.facebook.layout + '" ' + 
                             'data-action="' + $.controls.socialButtons.facebook.action + '" ' + 
-                            'data-show-faces="' + $.controls.socialButtons.facebook["show-faces"] + '" ' + 
-                            'data-share="' + $.controls.socialButtons.facebook.share + '">' + 
+                            'data-show-faces="' + $.controls.socialButtons.facebook["show-faces"].toString() + '" ' + 
+                            'data-share="' + $.controls.socialButtons.facebook.share.toString() + '">' + 
                             '</div>';
                         div.innerHTML += facebook;
                         head.load("http://connect.facebook.net/it_IT/sdk.js#xfbml=1&appId=" + $.controls.socialButtons.facebook.appId + "&version=v2.0");
@@ -781,7 +775,7 @@
         /*** ***/
 
         /*** Creazione del menù dei livelli ***/
-        menuLayers = $.geoLayers.filter(function(l) { return l.inSelectorControl; });
+        menuLayers = $.geoLayers.filter(function(l) { return l.inMenu; });
         if (menuLayers.length) {
             menu = L.control({position: 'topleft'});
             menu.onAdd = function(map) {
@@ -800,7 +794,7 @@
                 .attr("href", "#")
                 .attr("id", function(d) { return d; })
                 .classed("disabled", function(d) {
-                    return !(geo.hasOwnProperty(d) && geo[d].inSelectorControl);
+                    return !(geo.hasOwnProperty(d) && geo[d].inMenu);
                 })
                 .on("click", function(d) {
                     if (geo.hasOwnProperty(d)) {
@@ -880,8 +874,8 @@
                 this._div.innerHTML = (parameters.md != 'widget' ? '<h4>'+$.legend.title+'</h4>' : '');
 		        return this._div;
             };
-            legend.update = function(territorio) {
-                var grades = data[territorio].ranges;
+            legend.update = function(region) {
+                var grades = data[region].ranges;
                 this._div.innerHTML = (parameters.md != 'widget' ? '<h4 title="'+$.legend.description+'">'+$.legend.title+'</h4>' : '');
                 for (var i=0; i<grades.length; i++) {
                     var color = (colorbrewer.Reds[grades.length] ? colorbrewer.Reds[grades.length][i] : colorbrewer.Reds[3][i]);
@@ -913,10 +907,10 @@
 
         function style(feature) {
             //if ($.debug) console.log("styleFunction",arguments);
-            var territorio = feature.properties._layer,
-                geoLayer = $.geoLayers.filter(function(l) { return (l.type === "vector" && l.schema.name === territorio); })[0],
+            var region = feature.properties._layer,
+                geoLayer = $.geoLayers.filter(function(l) { return (l.type === "vector" && l.schema.name === region); })[0],
                 currentStyle = geoLayer.style.default;
-            currentStyle.fillColor = getColor(parseInt(feature.properties.data[data[territorio].value]), data[territorio].bins, geoLayer.style.default.palette);
+            currentStyle.fillColor = getColor(parseInt(feature.properties.data[data[region].value]), data[region].bins, data[region].palette);
 	    	return currentStyle;
     	}
 
@@ -929,8 +923,8 @@
             //if ($.debug) console.log("highlightFeatureFunction",arguments);
             var layer = e.target,
                 props = layer.feature.properties,
-                territorio = layer.feature.properties._layer,
-                geoLayer = $.geoLayers.filter(function(l) { return (l.type === "vector" && l.schema.name === territorio); })[0],
+                region = layer.feature.properties._layer,
+                geoLayer = $.geoLayers.filter(function(l) { return (l.type === "vector" && l.schema.name === region); })[0],
                 highlightStyle = geoLayer.style.highlight;
                     
             if (!layer.selected) layer.setStyle(highlightStyle);
@@ -944,8 +938,8 @@
         function resetHighlight(e) {
             //if ($.debug) console.log("resetHighlightFunction",arguments);
             var layer = e.target,
-                territorio = layer.feature.properties._layer,
-                geoLayer = $.geoLayers.filter(function(l) { return (l.type === "vector" && l.schema.name === territorio); })[0],
+                region = layer.feature.properties._layer,
+                geoLayer = $.geoLayers.filter(function(l) { return (l.type === "vector" && l.schema.name === region); })[0],
                 defaultStyle = geoLayer.style.default;
             if (!layer.selected) geojson.eachLayer(function(l) { if (!l.selected) geojson.resetStyle(l); });
             if ($.hasOwnProperty('label') && $.label.active) label.close();
@@ -954,8 +948,8 @@
 	    function openInfoWindow(e, layer) {
             if ($.debug) console.log("openInfoWindowFunction",arguments);
             var layer = layer || e.target,
-                territorio = layer.feature.properties._layer,
-                geoLayer = $.geoLayers.filter(function(l) { return (l.type === "vector" && l.schema.name === territorio); })[0],
+                region = layer.feature.properties._layer,
+                geoLayer = $.geoLayers.filter(function(l) { return (l.type === "vector" && l.schema.name === region); })[0],
                 selectedStyle = geoLayer.style.selected;
             geojson.eachLayer(function(l) { l.selected = false; geojson.resetStyle(l); });
             layer.selected = true;
@@ -987,26 +981,26 @@
         /*** ***/
 
         // Join tra dati e territori
-        function joinData(territorio) {
+        function joinData(region) {
             if ($.debug) console.log("joinDataFunction",arguments);
-            var numGeo = geo[territorio].resource.length,
-                numData = data[territorio].resource.length,
+            var numGeo = geo[region].resource.length,
+                numData = data[region].resource.length,
                 noData = true, numOkData = 0, numNoData = 0;
-            for (var i=0; i<geo[territorio].resource.length; i++) {
-                var geoID = geo[territorio].resource[i].properties[geo[territorio].id];
+            for (var i=0; i<geo[region].resource.length; i++) {
+                var geoID = geo[region].resource[i].properties[geo[region].id];
                 for (var j=0; j<numData; j++) {
-                    var dataID = data[territorio].resource[j][data[territorio].id];
+                    var dataID = data[region].resource[j][data[region].id];
                     if (dataID == geoID) {
                         numOkData++;
-                        geo[territorio].resource[i].properties.data = data[territorio].resource[j];
-                        geo[territorio].resource[i].properties._layer = territorio;
+                        geo[region].resource[i].properties.data = data[region].resource[j];
+                        geo[region].resource[i].properties._layer = region;
                         noData = false;
                         break;
                     }
                 }
                 if (noData) {
                     numNoData++;
-                    geo[territorio].resource.splice(i,1);
+                    geo[region].resource.splice(i,1);
                     i--;
                 } else {
                     noData = true;
@@ -1015,37 +1009,37 @@
         }
 
         // Binning della distribuzione dei dati
-        function binData(territorio) {
+        function binData(region) {
             if ($.debug) console.log("binDataFunction",arguments);
-            var geoLayer = $.geoLayers.filter(function(l) { return (l.type === "vector" && l.schema.name === territorio); })[0],
-                dataSet = $.dataSets.filter(function(l) { return l.schema.layer === territorio; })[0];
-            var serie = data[territorio].resource.map(function(el) { return parseInt(el[data[territorio].value]); });
+            var geoLayer = $.geoLayers.filter(function(l) { return (l.type === "vector" && l.schema.name === region); })[0],
+                dataSet = $.dataSets.filter(function(l) { return l.schema.layer === region; })[0];
+            var serie = data[region].resource.map(function(el) { return parseInt(el[data[region].value]); });
             var gs = new geostats(serie);
-            data[territorio].bins = gs.getJenks(serie.length > dataSet.bins ? dataSet.bins : serie.length-1);
-            data[territorio].ranges = gs.ranges;
-            legend.update(territorio);
+            data[region].bins = gs.getJenks(serie.length > dataSet.bins ? dataSet.bins : serie.length-1);
+            data[region].ranges = gs.ranges;
+            legend.update(region);
         }
 
         // Caricamento asincrono dei dati
-        function loadData(territorio) { // territorio = regioni || province || comuni
+        function loadData(region) { // region = regioni || province || comuni
             
             if ($.debug) console.log("loadDataFunction",arguments);
             
-            var geoLayer = $.geoLayers.filter(function(l) { return (l.type === "vector" && l.schema.name === territorio); })[0],
-                dataSet = $.dataSets.filter(function(l) { return l.schema.layer === territorio; })[0],
+            var geoLayer = $.geoLayers.filter(function(l) { return (l.type === "vector" && l.schema.name === region); })[0],
+                dataSet = $.dataSets.filter(function(l) { return l.schema.layer === region; })[0],
                 geoPath, dataPath, markersPath, q;
             
             d3.selectAll("nav#menu-ui a").classed("active", false);
-            d3.select("nav#menu-ui a#"+territorio).classed("active", true);
-            parameters.dl = territorio;
+            d3.select("nav#menu-ui a#"+region).classed("active", true);
+            parameters.dl = region;
             geojson.clearLayers();
 
             if ($.debug) console.log("geoLayer",geoLayer);
             if ($.debug) console.log("dataSet",dataSet);
 
-            if (!geo[territorio].resource || !data[territorio].resource) {
-                geoPath = geoLayer.url.call(geoLayer, territorio, (parameters.t ? parameters.tl : undefined), parameters.t || undefined);
-                dataPath = dataSet.url.call(dataSet, territorio, (parameters.t ? defaultData[parameters.tl].id : undefined), parameters.t || undefined);
+            if (!geo[region].resource || !data[region].resource) {
+                geoPath = geoLayer.url.call(geoLayer, region, (parameters.t ? parameters.tl : undefined), parameters.t || undefined);
+                dataPath = dataSet.url.call(dataSet, region, (parameters.t ? defaultData[parameters.tl].id : undefined), parameters.t || undefined);
                 
                 map.spin(true);
 
@@ -1057,36 +1051,36 @@
                 q.defer(d3[dataSet.format], dataPath); // Dati
 
                 if ($.pointsSet.resourceId) {
-                    markersPath = $.pointsSet.url.call($.pointsSet, territorio);
+                    markersPath = $.pointsSet.url.call($.pointsSet, region);
                     if ($.debug) console.log("markersPath",markersPath);
                     q.defer(d3[$.pointsSet.format], markersPath);
                 }
 
                 q.await(function(err, geojs, datajs, markersjs) {
                     if ($.debug) console.log("await",arguments);
-                    geo[territorio].resource = geoLayer.transform(geojs);
-                    data[territorio].resource = dataSet.transform(datajs);
-                    data[territorio].markers = (markersjs ? $.pointsSet.transform(markersjs) : null);
+                    geo[region].resource = geoLayer.transform(geojs);
+                    data[region].resource = dataSet.transform(datajs);
+                    data[region].markers = (markersjs ? $.pointsSet.transform(markersjs) : null);
                     map.spin(false);
-                    /*if (territorio == 'comuni') {
+                    /*if (region == 'comuni') {
                         JSTERS['comuni'] = geo['comuni'].resource.map(function(el) { var arr = {}; arr[geo['regioni'].id] = el.properties[geo['regioni'].id]; arr[geo['province'].id] = el.properties[geo['province'].id]; arr[geo['comuni'].id] = el.properties[geo['comuni'].id]; arr[geo['comuni'].label] = el.properties[geo['comuni'].label]; return arr; });
                     }*/
-                    joinData(territorio);
-                    binData(territorio);
-	    	        geojson.addData(geo[territorio].resource);
+                    joinData(region);
+                    binData(region);
+	    	        geojson.addData(geo[region].resource);
                     if (!svgViewBox) svgViewBox = d3.select(".leaflet-overlay-pane svg").attr("viewBox").split(" ");
                     if (parameters.t) { map.fitBounds(geojson.getBounds()); }
                     if (parameters.i) {
                         geojson.eachLayer(function(l) { 
-                            if (l.feature.properties[geo[territorio].id] == parameters.i) {
+                            if (l.feature.properties[geo[region].id] == parameters.i) {
                                 openInfoWindow(null, l);
                             }
                         });
                     }
-                    if (data[territorio].markers) {
+                    if (data[region].markers) {
                         var clusters = new L.MarkerClusterGroup({ showCoverageOnHover: false }),
                             markers = [],
-                            points = data[territorio].markers.result.records;
+                            points = data[region].markers.result.records;
                         for (var i=0; i<points.length; i++) {
                             var marker = L.marker();
                             marker.setIcon(L.icon({iconUrl: $.pointsSet.icon, shadowUrl: $.pointsSet.shadow}));
@@ -1104,7 +1098,7 @@
                     }
                 });
             } else {
-                geojson.addData(geo[territorio].resource);
+                geojson.addData(geo[region].resource);
                 delete parameters.i;
                 if (embedControl && embedControl.isAdded) embedControl.removeFrom(map);
                 info.update();
