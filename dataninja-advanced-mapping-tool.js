@@ -34,26 +34,26 @@
 
         // Configuration initialization
         for (i=0; i<$.dataSets.length; i++) {
-            sourceDef = $.dataSources[$.dataSets[i].source],
             typeDef = $.dataTypes[$.dataSets[i].type];
-            for (k in sourceDef) {
-                if (sourceDef.hasOwnProperty(k) && !$.dataSets[i].hasOwnProperty(k)) {
-                    $.dataSets[i][k] = sourceDef[k];
-                }
-            }
             for (k in typeDef) {
                 if (typeDef.hasOwnProperty(k) && !$.dataSets[i].hasOwnProperty(k)) {
                     $.dataSets[i][k] = typeDef[k];
                 }
             }
+            sourceDef = $.dataSources[$.dataSets[i].source];
+            for (k in sourceDef) {
+                if (sourceDef.hasOwnProperty(k) && !$.dataSets[i].hasOwnProperty(k)) {
+                    $.dataSets[i][k] = sourceDef[k];
+                }
+            }
         }
 
         if ($.infowindow.active) {
-            for (i=0; i<$.infowindow.download.files.length; i++) {
-                sourceDef = $.dataSources[$.infowindow.download.files[i].source];
+            for (i=0; i<$.infowindow.downloads.files.length; i++) {
+                sourceDef = $.dataSources[$.infowindow.downloads.files[i].source];
                 for (k in sourceDef) {
-                    if (sourceDef.hasOwnProperty(k) && !$.infowindow.download.files[i].hasOwnProperty(k)) {
-                        $.infowindow.download.files[i][k] = sourceDef[k];
+                    if (sourceDef.hasOwnProperty(k) && !$.infowindow.downloads.files[i].hasOwnProperty(k)) {
+                        $.infowindow.downloads.files[i][k] = sourceDef[k];
                     }
                 }
             }
@@ -69,13 +69,7 @@
         }
 
         for (i=0; i<$.geoLayers.length; i++) {
-            sourceDef = $.geoSources[$.geoLayers[i].source],
             typeDef = $.geoTypes[$.geoLayers[i].type];
-            for (k in sourceDef) {
-                if (sourceDef.hasOwnProperty(k) && !$.geoLayers[i].hasOwnProperty(k)) {
-                    $.geoLayers[i][k] = sourceDef[k];
-                }
-            }
             for (k in typeDef) {
                 if (typeDef.hasOwnProperty(k)) {
                     if (!$.geoLayers[i].hasOwnProperty(k)) {
@@ -87,6 +81,12 @@
                             }
                         }
                     }
+                }
+            }
+            sourceDef = $.geoSources[$.geoLayers[i].source];
+            for (k in sourceDef) {
+                if (sourceDef.hasOwnProperty(k) && !$.geoLayers[i].hasOwnProperty(k)) {
+                    $.geoLayers[i][k] = sourceDef[k];
                 }
             }
         }
@@ -206,9 +206,7 @@
         if ($.debug) console.log("tileLayers",tileLayers);
 
         for (i=0; i<tileLayers.length; i++) {
-            if (tileLayers[i].source === 'remote') {
-                L.tileLayer(tileLayers[i].uri+tileLayers[i].path, tileLayers[i].style).addTo(map);
-            }
+            L.tileLayer(tileLayers[i].url.call(tileLayers[i]), tileLayers[i].options).addTo(map);
         }
         
         map.spin(true);
@@ -260,7 +258,7 @@
                         filterKey = data[territorio].id,
                         filterValue = props[geo[territorio].id],
                         buttons = [], btnTitle, btnUrl, btnPlace,
-                        dnlBtn = [], dnlPath, dnlFile;
+                        dnlBtn = [];
     
                     if ($.infowindow.shareButtons.active) {
                         btnTitle = $.infowindow.shareButtons.title + (territorio == 'regioni' ? ' in ' : ' a ') + props[geo[territorio].label];
@@ -310,14 +308,14 @@
 
                     if ($.debug) console.log("shareButtons",buttons);
 
-                    if ($.infowindow.download.active) {
-                        for (i=0; i<$.infowindow.download.files.length; i++) {
+                    if ($.infowindow.downloads.active) {
+                        for (i=0; i<$.infowindow.downloads.files.length; i++) {
                             dnlBtn.push('<a id="a-' + 
-                                $.infowindow.download.files[i].name + 
+                                $.infowindow.downloads.files[i].name + 
                                 '" class="dnl" href="#" title="' + 
-                                $.infowindow.download.files[i].title + 
+                                $.infowindow.downloads.files[i].title + 
                                 '"><img src="' + 
-                                $.infowindow.download.files[i].image + 
+                                $.infowindow.downloads.files[i].image + 
                                 '" /></a>'
                             );
                         }
@@ -339,10 +337,10 @@
                     if ($.debug) console.log("Table header",thead);
 
                     var tfoot;
-                    if ($.infowindow.download.active) {
+                    if ($.infowindow.downloads.active) {
                         tfoot = '<tfoot>' + 
                             '<tr><td colspan="2" style="text-align:right;font-size: smaller;">' + 
-                            ($.infowindow.download.license || '') + 
+                            ($.infowindow.downloads.license || '') + 
                             '</td></tr>' + 
                             '</tfoot>';
                     }
@@ -412,35 +410,40 @@
                         });
                     }
             
-                    if ($.infowindow.download.active) {
-                        for (i=0; i<$.infowindow.download.files.length; i++) {
-                            dnlPath = $.infowindow.download.files[i].path + 
-                                "?resource_id=" + $.infowindow.download.files[i].resourceId + 
-                                ($.infowindow.download.files[i].limit ? "&limit="+ $.infowindow.download.files[i].limit : "") + 
-                                "&filters[" + 
-                                filterKey + 
-                                "]=" + 
-                                filterValue;
+                    if ($.infowindow.downloads.active) {
+                        for (i=0; i<$.infowindow.downloads.files.length; i++) {
+                            if ($.infowindow.downloads.files[i].active) {
+                                (function(i) {
+                                     var dnlPath = $.infowindow.downloads.files[i].path + 
+                                        "?resource_id=" + $.infowindow.downloads.files[i].resourceId + 
+                                        ($.infowindow.downloads.files[i].limit ? "&limit="+ $.infowindow.downloads.files[i].limit : "") + 
+                                        "&filters[" + 
+                                        filterKey + 
+                                        "]=" + 
+                                        filterValue;
 
-                            dnlFile = stoday + 
-                                '_' + $.infowindow.download.files[i].filebase + 
-                                '-' + $.infowindow.download.files[i].name + 
-                                '_' + filterKey + 
-                                '-' + filterValue + 
-                                '.csv';
+                                    var dnlFile = stoday + 
+                                        '_' + $.infowindow.downloads.files[i].filebase + 
+                                        '-' + $.infowindow.downloads.files[i].name + 
+                                        '_' + filterKey + 
+                                        '-' + filterValue + 
+                                        '.csv';
 
-                            d3.select('a#a-'+$.infowindow.download.files[i].name).on("click", function() {
-                                var that = this;
-                                d3.json(dnlPath, function(err,res) {
-                                    if (res.result.records.length > 0) {
-                                        var csv = agnes.jsonToCsv(res.result.records, delim),
-                                            blob = new Blob([csv], {type: "text/csv;charset=utf-8"});
-                                        saveAs(blob, dnlFile);
-                                    } else {
-                                        alert("No data!");
-                                    }
-                                });
-                            });
+                                    d3.select('a#a-'+$.infowindow.downloads.files[i].name).on("click", function() {
+                                        if ($.debug) console.log(this, i, $.infowindow.downloads.files[i].name, dnlPath, dnlFile);
+                                        d3[$.infowindow.downloads.files[i].format](dnlPath, function(err,res) {
+                                            var dataset = $.infowindow.downloads.files[i].transform(res);
+                                            if (dataset.length > 0) {
+                                                var csv = agnes.jsonToCsv(dataset, delim),
+                                                    blob = new Blob([csv], {type: "text/csv;charset=utf-8"});
+                                                saveAs(blob, dnlFile);
+                                            } else {
+                                                alert("No data!");
+                                            }
+                                        });
+                                    });
+                                })(i);
+                            }
                         }
                     }
     
@@ -853,20 +856,9 @@
 
                     osmGeocoder._completely.input.maxLength = 50; // limit the max number of characters in the input text
                     
-                    var acFile;
-                    if (parameters.t) {
-                        acFile = $.controls.geocoder.autocomplete.path + 
-                            $.controls.geocoder.autocomplete.prefix + 
-                            parameters.t + 
-                            '.' + $.controls.geocoder.autocomplete.format;
-                    } else {
-                        acFile = $.controls.geocoder.autocomplete.path + 
-                            $.controls.geocoder.autocomplete.filename + 
-                            '.' + $.controls.geocoder.autocomplete.format;
-                    }
-                     
-                    d3.json(acFile, function(err,data) {
-                        defaultGeo[$.controls.geocoder.layer].list = data;
+                    var acFile = $.controls.geocoder.autocomplete.url.call($.controls.geocoder.autocomplete, parameters.t || undefined);
+                    d3[$.controls.geocoder.autocomplete.format](acFile, function(err,res) {
+                        defaultGeo[$.controls.geocoder.layer].list = $.controls.geocoder.autocomplete.transform(res);
                         osmGeocoder._completely.options = defaultGeo[$.controls.geocoder.layer]
                             .list.map(function(el) { 
                                 return el[geo[$.controls.geocoder.layer].label]; 
@@ -997,24 +989,24 @@
         // Join tra dati e territori
         function joinData(territorio) {
             if ($.debug) console.log("joinDataFunction",arguments);
-            var numGeo = geo[territorio].resource.features.length,
-                numData = data[territorio].resource.result.records.length,
+            var numGeo = geo[territorio].resource.length,
+                numData = data[territorio].resource.length,
                 noData = true, numOkData = 0, numNoData = 0;
-            for (var i=0; i<geo[territorio].resource.features.length; i++) {
-                var geoID = geo[territorio].resource.features[i].properties[geo[territorio].id];
+            for (var i=0; i<geo[territorio].resource.length; i++) {
+                var geoID = geo[territorio].resource[i].properties[geo[territorio].id];
                 for (var j=0; j<numData; j++) {
-                    var dataID = data[territorio].resource.result.records[j][data[territorio].id];
+                    var dataID = data[territorio].resource[j][data[territorio].id];
                     if (dataID == geoID) {
                         numOkData++;
-                        geo[territorio].resource.features[i].properties.data = data[territorio].resource.result.records[j];
-                        geo[territorio].resource.features[i].properties._layer = territorio;
+                        geo[territorio].resource[i].properties.data = data[territorio].resource[j];
+                        geo[territorio].resource[i].properties._layer = territorio;
                         noData = false;
                         break;
                     }
                 }
                 if (noData) {
                     numNoData++;
-                    geo[territorio].resource.features.splice(i,1);
+                    geo[territorio].resource.splice(i,1);
                     i--;
                 } else {
                     noData = true;
@@ -1027,7 +1019,7 @@
             if ($.debug) console.log("binDataFunction",arguments);
             var geoLayer = $.geoLayers.filter(function(l) { return (l.type === "vector" && l.schema.name === territorio); })[0],
                 dataSet = $.dataSets.filter(function(l) { return l.schema.layer === territorio; })[0];
-            var serie = data[territorio].resource.result.records.map(function(el) { return parseInt(el[data[territorio].value]); });
+            var serie = data[territorio].resource.map(function(el) { return parseInt(el[data[territorio].value]); });
             var gs = new geostats(serie);
             data[territorio].bins = gs.getJenks(serie.length > dataSet.bins ? dataSet.bins : serie.length-1);
             data[territorio].ranges = gs.ranges;
@@ -1061,23 +1053,23 @@
                 if ($.debug) console.log("dataPath",dataPath);
 
                 q = queue();
-                q.defer(d3.json, geoPath); // Geojson
-                q.defer(d3.json, dataPath); // Dati
+                q.defer(d3[geoLayer.format], geoPath); // Geojson
+                q.defer(d3[dataSet.format], dataPath); // Dati
 
                 if ($.pointsSet.resourceId) {
                     markersPath = $.pointsSet.url.call($.pointsSet, territorio);
                     if ($.debug) console.log("markersPath",markersPath);
-                    q.defer(d3.json, markersPath);
+                    q.defer(d3[$.pointsSet.format], markersPath);
                 }
 
                 q.await(function(err, geojs, datajs, markersjs) {
                     if ($.debug) console.log("await",arguments);
-                    geo[territorio].resource = geojs;
-                    data[territorio].resource = datajs;
-                    data[territorio].markers = markersjs || null;
+                    geo[territorio].resource = geoLayer.transform(geojs);
+                    data[territorio].resource = dataSet.transform(datajs);
+                    data[territorio].markers = (markersjs ? $.pointsSet.transform(markersjs) : null);
                     map.spin(false);
                     /*if (territorio == 'comuni') {
-                        JSTERS['comuni'] = geo['comuni'].resource.features.map(function(el) { var arr = {}; arr[geo['regioni'].id] = el.properties[geo['regioni'].id]; arr[geo['province'].id] = el.properties[geo['province'].id]; arr[geo['comuni'].id] = el.properties[geo['comuni'].id]; arr[geo['comuni'].label] = el.properties[geo['comuni'].label]; return arr; });
+                        JSTERS['comuni'] = geo['comuni'].resource.map(function(el) { var arr = {}; arr[geo['regioni'].id] = el.properties[geo['regioni'].id]; arr[geo['province'].id] = el.properties[geo['province'].id]; arr[geo['comuni'].id] = el.properties[geo['comuni'].id]; arr[geo['comuni'].label] = el.properties[geo['comuni'].label]; return arr; });
                     }*/
                     joinData(territorio);
                     binData(territorio);

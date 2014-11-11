@@ -3,39 +3,34 @@ var mapConfig = {
     debug: true,
 
     dataSources: {
-        local: {
+        file: {
+            domain: '',
             path: '',
+            filename: '',
             format: '',
             url: function(territorio, filterKey, filterValue) {
-                return this.path + 
-                    territorio + 
-                    (filterKey && filterValue ? '_'+filterKey+'-'+filterValue : '') +
-                    "." + this.format;
-            }
-        },
-        remote: {
-            uri: '',
-            path: '',
-            format: '',
-            url: function(territorio, filterKey, filterValue) {
-                return this.uri + 
+                return this.domain + 
                     this.path + 
-                    territorio + 
-                    (filterKey && filterValue ? '_'+filterKey+'-'+filterValue : '') +
-                    "." + this.format;
+                    (this.filename || (territorio + (filterKey && filterValue ? '_'+filterKey+'-'+filterValue : '') + "." + this.format));
+            },
+            transform: function(res) {
+                return res;
             }
         },
         dkan: {
-            uri: '',
+            domain: '',
             path: '/api/confiscatibene/action/datastore/search.json',
-            //path: '', // ie. /api/confiscatibene/action/datastore/search.json
             resourceId: '',
             limit: 5000,
+            format: 'json',
             url: function(territorio, filterKey, filterValue) {
-                return this.uri + this.path + 
+                return this.domain + this.path + 
                     '?resource_id=' + this.resourceId +
                     (filterKey && filterValue ? ('&filters[' + filterKey + ']=' + filterValue) : '') + 
                     (this.limit ? '&limit=' + this.limit : '');
+            },
+            transform: function(res) {
+                return res.result.records;
             }
         }
         // ...
@@ -49,26 +44,26 @@ var mapConfig = {
     },
 
     geoSources: {
-        local: {
+        file: {
+            domain: '',
             path: '',
             format: '',
             url: function(territorio, filterKey, filterValue) {
-                return this.path + 
-                    territorio + 
-                    (filterKey && filterValue ? '_'+filterKey+'-'+filterValue : '') + 
-                    '.' + this.format;
-            }
-        },
-        remote: {
-            uri: '',
-            path: '',
-            format: '',
-            url: function(territorio, filterKey, filterValue) {
-                return this.uri + 
+                return this.domain + 
                     this.path + 
                     territorio + 
                     (filterKey && filterValue ? '_'+filterKey+'-'+filterValue : '') + 
                     '.' + this.format;
+            },
+            transform: function(res) {
+                return res.features;
+            }
+        },
+        tileserver: {
+            domain: '',
+            path: 'http://{s}.tile.openstreetmap.org/${z}/${x}/${y}.png', // OSM mapnik
+            url: function() {
+                return this.domain + this.path;
             }
         }
     },
@@ -77,10 +72,9 @@ var mapConfig = {
         tile: {
             active: true,
             inSelectorControl: false,
-            uri: '',
-            path: '', // ie. /api/geoiq/{s}/{z}/{x}/{y}.png
-            attribution: '',
-            style: {
+            source: 'tileserver',
+            options: {
+                attribution: '',
                 opacity: 0.7 // ie. float [0,1]
             }
         },
@@ -130,7 +124,6 @@ var mapConfig = {
                 }
             }
 
-            console.log(options);
             for (k in data) {
                 if (data.hasOwnProperty(k)) {
                     if (!options.include.length || options.include.indexOf(k) > -1) {
@@ -200,17 +193,19 @@ var mapConfig = {
         source: 'dkan',
         clusters: true,
         icon: 'img/marker-icon.png',
-        shadow: 'img/marker-shadow.png'
+        shadow: 'img/marker-shadow.png',
+        transform: function(res) {
+            return res;
+        }
     },
 
     geoLayers: [
         {
-            source: 'remote',
             type: 'tile',
             path: '/api/geoiq/{s}/{z}/{x}/{y}.png' // ie. http://{s}.acetate.geoiq.com/tiles/acetate/{z}/{x}/{y}.png
         },
         {
-            source: 'local',
+            source: 'file',
             path: 'geo/',
             format: 'json',
             type: 'vector', // from geoTypes attributes
@@ -222,7 +217,7 @@ var mapConfig = {
             }
         },
         {
-            source: 'local',
+            source: 'file',
             path: 'geo/',
             format: 'json',
             type: 'vector', // from geoTypes attributes
@@ -234,7 +229,7 @@ var mapConfig = {
             }
         },
         {
-            source: 'local',
+            source: 'file',
             path: 'geo/',
             format: 'json',
             type: 'vector', // from geoTypes attributes
@@ -306,25 +301,33 @@ var mapConfig = {
                 '<p>Tieniti aggiornato sul progetto visitando il sito ufficiale di <a href="http://www.confiscatibene.it" target="_blank">Confiscati Bene</a> o seguendo l\'account Twitter <a href="https://twitter.com/confiscatibene" target="_blank">@confiscatibene</a>, puoi anche scriverci all\'indirizzo <a href="mailto:info@confiscatibene.it" target="_blank">info@confiscatibene.it</a>.</p>',
             mobile: '<a href="mailto:info@confiscatibene.it" target="_blank" style="margin-right: 30px;">Info</a>',
         },
-        download: {
+        downloads: {
             active: true,
             license: 'Creative Commons Attribution <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank">CC-BY 4.0 International</a>.',
             files: [
                 {
+                    active: true,
                     source: 'dkan',
                     resourceId: 'e5b4d63a-e1e8-40a3-acec-1d351f03ee56',
                     name: 'immobili',
                     filebase: 'confiscatibene',
                     title: 'Scarica l\'elenco degli immobili',
-                    image: 'img/house109-dnl.png'
+                    image: 'img/house109-dnl.png',
+                    transform: function(res) {
+                        return res.result.records;
+                    }
                 },
                 {
+                    active: true,
                     source: 'dkan',
                     resourceId: '8b7e12f1-6484-47f0-9cf6-88b446297dbc',
                     name: 'aziende',
                     filebase: 'confiscatibene',
                     title: 'Scarica l\'elenco delle aziende',
-                    image: 'img/factory6-dnl.png'
+                    image: 'img/factory6-dnl.png',
+                    transform: function(res) {
+                        return res.result.records;
+                    }
                 }
             ]
         },
@@ -465,10 +468,19 @@ var mapConfig = {
             zoom: 10,
             autocomplete: {
                 active: false,
+                uri: '',
                 path: 'geo/',
-                name: 'lista_comuni.json', // ie. geo/lista_comuni.json
+                filename: 'lista_comuni.json', // ie. geo/lista_comuni.json
                 prefix: 'lista_comuni-', // ie. geo/lista_comuni-
-                format: 'json'
+                format: 'json',
+                url: function(territorio) {
+                    return this.uri + 
+                        this.path + 
+                        (territorio ? this.prefix + territorio + '.' + this.format : this.filename);
+                },
+                transform: function(res) {
+                    return res;
+                }
             }
         }
     }
