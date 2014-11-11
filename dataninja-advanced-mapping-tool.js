@@ -95,7 +95,7 @@
 
         // Url shortener initialization
         if ($.urlShortener.active) {
-            dtnj = yourls.connect($.urlShortener.uri+$.urlShortener.path, { signature: $.urlShortener.signature });
+            dtnj = yourls.connect($.urlShortener.url.call($.urlShortener), { signature: $.urlShortener.signature });
         }
 
         if ($.debug) console.log("dtnj",dtnj);

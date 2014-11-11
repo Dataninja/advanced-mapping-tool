@@ -60,8 +60,8 @@ var mapConfig = {
             }
         },
         tileserver: {
-            domain: '',
-            path: 'http://{s}.tile.openstreetmap.org/${z}/${x}/${y}.png', // OSM mapnik
+            domain: 'http://{s}.tile.openstreetmap.org',
+            path: '/${z}/${x}/${y}.png', // OSM mapnik
             url: function() {
                 return this.domain + this.path;
             }
@@ -193,15 +193,13 @@ var mapConfig = {
         source: 'dkan',
         clusters: true,
         icon: 'img/marker-icon.png',
-        shadow: 'img/marker-shadow.png',
-        transform: function(res) {
-            return res;
-        }
+        shadow: 'img/marker-shadow.png'
     },
 
     geoLayers: [
         {
             type: 'tile',
+            domain: '',
             path: '/api/geoiq/{s}/{z}/{x}/{y}.png' // ie. http://{s}.acetate.geoiq.com/tiles/acetate/{z}/{x}/{y}.png
         },
         {
@@ -282,10 +280,13 @@ var mapConfig = {
 
     urlShortener: {
         active: true,
-        uri: '', 
+        domain: '', 
         path: '/api/dtnj/yourls-api.php', // ie. /api/dtnj/yourls-api.php
         signature: 'efe758b8d3',
-        prefix: 'confiscatibene-' // ie. confiscatibene-
+        prefix: 'confiscatibene-', // ie. confiscatibene-
+        url: function() {
+            return this.domain + this.path;
+        }
     },
 
     infowindow: {
@@ -468,13 +469,13 @@ var mapConfig = {
             zoom: 10,
             autocomplete: {
                 active: false,
-                uri: '',
+                domain: '',
                 path: 'geo/',
                 filename: 'lista_comuni.json', // ie. geo/lista_comuni.json
                 prefix: 'lista_comuni-', // ie. geo/lista_comuni-
                 format: 'json',
                 url: function(territorio) {
-                    return this.uri + 
+                    return this.domain + 
                         this.path + 
                         (territorio ? this.prefix + territorio + '.' + this.format : this.filename);
                 },
