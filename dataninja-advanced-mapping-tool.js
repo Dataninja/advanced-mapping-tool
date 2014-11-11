@@ -48,7 +48,7 @@
             }
         }
 
-        if ($.infowindow.active) {
+        if ($.hasOwnProperty('infowindow') && $.infowindow.active) {
             for (i=0; i<$.infowindow.downloads.files.length; i++) {
                 sourceDef = $.dataSources[$.infowindow.downloads.files[i].source];
                 for (k in sourceDef) {
@@ -59,7 +59,7 @@
             }
         }
 
-        if ($.pointsSet.active) {
+        if ($.hasOwnProperty('pointsSet') && $.pointsSet.active) {
             sourceDef = $.dataSources[$.pointsSet.source];
             for (k in sourceDef) {
                 if (sourceDef.hasOwnProperty(k) && !$.pointsSet.hasOwnProperty(k)) {
@@ -94,7 +94,7 @@
         if ($.debug) console.log("$",$);
 
         // Url shortener initialization
-        if ($.urlShortener.active) {
+        if ($.hasOwnProperty('urlShortener') && $.urlShortener.active) {
             dtnj = yourls.connect($.urlShortener.url.call($.urlShortener), { signature: $.urlShortener.signature });
         }
 
@@ -158,7 +158,7 @@
             }
         }
         
-        if ($.pointsSet.active && parameters.mr && parameters.mr.hasOwnProperty('rid')) {
+        if ($.hasOwnProperty('pointsSet') && $.pointsSet.active && parameters.mr && parameters.mr.hasOwnProperty('rid')) {
             $.pointsSet.resourceId = parameters.mr.rid;
             parameters.mr.lat = parameters.mr.lat || 'lat';
             parameters.mr.lng = parameters.mr.lng || 'lng';
@@ -223,7 +223,7 @@
         /*** ***/
 
         /*** Gestione dell'infowindow al click ***/
-        if ($.infowindow.active) {
+        if ($.hasOwnProperty('infowindow') && $.infowindow.active) {
             if (parameters.md === 'widget') {
                 info = {};
                 info._div = d3.select('body').append('div').attr('id','infowindow').classed("info", true).node();
@@ -260,13 +260,13 @@
                         buttons = [], btnTitle, btnUrl, btnPlace,
                         dnlBtn = [];
     
-                    if ($.infowindow.shareButtons.active) {
+                    if ($.infowindow.hasOwnProperty('shareButtons') && $.infowindow.shareButtons.active) {
                         btnTitle = $.infowindow.shareButtons.title + (territorio == 'regioni' ? ' in ' : ' a ') + props[geo[territorio].label];
                         btnUrl = 'http://' + location.hostname + Arg.url(parameters).replace(/&*md=[^&]*/,'').replace(/&{2,}/g,"&");
                         btnEncUrl = 'http://' + location.hostname + encodeURIComponent(Arg.url(parameters).replace(/&*md=[^&]*/,'').replace(/&{2,}/g,"&"));
                         btnPlace = props[geo[territorio].label];
                     
-                        if ($.infowindow.shareButtons.twitter.active) {
+                        if ($.infowindow.shareButtons.hasOwnProperty('twitter') && $.infowindow.shareButtons.twitter.active) {
                             buttons.push('<a class="ssb" href="http://twitter.com/share?url=' + btnEncUrl + 
                                 '&via=' + $.infowindow.shareButtons.twitter.via + 
                                 '&text=' + encodeURIComponent(btnPlace + ' - ' + $.infowindow.shareButtons.twitter.text + ' ') + 
@@ -274,32 +274,32 @@
                             );
                         }
 
-                        if ($.infowindow.shareButtons.facebook.active) {
+                        if ($.infowindow.shareButtons.hasOwnProperty('facebook') && $.infowindow.shareButtons.facebook.active) {
                             buttons.push('<a class="ssb" href="http://www.facebook.com/sharer.php?u=' + btnEncUrl + 
                                 '" target="_blank" title="'+btnTitle+' su Facebook"><img src="img/facebook.png" id="ssb-facebook"></a>'
                             );
                         }
 
-                        if ($.infowindow.shareButtons.gplus.active) {
+                        if ($.infowindow.shareButtons.hasOwnProperty('gplus') && $.infowindow.shareButtons.gplus.active) {
                             buttons.push('<a class="ssb" href="https://plus.google.com/share?url=' + btnEncUrl + 
                                 '" target="_blank" title="'+btnTitle+' su Google Plus"><img src="img/gplus.png" id="ssb-gplus"></a>'
                             );
                         }
 
-                        if ($.infowindow.shareButtons.linkedin.active) {
+                        if ($.infowindow.shareButtons.hasOwnProperty('linkedin') && $.infowindow.shareButtons.linkedin.active) {
                             buttons.push('<a class="ssb" href="http://www.linkedin.com/shareArticle?mini=true&url=' + btnEncUrl + 
                                 '" target="_blank" title="'+btnTitle+' su LinkedIn"><img src="img/linkedin.png" id="ssb-linkedin"></a>'
                             );
                         }
 
-                        if ($.infowindow.shareButtons.email.active) {
+                        if ($.infowindow.shareButtons.hasOwnProperty('email') && $.infowindow.shareButtons.email.active) {
                             buttons.push('<a class="ssb" href="mailto:?Subject=' + encodeURIComponent($.infowindow.shareButtons.email.subject + ' | ' + btnPlace) + 
                                 '&Body=' + encodeURIComponent(btnPlace + ' - ' + $.infowindow.shareButtons.email.body + ': ') + btnEncUrl + 
                                 '" target="_blank" title="'+btnTitle+' per email"><img src="img/email.png" id="ssb-email"></a>'
                             );
                         }
 
-                        if ($.infowindow.shareButtons.permalink.active) {
+                        if ($.infowindow.shareButtons.hasOwnProperty('permalink') && $.infowindow.shareButtons.permalink.active) {
                             buttons.push('<a class="ssb" href="' + btnUrl + 
                                 '" target="_blank" title="Permalink"><img src="img/link.png" id="ssb-link"></a>'
                             );
@@ -308,7 +308,7 @@
 
                     if ($.debug) console.log("shareButtons",buttons);
 
-                    if ($.infowindow.downloads.active) {
+                    if ($.infowindow.hasOwnProperty('downloads') && $.infowindow.downloads.active) {
                         for (i=0; i<$.infowindow.downloads.files.length; i++) {
                             dnlBtn.push('<a id="a-' + 
                                 $.infowindow.downloads.files[i].name + 
@@ -337,7 +337,7 @@
                     if ($.debug) console.log("Table header",thead);
 
                     var tfoot;
-                    if ($.infowindow.downloads.active) {
+                    if ($.infowindow.hasOwnProperty('downloads') && $.infowindow.downloads.active) {
                         tfoot = '<tfoot>' + 
                             '<tr><td colspan="2" style="text-align:right;font-size: smaller;">' + 
                             ($.infowindow.downloads.license || '') + 
@@ -348,7 +348,7 @@
                     if ($.debug) console.log("Table footer",tfoot);
 
                     var tbody;
-                    if ($.infowindow.view.active && $.viewTypes.hasOwnProperty($.infowindow.view.type)) {
+                    if ($.infowindow.hasOwnProperty('view') && $.infowindow.view.active && $.viewTypes.hasOwnProperty($.infowindow.view.type)) {
                         tbody = $.viewTypes[$.infowindow.view.type](props.data, $.infowindow.view.options);
                         if (!(tbody.indexOf('<tbody>') > -1)) {
                             tbody = '<tbody>' + tbody + '</tbody>';
@@ -361,12 +361,12 @@
 
                     this._div.innerHTML += '<table class="zebra">' + thead + tbody + tfoot + '</table>';
 
-                    if ($.infowindow.shareButtons.active && $.urlShortener.active) {
+                    if ($.infowindow.hasOwnProperty('shareButtons') && $.infowindow.shareButtons.active && $.hasOwnProperty('urlShortener') && $.urlShortener.active) {
                         dtnj.shorten(btnEncUrl, $.urlShortener.prefix+md5(btnUrl), function(data) {
                             var btnEncUrl = data.shorturl,
                                 buttons = [];
 
-                            if ($.infowindow.shareButtons.twitter.active) {
+                            if ($.infowindow.shareButtons.hasOwnProperty('twitter') && $.infowindow.shareButtons.twitter.active) {
                                 buttons.push('<a class="ssb" href="http://twitter.com/share?url=' + btnEncUrl + 
                                     '&via=' + $.infowindow.shareButtons.twitter.via + 
                                     '&text=' + encodeURIComponent(btnPlace + ' - ' + $.infowindow.shareButtons.twitter.text + ' ') + 
@@ -374,32 +374,32 @@
                                 );
                             }
 
-                            if ($.infowindow.shareButtons.facebook.active) {
+                            if ($.infowindow.shareButtons.hasOwnProperty('facebook') && $.infowindow.shareButtons.facebook.active) {
                                 buttons.push('<a class="ssb" href="http://www.facebook.com/sharer.php?u=' + btnEncUrl + 
                                     '" target="_blank" title="'+btnTitle+' su Facebook"><img src="img/facebook.png" id="ssb-facebook"></a>'
                                 );
                             }
 
-                            if ($.infowindow.shareButtons.gplus.active) {
+                            if ($.infowindow.shareButtons.hasOwnProperty('gplus') && $.infowindow.shareButtons.gplus.active) {
                                 buttons.push('<a class="ssb" href="https://plus.google.com/share?url=' + btnEncUrl + 
                                     '" target="_blank" title="'+btnTitle+' su Google Plus"><img src="img/gplus.png" id="ssb-gplus"></a>'
                                 );
                             }
 
-                            if ($.infowindow.shareButtons.linkedin.active) {
+                            if ($.infowindow.shareButtons.hasOwnProperty('linkedin') && $.infowindow.shareButtons.linkedin.active) {
                                 buttons.push('<a class="ssb" href="http://www.linkedin.com/shareArticle?mini=true&url=' + btnEncUrl + 
                                     '" target="_blank" title="'+btnTitle+' su LinkedIn"><img src="img/linkedin.png" id="ssb-linkedin"></a>'
                                 );
                             }
     
-                            if ($.infowindow.shareButtons.email.active) {
+                            if ($.infowindow.shareButtons.hasOwnProperty('email') && $.infowindow.shareButtons.email.active) {
                                 buttons.push('<a class="ssb" href="mailto:?Subject=' + encodeURIComponent($.infowindow.shareButtons.email.subject + ' | ' + btnPlace) + 
                                     '&Body=' + encodeURIComponent(btnPlace + ' - ' + $.infowindow.shareButtons.email.body + ': ') + btnEncUrl + 
                                     '" target="_blank" title="'+btnTitle+' per email"><img src="img/email.png" id="ssb-email"></a>'
                                 );
                             }
 
-                            if ($.infowindow.shareButtons.permalink.active) {
+                            if ($.infowindow.shareButtons.hasOwnProperty('permalink') && $.infowindow.shareButtons.permalink.active) {
                                 buttons.push('<a class="ssb" href="' + btnUrl + 
                                     '" target="_blank" title="Permalink"><img src="img/link.png" id="ssb-link"></a>'
                                 );
@@ -410,7 +410,7 @@
                         });
                     }
             
-                    if ($.infowindow.downloads.active) {
+                    if ($.infowindow.hasOwnProperty('downloads') && $.infowindow.downloads.active) {
                         for (i=0; i<$.infowindow.downloads.files.length; i++) {
                             if ($.infowindow.downloads.files[i].active) {
                                 (function(i) {
@@ -481,7 +481,7 @@
         /*** ***/
 
         /*** Fullscreen ***/
-        if ($.controls.fullscreen.active) {
+        if ($.controls.hasOwnProperty('fullscreen') && $.controls.fullscreen.active) {
             if (parameters.md != 'widget' && parameters.md != 'embed') {
                 fullscreen = L.control.fullscreen({title: $.controls.fullscreen.title}).addTo(map);
             }
@@ -492,7 +492,7 @@
         /*** ***/
 
         /*** Logo ***/
-        if ($.controls.logo.active) {
+        if ($.controls.hasOwnProperty('logo') && $.controls.logo.active) {
             if (parameters.md === 'widget') {
                 logo = d3.select('body').insert('div','#map').attr('id','logo-widget')
                     .append('a').classed('logo '+parameters.md, true)
@@ -521,7 +521,7 @@
         /*** ***/
 
         /*** Pulsante di reset ***/
-        if ($.controls.reset.active) {
+        if ($.controls.hasOwnProperty('reset') && $.controls.reset.active) {
             reset = L.control({position: (parameters.md === 'mobile' ? 'bottomleft' : 'topright')});
             reset.onAdd = function(map) {
                 var img = L.DomUtil.create('img', 'reset '+parameters.md);
@@ -542,7 +542,7 @@
         /*** ***/
 
         /*** Pulsante di embed ***/
-        if ($.controls.embed.active) {
+        if ($.controls.hasOwnProperty('embed') && $.controls.embed.active) {
             embedControl = L.control({position: (parameters.md === 'mobile' ? 'bottomleft' : 'topright')});
             embedControl.isAdded = false;
             embedControl.onRemove = function(map) { this.isAdded = false; }
@@ -564,7 +564,7 @@
                         '<input type="text" id="embed-permalink" value="' + url + '" readonly></input>';
                 }
 
-                if ($.urlShortener.active && $.controls.embed.shorturl) {
+                if ($.hasOwnProperty('urlShortener') && $.urlShortener.active && $.controls.embed.shorturl) {
                     p['shorturl'] = L.DomUtil.create('p', 'shorturl', inputarea);
                     p['shorturl'].innerHTML = '' + 
                         '<label for="embed-shorturl" title="Clicca per selezionare">Short URL:</label>&nbsp;' + 
@@ -609,7 +609,7 @@
                 }
 
                 parameters.md = oldMd;
-                if ($.controls.embed.svg.active) {
+                if ($.controls.embed.hasOwnProperty('svg') && $.controls.embed.svg.active) {
                     p['svg'] = L.DomUtil.create('p', 'svg', inputarea);
                     p['svg'].innerHTML = '' + 
                         '<label for="embed-svg" title="Copia/incolla il codice o scaricalo cliccando sull\'immagine">Scalable Vector Graphics:</label>&nbsp;' +
@@ -656,7 +656,7 @@
         /*** ***/
 
         /*** Screenshot map ***/
-        if ($.controls.screenshot.active) {
+        if ($.controls.hasOwnProperty('screenshot') && $.controls.screenshot.active) {
             if (parameters.md != 'widget') {
                 screenshot = L.control({position: (parameters.md === 'mobile' ? 'bottomleft' : 'topright')});
                 screenshot.onAdd = function(map) {
@@ -695,7 +695,7 @@
         /*** ***/
 
         /*** Detach map ***/
-        if ($.controls.detach.active) {
+        if ($.controls.hasOwnProperty('detach') && $.controls.detach.active) {
             if (parameters.md === 'embed' || parameters.md === 'widget') {
                 detach = L.control({position: 'topright'});
                 detach.onAdd = function(map) {
@@ -720,7 +720,7 @@
         /*** ***/
 
         /*** Pulsanti di condivisione ***/
-        if ($.controls.socialButtons.active) {
+        if ($.controls.hasOwnProperty('socialButtons') && $.controls.socialButtons.active) {
             if (!parameters.md) {
                 share = L.control({position: 'bottomleft'});
                 share.onAdd = function(map) {
@@ -730,7 +730,7 @@
                     div.setAttribute('id','buttons');
                     div.innerHTML = '';
 
-                    if ($.controls.socialButtons.twitter.active) {
+                    if ($.controls.socialButtons.hasOwnProperty('twitter') && $.controls.socialButtons.twitter.active) {
                         twitter = '<a ' + 
                             'href="https://twitter.com/share" ' + 
                             'class="twitter-share-button" ' + 
@@ -745,7 +745,7 @@
                         head.load("https://platform.twitter.com/widgets.js");
                     }
 
-                    if ($.controls.socialButtons.facebook.active) {
+                    if ($.controls.socialButtons.hasOwnProperty('facebook') && $.controls.socialButtons.facebook.active) {
                         facebook = '<div ' + 
                             'class="fb-like" ' + 
                             'style="overflow:hidden;" ' + 
@@ -759,7 +759,7 @@
                         head.load("http://connect.facebook.net/it_IT/sdk.js#xfbml=1&appId=" + $.controls.socialButtons.facebook.appId + "&version=v2.0");
                     }
                     
-                    if ($.controls.socialButtons.gplus.active) {
+                    if ($.controls.socialButtons.hasOwnProperty('gplus') && $.controls.socialButtons.gplus.active) {
                         gplus = '<div ' + 
                             'class="g-plusone" ' + 
                             'data-size="' + $.controls.socialButtons.gplus.size + '" ' + 
@@ -819,7 +819,7 @@
         /*** ***/
 
         /*** Funzione di ricerca del luogo ***/
-        if ($.controls.geocoder.active) {
+        if ($.controls.hasOwnProperty('geocoder') && $.controls.geocoder.active) {
             if (parameters.md != 'widget' && parameters.md != 'mobile') {
                 osmGeocoder = new L.Control.OSMGeocoder(
                     { 
@@ -846,7 +846,7 @@
                     
                 map.addControl(osmGeocoder);
 
-                if ($.controls.geocoder.autocomplete.active) {
+                if ($.controls.geocoder.hasOwnProperty('autocomplete') && $.controls.geocoder.autocomplete.active) {
                     osmGeocoder._completely = completely(osmGeocoder._input);
                     
                     osmGeocoder._completely.onChange = function (text) {
@@ -873,7 +873,7 @@
         /*** ***/
 
         /*** Legenda ***/
-        if ($.legend.active) {
+        if ($.hasOwnProperty('legend') && $.legend.active) {
 		    legend = L.control({position: 'bottomleft'});
     	    legend.onAdd = function (map) {
                 this._div = L.DomUtil.create('div', 'info legend '+parameters.md);
@@ -934,7 +934,7 @@
                 highlightStyle = geoLayer.style.highlight;
                     
             if (!layer.selected) layer.setStyle(highlightStyle);
-            if ($.label.active) {
+            if ($.hasOwnProperty('label') && $.label.active) {
                 label.setContent(props[geo[parameters.dl].label]+'<br>' + $.label.text + ': '+props.data[data[parameters.dl].value]);
                 label.setLatLng(layer.getBounds().getCenter());
                 map.showLabel(label);
@@ -948,7 +948,7 @@
                 geoLayer = $.geoLayers.filter(function(l) { return (l.type === "vector" && l.schema.name === territorio); })[0],
                 defaultStyle = geoLayer.style.default;
             if (!layer.selected) geojson.eachLayer(function(l) { if (!l.selected) geojson.resetStyle(l); });
-            if ($.label.active) label.close();
+            if ($.hasOwnProperty('label') && $.label.active) label.close();
 	    }
 
 	    function openInfoWindow(e, layer) {
