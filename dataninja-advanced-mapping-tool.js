@@ -48,12 +48,14 @@
             }
         }
 
-        if ($.hasOwnProperty('infowindow') && $.infowindow.active) {
+        if ($.hasOwnProperty('infowindow') && $.infowindow.active && $.infowindow.hasOwnProperty('downloads') && $.infowindow.downloads.active) {
             for (i=0; i<$.infowindow.downloads.files.length; i++) {
-                sourceDef = $.dataSources[$.infowindow.downloads.files[i].source];
-                for (k in sourceDef) {
-                    if (sourceDef.hasOwnProperty(k) && !$.infowindow.downloads.files[i].hasOwnProperty(k)) {
-                        $.infowindow.downloads.files[i][k] = sourceDef[k];
+                if ($.infowindow.downloads.files[i].active) {
+                    sourceDef = $.dataSources[$.infowindow.downloads.files[i].source];
+                    for (k in sourceDef) {
+                        if (sourceDef.hasOwnProperty(k) && !$.infowindow.downloads.files[i].hasOwnProperty(k)) {
+                            $.infowindow.downloads.files[i][k] = sourceDef[k];
+                        }
                     }
                 }
             }
@@ -311,14 +313,16 @@
 
                     if ($.infowindow.hasOwnProperty('downloads') && $.infowindow.downloads.active) {
                         for (i=0; i<$.infowindow.downloads.files.length; i++) {
-                            dnlBtn.push('<a id="a-' + 
-                                $.infowindow.downloads.files[i].name + 
-                                '" class="dnl" href="#" title="' + 
-                                $.infowindow.downloads.files[i].title + 
-                                '"><img src="' + 
-                                $.infowindow.downloads.files[i].image + 
-                                '" /></a>'
-                            );
+                            if ($.infowindow.downloads.files[i].active) {
+                                dnlBtn.push('<a id="a-' + 
+                                    $.infowindow.downloads.files[i].name + 
+                                    '" class="dnl" href="#" title="' + 
+                                    $.infowindow.downloads.files[i].title + 
+                                    '"><img src="' + 
+                                    $.infowindow.downloads.files[i].image + 
+                                    '" /></a>'
+                                );
+                            }
                         }
                     }
                     
@@ -327,8 +331,9 @@
                     var thead = '<thead>' + 
                         '<tr>' + 
                         '<th>' + 
-                        '<span id="sdnlBtn">'+dnlBtn.join("&nbsp;")+'</span>' + "&nbsp;&nbsp;" + 
-                        '<span id="sshrBtn">'+buttons.join("&nbsp;")+'</span>' + '</th>' + 
+                        (dnlBtn.length ? '<span id="sdnlBtn">'+dnlBtn.join("&nbsp;")+'</span>' + '&nbsp;&nbsp;' : '') + 
+                        (buttons.length ? '<span id="sshrBtn">'+buttons.join("&nbsp;")+'</span>' : '') + 
+                        '</th>' + 
                         '<th style="text-align:right;"><a id="close-cross" href="#" title="Chiudi"><img src="img/close.png" /></a></th></tr>' + 
                         '<tr>' + 
                         '<th colspan="2" class="rossobc">' + props[geo[region].label] + '</th>' +
@@ -344,6 +349,8 @@
                             ($.infowindow.downloads.license || '') + 
                             '</td></tr>' + 
                             '</tfoot>';
+                    } else {
+                        tfoot = '<tfoot></tfoot>';
                     }
                     
                     if ($.debug) console.log("Table footer",tfoot);
@@ -361,6 +368,8 @@
                     if ($.debug) console.log("Table body",tbody);
 
                     this._div.innerHTML += '<table class="zebra">' + thead + tbody + tfoot + '</table>';
+
+                    if ($.debug) console.log("Table", this._div.innerHTML);
 
                     if ($.infowindow.hasOwnProperty('shareButtons') && $.infowindow.shareButtons.active && $.hasOwnProperty('urlShortener') && $.urlShortener.active) {
                         dtnj.shorten(btnEncUrl, $.urlShortener.prefix+md5(btnUrl), function(data) {
