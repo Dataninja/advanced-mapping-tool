@@ -142,7 +142,8 @@
             defaultData[$.dataSets[i].schema.name] = {
                 id: $.dataSets[i].schema.id,
                 label: $.dataSets[i].schema.label,
-                value: $.dataSets[i].schema.value,
+                value: (typeof $.dataSets[i].schema.values === "string" ? $.dataSets[i].schema.values : $.dataSets[i].schema.values[0]),
+                values: (typeof $.dataSets[i].schema.values === "string" ? [$.dataSets[i].schema.values] : $.dataSets[i].schema.values),
                 layer: $.dataSets[i].schema.layer,
                 name: $.dataSets[i].schema.name,
                 resourceId: $.dataSets[i].resourceId,
@@ -853,6 +854,7 @@
                         info.update();
                         legend.update();
                         dataMenu.update(d.name);
+                        dataMenu.onChange(data[d.name][0].values);
                         loadData(d.name);
                     }
                 })
@@ -873,12 +875,45 @@
             nav.setAttribute('id','datamenu-ui');
             if (parameters.md === 'widget') nav.setAttribute('style','display:none;');
             this._nav = nav;
+            d3.select(nav)
+                .on("mouseenter", function() {
+                    map.scrollWheelZoom.disable();
+                    map.doubleClickZoom.disable();
+                    map.dragging.disable();
+                })
+                .on("mouseleave", function() {
+                    map.scrollWheelZoom.enable();
+                    map.doubleClickZoom.enable();
+                    map.dragging.enable();
+                });
             return nav;
         };
 
+        dataMenu.onChange = function(region, index) {
+            d3.select(this._nav).select('select').remove();
+            var index = index || 0,
+                values = data[region][index].values;
+            if (values && values.length > 1) {
+                d3.select(this._nav)
+                    .append('select')
+                    .attr('disabled','disabled')
+                    .on('change', function() {
+                        var selectedIndex = d3.select(this).property('selectedIndex'),
+                            d = d3.select(this).selectAll("option")[0][selectedIndex].__data__;
+                        data[region][index].value = d;
+                        loadData(region,data[region][index].name);
+                    })
+                    .selectAll('option')
+                    .data(values)
+                    .enter()
+                    .append('option')
+                    .text(function(d) { return d; });
+            }
+        };
+
         dataMenu.update = function(region) {
+            d3.select(this._nav).style('display',null).selectAll("a, select").remove();
             if (region) {
-                d3.select(this._nav).style('display',null).selectAll("a").remove();
                 var menuDataSets = $.dataSets.filter(function(l) { return l.schema.layer === region; });
                 if (menuDataSets.length > 1) {
                     d3.select(this._nav).selectAll("a")
@@ -897,9 +932,11 @@
                             if (embedControl && embedControl.isAdded) embedControl.removeFrom(map);
                             info.update();
                             legend.update();
+                            dataMenu.onChange(region, index);
                             loadData(region, d.name);
                         })
                         .text(function(d) { return d.menu; });
+
                 } else {
                     d3.select(this._nav).style('display','none');
                 }
@@ -908,6 +945,7 @@
             
         dataMenu.addTo(map);
         dataMenu.update(menuGeoLayers[0].schema.name);
+        dataMenu.onChange(menuGeoLayers[0].schema.name);
        
         if ($.debug) console.log("dataMenu",dataMenu);
         /*** ***/
@@ -1191,6 +1229,7 @@
             d3.select("nav#geomenu-ui a#"+region).classed("active", true);
             d3.selectAll("nav#datamenu-ui a").classed("active", false);
             d3.select("nav#datamenu-ui a#"+(dataset || dataSets[0].schema.name)).classed("active", true);
+            d3.select("nav#datamenu-ui select").attr("disabled",null);
             
             parameters.dl = region;
             geojson.clearLayers();

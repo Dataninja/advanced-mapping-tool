@@ -189,18 +189,26 @@ html, body, #map {
 	background: #fff;
 	border-radius: 3px;
 	border: 1px solid rgba(0,0,0,0.4);
+    overflow: hidden;
 }
 
-.menu-ui a {
+.menu-ui a,
+.menu-ui select {
 	font-size: 13px;
 	font: 13px Arial, Helvetica, sans-serif;
+	border-bottom: 1px solid rgba(0,0,0,0.25);
 	color: #404040;
 	display: block;
 	margin: 0;
 	padding: 2px 10px;
 	text-decoration: none;
-	border-bottom: 1px solid rgba(0,0,0,0.25);
 	text-align: center;
+}
+
+.menu-ui select {
+    background: transparent;
+    border: none;
+    text-indent: 5px;
 }
 
 .menu-ui a.disabled {

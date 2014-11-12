@@ -219,8 +219,12 @@ var mapConfig = {
                 // Key of label values (not used)
                 label: '',
 
-                // Key of data values shown on map on loading
-                value: 'Totale beni'
+                // Keys of data values shown on map on loading
+                values: [
+                    'Totale beni',
+                    'Totale immobili',
+                    'Totale aziende'
+                ]
             },
 
             /* Custom parse function name from string to number
@@ -262,8 +266,8 @@ var mapConfig = {
                 // Key of label values (not used)
                 label: '',
 
-                // Key of data values shown on map on loading
-                value: 'Totale beni'
+                // Keys of data values shown on map on loading
+                values: 'Totale beni'
             },
 
             /* Custom parse function name from string to number
@@ -287,7 +291,7 @@ var mapConfig = {
                 layer: 'province',
                 id: 'IdProvinciaISTAT',
                 label: '',
-                value: 'Totale beni'
+                values: ['Totale beni']
             },
 
             parse: 'parseInt'
@@ -307,7 +311,7 @@ var mapConfig = {
                 layer: 'comuni',
                 id: 'IdComuneISTAT',
                 label: '',
-                value: 'Totale beni'
+                values: ['Totale beni']
             },
 
             parse: 'parseInt'
@@ -1034,7 +1038,8 @@ var mapConfig = {
  *       - id [string]
  *       - menu [string]
  *       - label [string]
- *       - value [string]
+ *       - values [string | array]
+ *         - [string]
  *     - parse [string] | [mixed] function( [string] )
  *     - (other attributes are inherited from dataSources and dataTypes and can be overrided)
  *   - ...
