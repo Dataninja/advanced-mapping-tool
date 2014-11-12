@@ -231,18 +231,20 @@
         	southWestB = L.latLng($.map.bounds.max.southWest),
             northEastB = L.latLng($.map.bounds.max.northEast),
             maxMapBounds = L.latLngBounds(southWestB, northEastB);
-                
+
         map = L.map('map', { 
-            maxZoom: $.map.zoom.max, 
-            minZoom: $.map.zoom.min, 
-            scrollWheelZoom: $.map.zoom.scrollWheel, 
+            maxZoom: $.map.zoom.max || null, 
+            minZoom: $.map.zoom.min || null, 
+            zoom: $.map.zoom.init || null,
+            center: ($.map.zoom.init ? mapBounds.getCenter() : null),
+            scrollWheelZoom: $.map.zoom.scrollWheel || true, 
             attributionControl: !$.map.attribution.length,
             maxBounds: maxMapBounds
         });
 
         if ($.debug) console.log("map",map);
 
-        map.fitBounds(mapBounds);
+        if (!$.map.zoom.init) map.fitBounds(mapBounds);
 
         // Tile layers
         var tileLayers = $.geoLayers.filter(function(l) { return l.type === 'tile'; });
@@ -499,6 +501,7 @@
                             delete parameters.i;
                             if (embedControl && embedControl.isAdded) embedControl.removeFrom(map);
                             info.update();
+                            map.scrollWheelZoom.enable();
                             return false;
                         });
 

@@ -45,14 +45,14 @@ var mapConfig = {
 
                 // Bottom-left corner
                 southWest: {
-                    lat: 35.568,
-                    lng: 1.537
+                    lat: 44.38596,
+                    lng: 11.14014
                 },
 
                 // Top-right corner
                 northEast: {
-                    lat: 47.843,
-                    lng: 23.203
+                    lat: 44.60514,
+                    lng: 11.60912
                 },
             },
 
@@ -61,22 +61,23 @@ var mapConfig = {
 
                 // Bottom-left corner
                 southWest: {
-                    lat: 22.472,
-                    lng: -16.523
+                    lat: 43,
+                    lng: 9
                 },
 
                 // Top-right corner
                 northEast: {
-                    lat: 62.083,
-                    lng: 73.828
+                    lat: 45,
+                    lng: 13
                 },
             }
         },
 
         // Zoom options
         zoom: {
+            init: 12,
             max: 13,
-            min: 5,
+            min: 11,
             scrollWheel: true
         },
 

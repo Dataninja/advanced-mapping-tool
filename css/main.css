@@ -223,6 +223,7 @@ html, body, #map {
     border-radius: 3px;
     text-indent: 5px;
     margin-top: 5px;
+    width: 100%;
 }
 
 .menu-ui a.disabled {
