@@ -164,6 +164,7 @@ var mapConfig = {
             }
         },
         {
+            active: false,
             source: 'file',
             path: 'geo/',
             format: 'json',
@@ -816,9 +817,6 @@ var mapConfig = {
             // Enable or not
             active: true,
 
-            // Switchable in menù
-            inMenu: false,
-
             // Default source is a tile server defined in geoSources
             source: 'tileserver',
 
@@ -834,9 +832,6 @@ var mapConfig = {
 
             // Enable or not
             active: true,
-            
-            // Switchable in menu
-            inMenu: true,
             
             /* Layer style, with three presets:
              * - default
@@ -963,12 +958,10 @@ var mapConfig = {
  * - geoTypes [object]
  *   - tile [object]
  *     - active [bool]
- *     - inMenu [bool]
  *     - source [string matching geoSources attributes]
  *     - options [object matching http://leafletjs.com/reference.html#tilelayer-options structure]
  *   - vector [object]
  *     - active [bool]
- *     - inMenu [bool]
  *     - style [object]
  *       - default [object matching http://leafletjs.com/reference.html#geojson-options style structure]
  *       - highlight [object]

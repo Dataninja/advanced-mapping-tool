@@ -33,6 +33,35 @@
             sourceDef, typeDef;
 
         // Configuration initialization
+        for (i=0; i<$.geoLayers.length; i++) {
+
+            if ($.debug) console.log('geoLayer', i, $.geoLayers[i]);
+
+            typeDef = $.geoTypes[$.geoLayers[i].type];
+            for (k in typeDef) {
+                if (typeDef.hasOwnProperty(k)) {
+                    if (!$.geoLayers[i].hasOwnProperty(k)) {
+                        $.geoLayers[i][k] = typeDef[k];
+                    } else if (typeof typeDef[k] === 'object') {
+                        for (var k2 in typeDef[k]) {
+                            if (typeDef[k].hasOwnProperty(k2) && !$.geoLayers[i][k].hasOwnProperty(k2)) {
+                                $.geoLayers[i][k][k2] = typeDef[k][k2];
+                            }
+                        }
+                    }
+                }
+            }
+            
+            sourceDef = $.geoSources[$.geoLayers[i].source];
+            for (k in sourceDef) {
+                if (sourceDef.hasOwnProperty(k) && !$.geoLayers[i].hasOwnProperty(k)) {
+                    $.geoLayers[i][k] = sourceDef[k];
+                }
+            }
+
+            if (!$.geoLayers[i].active) { $.geoLayers.splice(i,1); }
+        }
+
         for (i=0; i<$.dataSets.length; i++) {
             typeDef = $.dataTypes[$.dataSets[i].type];
             for (k in typeDef) {
@@ -46,6 +75,12 @@
                     $.dataSets[i][k] = sourceDef[k];
                 }
             }
+            
+            var geoLayersData = $.geoLayers.filter(function(l) { return l.hasOwnProperty('schema') && l.schema.name === $.dataSets[i].schema.layer; });
+
+            if ($.debug) console.log('geoLayersData', geoLayersData);
+
+            if (!geoLayersData.length || !geoLayersData[0].active) { $.dataSets.splice(i,1); }
         }
 
         if ($.hasOwnProperty('infowindow') && $.infowindow.active && $.infowindow.hasOwnProperty('downloads') && $.infowindow.downloads.active) {
@@ -70,29 +105,6 @@
             }
         }
 
-        for (i=0; i<$.geoLayers.length; i++) {
-            typeDef = $.geoTypes[$.geoLayers[i].type];
-            for (k in typeDef) {
-                if (typeDef.hasOwnProperty(k)) {
-                    if (!$.geoLayers[i].hasOwnProperty(k)) {
-                        $.geoLayers[i][k] = typeDef[k];
-                    } else if (typeof typeDef[k] === 'object') {
-                        for (var k2 in typeDef[k]) {
-                            if (typeDef[k].hasOwnProperty(k2) && !$.geoLayers[i][k].hasOwnProperty(k2)) {
-                                $.geoLayers[i][k][k2] = typeDef[k][k2];
-                            }
-                        }
-                    }
-                }
-            }
-            sourceDef = $.geoSources[$.geoLayers[i].source];
-            for (k in sourceDef) {
-                if (sourceDef.hasOwnProperty(k) && !$.geoLayers[i].hasOwnProperty(k)) {
-                    $.geoLayers[i][k] = sourceDef[k];
-                }
-            }
-        }
-
         if ($.debug) console.log("$",$);
 
         // Url shortener initialization
@@ -108,7 +120,6 @@
                 defaultGeo[$.geoLayers[i].schema.name] = {
                     id: $.geoLayers[i].schema.id,
                     label: $.geoLayers[i].schema.label,
-                    inMenu: $.geoLayers[i].inMenu,
                     resource: null,
                     list: []
                 };
@@ -788,8 +799,8 @@
         /*** ***/
 
         /*** Creazione del menù dei livelli ***/
-        menuLayers = $.geoLayers.filter(function(l) { return l.inMenu; });
-        if (menuLayers.length) {
+        menuLayers = $.geoLayers.filter(function(l) { return l.type != 'tile'; });
+        if (menuLayers.length > 1) {
             menu = L.control({position: 'topleft'});
             menu.onAdd = function(map) {
                 var nav = L.DomUtil.create('nav', 'menu-ui '+parameters.md);
@@ -807,7 +818,7 @@
                 .attr("href", "#")
                 .attr("id", function(d) { return d; })
                 .classed("disabled", function(d) {
-                    return !(geo.hasOwnProperty(d) && geo[d].inMenu);
+                    return !(geo.hasOwnProperty(d));
                 })
                 .on("click", function(d) {
                     if (geo.hasOwnProperty(d)) {
