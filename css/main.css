@@ -234,11 +234,6 @@ html, body, #map {
 	border-radius: 3px 3px 0 0;
 }
 
-.menu-ui a: last-child {
-	border: none;
-	border-radius: 0 0 3px 3px;
-}
-
 .menu-ui a: hover {
 	background: #f8f8f8;
 	color: #404040;
