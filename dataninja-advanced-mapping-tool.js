@@ -907,6 +907,37 @@
 
         /*** ***/
 
+        /*** Caricamento asincrono del pointsSet ***/
+        if ($.pointsSet && $.pointsSet.active && $.pointsSet.resourceId) {
+            var markersPath = $.pointsSet.url.call($.pointsSet);
+            if ($.debug) console.log("markersPath",markersPath);
+            d3[$.pointsSet.format](markersPath, function(err, markersjs) {
+                if ($.debug) console.log("markers",arguments);
+                var points = (markersjs ? $.pointsSet.transform(markersjs) : null);
+                if (points) {
+                    var clusters = new L.MarkerClusterGroup({ showCoverageOnHover: false }),
+                        markers = [];
+                    for (var i=0; i<points.length; i++) {
+                        var marker = L.marker();
+                        marker.setIcon(L.icon({iconUrl: $.pointsSet.icon, shadowUrl: $.pointsSet.shadow}));
+                        marker.setLatLng(L.latLng(points[i][parameters.mr.lat],points[i][parameters.mr.lng]));
+                        if (parameters.mr.hasOwnProperty('iw')) marker.bindPopup(points[i][parameters.mr.iw]);
+                        markers.push(marker);
+                        clusters.addLayer(marker);
+                    }
+                        
+                    if ($.pointsSet.clusters) {
+                        map.addLayer(clusters);
+                    } else {
+                        map.addLayer(L.layerGroup(markers));
+                    }
+                }
+            });
+        }
+
+        /*** ***/
+
+        /*** Gestione degli stili della choropleth ***/
         function getColor(d, bins, palette) {
             //if ($.debug) console.log("getColorFunction",arguments);
             var palette = palette || 'Reds',
@@ -1071,18 +1102,11 @@
                 q.defer(d3[dataSet.format], dataPath); // Dati -> Loop with condition
                 if ($.debug) console.log("dataPath",dataPath);
 
-                if ($.pointsSet.resourceId) {
-                    markersPath = $.pointsSet.url.call($.pointsSet, region);
-                    if ($.debug) console.log("markersPath",markersPath);
-                    q.defer(d3[$.pointsSet.format], markersPath);
-                }
-
                 q.await(function(err, geojs, datajs, markersjs) { // Access results by arguments
                     if ($.debug) console.log("await",arguments);
                     
                     geo[region].resource = geoLayer.transform(geojs);
                     data[region].resource = dataSet.transform(datajs); // Loop in object filtering data linked to current region
-                    data[region].markers = (markersjs ? $.pointsSet.transform(markersjs) : null);
 
                     map.spin(false);
                     
@@ -1105,25 +1129,6 @@
                         });
                     }
                     
-                    if (data[region].markers) {
-                        var clusters = new L.MarkerClusterGroup({ showCoverageOnHover: false }),
-                            markers = [],
-                            points = data[region].markers.result.records;
-                        for (var i=0; i<points.length; i++) {
-                            var marker = L.marker();
-                            marker.setIcon(L.icon({iconUrl: $.pointsSet.icon, shadowUrl: $.pointsSet.shadow}));
-                            marker.setLatLng(L.latLng(points[i][parameters.mr.lat],points[i][parameters.mr.lng]));
-                            if (parameters.mr.hasOwnProperty('iw')) marker.bindPopup(points[i][parameters.mr.iw]);
-                            markers.push(marker);
-                            clusters.addLayer(marker);
-                        }
-                        
-                        if ($.pointsSet.clusters) {
-                            map.addLayer(clusters);
-                        } else {
-                            map.addLayer(L.layerGroup(markers));
-                        }
-                    }
                 });
             } else {
                 geojson.addData(geo[region].resource);
