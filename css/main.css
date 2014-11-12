@@ -376,6 +376,18 @@ img.screenshot: hover {
     width: 30%;
 }
 
+/*** Dev utilities ***/
+.devutil {
+    background: white;
+    border: 1px solid rgba(0,0,0,0.25);
+    border-radius: 5px;
+    padding: 1em;
+}
+
+.devutil p {
+    margin-top: 2px;
+    margin-bottom: 2px;
+}
 
 /*** Sharing buttons ***/
 
