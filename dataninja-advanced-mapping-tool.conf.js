@@ -198,7 +198,50 @@ var mapConfig = {
             palette: 'Reds',
             
             schema: {
+
+                // Key name of dataset
+                name: 'regioni1',
                 
+                // Key name of layer data refer to
+                layer: 'regioni',
+
+                // Key of id values used for join
+                id: 'IdRegioneISTAT',
+                
+                // Key of label values (not used)
+                label: '',
+
+                // Key of data values shown on map on loading
+                value: 'Totale beni'
+            },
+
+            /* Custom parse function name from string to number
+             * If missing, 'parseFloat' is the default
+             * You can also define a custom function (el) { return el; }
+             */
+            parse: 'parseInt'
+        },
+        {
+            
+            // Inherits attributes from dataSource named here
+            source: 'file',
+            path: 'data/',
+            filename: 'e2f0c989-929f-4e4d-87e2-097140f8880f.json',
+            format: 'json',
+            transform: function(res) {
+                return res.result.records;
+            },
+
+            // Inherits attributes from geoType named here
+            type: 'choropleth', // from dataTypes attributes
+            bins: 7,
+            palette: 'Greens',
+            
+            schema: {
+                
+                // Key name of dataset
+                name: 'regioni2',
+
                 // Key name of layer data refer to
                 layer: 'regioni',
 
@@ -229,6 +272,7 @@ var mapConfig = {
             palette: 'Blues',
 
             schema: {
+                name: 'province1',
                 layer: 'province',
                 id: 'IdProvinciaISTAT',
                 label: '',
@@ -248,6 +292,7 @@ var mapConfig = {
             palette: 'Greens',
 
             schema: {
+                name: 'comuni1',
                 layer: 'comuni',
                 id: 'IdComuneISTAT',
                 label: '',
