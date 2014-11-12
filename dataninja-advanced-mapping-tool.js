@@ -9,15 +9,16 @@
 
     head.ready(function() {
 
+        // Global variables
         var $ = mapConfig, // Configuration object
             dtnj, // URL shortener via yourls-api lib
             parameters = Arg.query(), // Parsing URL GET parameters
             svgViewBox,
-            defaultGeo = {}, geo = {},
-            defaultData = {}, data = {},
-            menuLayers,
-            i, k,
-            map,
+            defaultGeo = {}, geo = {}, // Geo layers enabled and used
+            defaultData = {}, data = {}, // Data sets enabled and used
+            i, k, // Counter
+            map, // Map object
+            // Map controls
             attrib = L.control.attribution(),
             info,
             fullscreen,
@@ -27,50 +28,16 @@
             screenshot,
             detach,
             share,
-            menu,
+            geoMenu, dataMenu, varMenu,
             osmGeocoder,
-            legend,
-            sourceDef, typeDef;
+            legend;
 
-        // Configuration initialization
-        for (i=0; i<$.dataSets.length; i++) {
-            typeDef = $.dataTypes[$.dataSets[i].type];
-            for (k in typeDef) {
-                if (typeDef.hasOwnProperty(k) && !$.dataSets[i].hasOwnProperty(k)) {
-                    $.dataSets[i][k] = typeDef[k];
-                }
-            }
-            sourceDef = $.dataSources[$.dataSets[i].source];
-            for (k in sourceDef) {
-                if (sourceDef.hasOwnProperty(k) && !$.dataSets[i].hasOwnProperty(k)) {
-                    $.dataSets[i][k] = sourceDef[k];
-                }
-            }
-        }
+        /*** Configuration initialization ***/
+        var sourceDef, typeDef;
 
-        if ($.hasOwnProperty('infowindow') && $.infowindow.active && $.infowindow.hasOwnProperty('downloads') && $.infowindow.downloads.active) {
-            for (i=0; i<$.infowindow.downloads.files.length; i++) {
-                if ($.infowindow.downloads.files[i].active) {
-                    sourceDef = $.dataSources[$.infowindow.downloads.files[i].source];
-                    for (k in sourceDef) {
-                        if (sourceDef.hasOwnProperty(k) && !$.infowindow.downloads.files[i].hasOwnProperty(k)) {
-                            $.infowindow.downloads.files[i][k] = sourceDef[k];
-                        }
-                    }
-                }
-            }
-        }
-
-        if ($.hasOwnProperty('pointsSet') && $.pointsSet.active) {
-            sourceDef = $.dataSources[$.pointsSet.source];
-            for (k in sourceDef) {
-                if (sourceDef.hasOwnProperty(k) && !$.pointsSet.hasOwnProperty(k)) {
-                    $.pointsSet[k] = sourceDef[k];
-                }
-            }
-        }
-
+        // Geolayers
         for (i=0; i<$.geoLayers.length; i++) {
+
             typeDef = $.geoTypes[$.geoLayers[i].type];
             for (k in typeDef) {
                 if (typeDef.hasOwnProperty(k)) {
@@ -85,15 +52,69 @@
                     }
                 }
             }
+            
             sourceDef = $.geoSources[$.geoLayers[i].source];
             for (k in sourceDef) {
                 if (sourceDef.hasOwnProperty(k) && !$.geoLayers[i].hasOwnProperty(k)) {
                     $.geoLayers[i][k] = sourceDef[k];
                 }
             }
+
+            // Ignore disabled geolayers
+            if (!$.geoLayers[i].active) { $.geoLayers.splice(i,1); i--; }
+        }
+
+        // Datasets
+        for (i=0; i<$.dataSets.length; i++) {
+
+            typeDef = $.dataTypes[$.dataSets[i].type];
+            for (k in typeDef) {
+                if (typeDef.hasOwnProperty(k) && !$.dataSets[i].hasOwnProperty(k)) {
+                    $.dataSets[i][k] = typeDef[k];
+                }
+            }
+
+            sourceDef = $.dataSources[$.dataSets[i].source];
+            for (k in sourceDef) {
+                if (sourceDef.hasOwnProperty(k) && !$.dataSets[i].hasOwnProperty(k)) {
+                    $.dataSets[i][k] = sourceDef[k];
+                }
+            }
+            
+            // Ignore datasets linked to disabled geolayers
+            var geoLayersData = $.geoLayers.filter(function(l) { 
+                return l.hasOwnProperty('schema') && l.schema.name === $.dataSets[i].schema.layer; 
+            });
+            if (!geoLayersData.length || !geoLayersData[0].active) { $.dataSets.splice(i,1); i--; }
+        }
+
+        // Downloads in infowindow
+        if ($.hasOwnProperty('infowindow') && $.infowindow.active && $.infowindow.hasOwnProperty('downloads') && $.infowindow.downloads.active) {
+            for (i=0; i<$.infowindow.downloads.files.length; i++) {
+                if ($.infowindow.downloads.files[i].active) {
+                    sourceDef = $.dataSources[$.infowindow.downloads.files[i].source];
+                    for (k in sourceDef) {
+                        if (sourceDef.hasOwnProperty(k) && !$.infowindow.downloads.files[i].hasOwnProperty(k)) {
+                            $.infowindow.downloads.files[i][k] = sourceDef[k];
+                        }
+                    }
+                }
+            }
+        }
+
+        // PointsSet
+        if ($.hasOwnProperty('pointsSet') && $.pointsSet.active) {
+            sourceDef = $.dataSources[$.pointsSet.source];
+            for (k in sourceDef) {
+                if (sourceDef.hasOwnProperty(k) && !$.pointsSet.hasOwnProperty(k)) {
+                    $.pointsSet[k] = sourceDef[k];
+                }
+            }
         }
 
         if ($.debug) console.log("$",$);
+
+        /*** ***/
 
         // Url shortener initialization
         if ($.hasOwnProperty('urlShortener') && $.urlShortener.active) {
@@ -108,7 +129,6 @@
                 defaultGeo[$.geoLayers[i].schema.name] = {
                     id: $.geoLayers[i].schema.id,
                     label: $.geoLayers[i].schema.label,
-                    inMenu: $.geoLayers[i].inMenu,
                     resource: null,
                     list: []
                 };
@@ -119,31 +139,35 @@
 
         /*** Data sets initialization ***/
         for (i=0; i<$.dataSets.length; i++) {
-            defaultData[$.dataSets[i].schema.layer] = { // Layer in the object, key will be the name
+            defaultData[$.dataSets[i].schema.name] = {
                 id: $.dataSets[i].schema.id,
                 label: $.dataSets[i].schema.label,
-                value: $.dataSets[i].schema.value,
+                value: (typeof $.dataSets[i].schema.values === "string" ? $.dataSets[i].schema.values : $.dataSets[i].schema.values[0]),
+                values: (typeof $.dataSets[i].schema.values === "string" ? [$.dataSets[i].schema.values] : $.dataSets[i].schema.values),
+                layer: $.dataSets[i].schema.layer,
+                name: $.dataSets[i].schema.name,
                 resourceId: $.dataSets[i].resourceId,
                 resource: null,
-                markers: null,
                 bins: [],
                 ranges: [],
-                palette: $.dataSets[i].palette
+                palette: $.dataSets[i].palette,
+                active: false
             };
 
+            // Parsing function for dataset values
             if (typeof $.dataSets[i].parse === "string") {
                 var parse = $.dataSets[i].parse;
-                defaultData[$.dataSets[i].schema.layer].parse = function(el) { return isNaN(window[parse](el)) ? el : window[parse](el); };
+                defaultData[$.dataSets[i].schema.name].parse = function(el) { return isNaN(window[parse](el)) ? el : window[parse](el); };
             } else if (typeof $.dataSets[i].parse === "function") {
-                defaultData[$.dataSets[i].schema.layer].parse = $.dataSets[i].parse;
+                defaultData[$.dataSets[i].schema.name].parse = $.dataSets[i].parse;
             } else {
-                defaultData[$.dataSets[i].schema.layer].parse = function(el) { return isNaN(parseFloat(el)) ? el : parseFloat(el); };
+                defaultData[$.dataSets[i].schema.name].parse = function(el) { return isNaN(parseFloat(el)) ? el : parseFloat(el); };
             }
         }
 
         if ($.debug) console.log("defaultData",defaultData);
 
-        // URL GET parameters initialization
+        /*** URL GET parameters initialization ***/
         /* ie. http://viz.confiscatibene.it/anbsc/choropleth/?ls[0]=regioni&ls[1]=province&ls[2]=comuni&dl=regioni&t=1
             {
                 ls: Array(), // Livelli caricati: regioni, province, comuni (default: tutti) -- LAYERS
@@ -151,8 +175,8 @@
                 dl: [string], // Livello mostrato al caricamento -- DEFAULT LAYER
                 ml: [string], // Livello caricato più alto: regioni, province, comuni -- MAX LAYER
                 tl: [string], // Livello a cui si riferisce t -- TERRITORY LAYER
-                t: [int], // Codice istat del region centrato e con infowindow aperta (si riferisce a tl) -- TERRITORY
-                i: [int] // Codice istat del region con infowindow aperta -- INFO
+                t: [int], // Codice istat del territorio centrato e con infowindow aperta (si riferisce a tl) -- TERRITORY
+                i: [int] // Codice istat del territotio con infowindow aperta -- INFO
             }
         */
         
@@ -180,14 +204,21 @@
 
         // Livelli disponibili da parametri dell'URL
         for (i=parameters.ls.indexOf(parameters.ml); i<parameters.ls.length; i++) {
-            if (defaultGeo.hasOwnProperty(parameters.ls[i]) && defaultData.hasOwnProperty(parameters.ls[i])) {
-                geo[parameters.ls[i]] = defaultGeo[parameters.ls[i]];
-                data[parameters.ls[i]] = defaultData[parameters.ls[i]];
+            if (defaultGeo.hasOwnProperty(parameters.ls[i])) {
+                var defaultJoinData = [];
+                for (k in defaultData) {
+                    if (defaultData.hasOwnProperty(k) && defaultData[k].layer === parameters.ls[i]) {
+                        defaultJoinData.push(defaultData[k]);
+                    }
+                }
+                if (defaultJoinData.length) {
+                    geo[parameters.ls[i]] = defaultGeo[parameters.ls[i]];
+                    data[parameters.ls[i]] = defaultJoinData;
+                }
             }
         }
                 
         if ($.debug) console.log("geo",geo);
-
         if ($.debug) console.log("data",data);
 
         /*** ***/
@@ -266,8 +297,9 @@
                     var delim = agnes.rowDelimiter(),
                         today = new Date(),
                         stoday = d3.time.format('%Y%m%d')(today),
-                        region = parameters.dl,
-                        filterKey = data[region].id,
+                        region = props._layer,
+                        index = data[region].map(function(el) { return el.active; }).indexOf(true),
+                        filterKey = data[region][index].id,
                         filterValue = props[geo[region].id],
                         buttons = [], btnTitle, btnUrl, btnPlace,
                         dnlBtn = [];
@@ -366,7 +398,7 @@
 
                     var tbody;
                     if ($.infowindow.hasOwnProperty('view') && $.infowindow.view.active && $.viewTypes.hasOwnProperty($.infowindow.view.type)) {
-                        tbody = $.viewTypes[$.infowindow.view.type](props.data, $.infowindow.view.options);
+                        tbody = $.viewTypes[$.infowindow.view.type](props.data[data[region][index].name], $.infowindow.view.options);
                         if (!(tbody.indexOf('<tbody>') > -1)) {
                             tbody = '<tbody>' + tbody + '</tbody>';
                         }
@@ -784,46 +816,141 @@
         }
         
         if ($.debug) console.log("share",share);
-
         /*** ***/
 
-        /*** Creazione del menù dei livelli ***/
-        menuLayers = $.geoLayers.filter(function(l) { return l.inMenu; });
-        if (menuLayers.length) {
-            menu = L.control({position: 'topleft'});
-            menu.onAdd = function(map) {
+
+
+        /*** Creazione del menù dei geolayers ***/
+        var menuGeoLayers = $.geoLayers.filter(function(l) { return l.type != 'tile'; });
+        if (menuGeoLayers.length > 1) {
+            geoMenu = L.control({position: 'topleft'});
+            geoMenu.onAdd = function(map) {
                 var nav = L.DomUtil.create('nav', 'menu-ui '+parameters.md);
-                nav.setAttribute('id','menu-ui');
+                nav.setAttribute('id','geomenu-ui');
                 if (parameters.md === 'widget') nav.setAttribute('style','display:none;');
                 return nav;
             };
             
-            menu.addTo(map);
+            geoMenu.addTo(map);
             
-            d3.select("nav#menu-ui").selectAll("a")
-                .data(d3.keys(defaultGeo))
+            d3.select("nav#geomenu-ui").selectAll("a")
+                .data(menuGeoLayers.map(function(el) { return el.schema; }))
                 .enter()
                 .append("a")
                 .attr("href", "#")
-                .attr("id", function(d) { return d; })
+                .attr("id", function(d) { return d.name; })
                 .classed("disabled", function(d) {
-                    return !(geo.hasOwnProperty(d) && geo[d].inMenu);
+                    return !(geo.hasOwnProperty(d.name));
                 })
-                .on("click", function(d) {
-                    if (geo.hasOwnProperty(d)) {
+                .on("click", function(d,i) {
+                    if (geo.hasOwnProperty(d.name)) {
+                        var region = d.name;
+                        data[region][0].active = true;
+                        for (var i=0; i<data[region].length; i++) {
+                            if (i != 0) data[region][i].active = false;
+                        }
                         delete parameters.i;
                         if (embedControl && embedControl.isAdded) embedControl.removeFrom(map);
                         info.update();
-                        loadData(d);
+                        legend.update();
+                        dataMenu.update(d.name);
+                        dataMenu.onChange(data[d.name][0].values);
+                        loadData(d.name);
                     }
                 })
-                .text(function(d) { return d; });
+                .text(function(d) { return d.menu; });
         }
        
-        if ($.debug) console.log("menuLayers",menuLayers);
-        if ($.debug) console.log("menu",menu);
-
+        if ($.debug) console.log("menuGeoLayers",menuGeoLayers);
+        if ($.debug) console.log("geoMenu",geoMenu);
         /*** ***/
+
+
+
+        /*** Creazione del menù dei datasets ***/
+        dataMenu = L.control({position: 'topleft'});
+
+        dataMenu.onAdd = function(map) {
+            var nav = L.DomUtil.create('nav', 'menu-ui '+parameters.md);
+            nav.setAttribute('id','datamenu-ui');
+            if (parameters.md === 'widget') nav.setAttribute('style','display:none;');
+            this._nav = nav;
+            d3.select(nav)
+                .on("mouseenter", function() {
+                    map.scrollWheelZoom.disable();
+                    map.doubleClickZoom.disable();
+                    map.dragging.disable();
+                })
+                .on("mouseleave", function() {
+                    map.scrollWheelZoom.enable();
+                    map.doubleClickZoom.enable();
+                    map.dragging.enable();
+                });
+            return nav;
+        };
+
+        dataMenu.onChange = function(region, index) {
+            d3.select(this._nav).select('select').remove();
+            var index = index || 0,
+                values = data[region][index].values;
+            if (values && values.length > 1) {
+                d3.select(this._nav)
+                    .append('select')
+                    .attr('disabled','disabled')
+                    .on('change', function() {
+                        var selectedIndex = d3.select(this).property('selectedIndex'),
+                            d = d3.select(this).selectAll("option")[0][selectedIndex].__data__;
+                        data[region][index].value = d;
+                        loadData(region,data[region][index].name);
+                    })
+                    .selectAll('option')
+                    .data(values)
+                    .enter()
+                    .append('option')
+                    .text(function(d) { return d; });
+            }
+        };
+
+        dataMenu.update = function(region) {
+            d3.select(this._nav).style('display',null).selectAll("a, select").remove();
+            if (region) {
+                var menuDataSets = $.dataSets.filter(function(l) { return l.schema.layer === region; });
+                if (menuDataSets.length > 1) {
+                    d3.select(this._nav).selectAll("a")
+                        .data(menuDataSets.map(function(el) { return el.schema; }))
+                        .enter()
+                        .append("a")
+                        .attr("href", "#")
+                        .attr("id", function(d) { return d.name; })
+                        .on("click", function(d,index) {
+                            var region = d.layer;
+                            data[region][index].active = true;
+                            for (var i=0; i<data[region].length; i++) {
+                                if (i != index) data[region][i].active = false;
+                            }
+                            delete parameters.i;
+                            if (embedControl && embedControl.isAdded) embedControl.removeFrom(map);
+                            info.update();
+                            legend.update();
+                            dataMenu.onChange(region, index);
+                            loadData(region, d.name);
+                        })
+                        .text(function(d) { return d.menu; });
+
+                } else {
+                    d3.select(this._nav).style('display','none');
+                }
+            }
+        };
+            
+        dataMenu.addTo(map);
+        dataMenu.update(menuGeoLayers[0].schema.name);
+        dataMenu.onChange(menuGeoLayers[0].schema.name);
+       
+        if ($.debug) console.log("dataMenu",dataMenu);
+        /*** ***/
+
+
 
         /*** Funzione di ricerca del luogo ***/
         if ($.controls.hasOwnProperty('geocoder') && $.controls.geocoder.active) {
@@ -876,36 +1003,45 @@
         }
         
         if ($.debug) console.log("osmGeocoder",osmGeocoder);
-
         /*** ***/
+
+
 
         /*** Legenda ***/
         if ($.hasOwnProperty('legend') && $.legend.active) {
 		    legend = L.control({position: 'bottomleft'});
     	    legend.onAdd = function (map) {
                 this._div = L.DomUtil.create('div', 'info legend '+parameters.md);
-                this._div.innerHTML = (parameters.md != 'widget' ? '<h4>'+$.legend.title+'</h4>' : '');
 		        return this._div;
             };
             legend.update = function(region) {
-                var grades = data[region].ranges;
-                this._div.innerHTML = (parameters.md != 'widget' ? '<h4 title="'+$.legend.description+'">'+$.legend.title+'</h4>' : '');
-                for (var i=0; i<grades.length; i++) {
-                    var color = (colorbrewer.Reds[grades.length] ? colorbrewer.Reds[grades.length][i] : colorbrewer.Reds[3][i]);
-                    this._div.innerHTML += '<i title="Tra ' + 
-                        grades[i].replace("-","e") + 
-                        ' ' + $.legend.itemLabel+'" style="background:' + 
-                        color + '"></i> ' + 
-                        (parameters.md != 'widget' ? grades[i] : '') + '<br>';
+                if (region) {
+                    var index = data[region].map(function(el) { return el.active; }).indexOf(true),
+                        dataSet = $.dataSets.filter(function(l) { return l.schema.layer === region; })[index];
+    
+                    var grades = data[region][index].ranges;
+                    this._div.innerHTML = (parameters.md != 'widget' ? '<h4 title="'+$.legend.description+'">'+$.legend.title+'</h4>' : '');
+                    for (var i=0; i<grades.length; i++) {
+                        var color = (colorbrewer[dataSet.palette][grades.length] ? colorbrewer[dataSet.palette][grades.length][i] : colorbrewer[dataSet.palette][3][i]);
+                        this._div.innerHTML += '<i title="Tra ' + 
+                            grades[i].replace("-","e") + 
+                            ' ' + $.legend.itemLabel+'" style="background:' + 
+                            color + '"></i> ' + 
+                            (parameters.md != 'widget' ? grades[i] : '') + '<br>';
+                    }
+                    if (parameters.md != 'widget') this._div.innerHTML += '<br>'+$.legend.description;
+                } else {
+                    this._div.innerHTML = (parameters.md != 'widget' ? '<h4>'+$.legend.title+'</h4>' : '');
                 }
-                if (parameters.md != 'widget') this._div.innerHTML += '<br>'+$.legend.description;
     		};
             legend.addTo(map);
+            legend.update();
         }
         
         if ($.debug) console.log("legend",legend);
-
         /*** ***/
+
+
 
         /*** Caricamento asincrono del pointsSet ***/
         if ($.pointsSet && $.pointsSet.active && $.pointsSet.resourceId) {
@@ -934,14 +1070,14 @@
                 }
             });
         }
-
         /*** ***/
+
+
 
         /*** Gestione degli stili della choropleth ***/
         function getColor(d, bins, palette) {
             //if ($.debug) console.log("getColorFunction",arguments);
-            var palette = palette || 'Reds',
-                binsNum = (colorbrewer[palette][bins.length-1] ? bins.length-1 : 3);
+            var binsNum = (colorbrewer[palette][bins.length-1] ? bins.length-1 : 3);
             for (var i=1; i<bins.length; i++) {
                 if (d <= bins[i]) {
                     return colorbrewer[palette][binsNum][i-1];
@@ -953,12 +1089,14 @@
             //if ($.debug) console.log("styleFunction",arguments);
             var region = feature.properties._layer,
                 geoLayer = $.geoLayers.filter(function(l) { return (l.type === "vector" && l.schema.name === region); })[0],
+                index = data[region].map(function(el) { return el.active; }).indexOf(true),
                 currentStyle = geoLayer.style.default;
-            currentStyle.fillColor = getColor(feature.properties.data[data[region].value], data[region].bins, data[region].palette); // Dynamic parsing
+            currentStyle.fillColor = getColor(feature.properties.data[data[region][index].name][data[region][index].value], data[region][index].bins, data[region][index].palette); // Dynamic parsing
 	    	return currentStyle;
     	}
-
         /*** ***/
+
+
 
         /*** Gestione degli eventi ***/
         var geojson, label = new L.Label();
@@ -969,11 +1107,12 @@
                 props = layer.feature.properties,
                 region = layer.feature.properties._layer,
                 geoLayer = $.geoLayers.filter(function(l) { return (l.type === "vector" && l.schema.name === region); })[0],
+                index = data[region].map(function(el) { return el.active; }).indexOf(true),
                 highlightStyle = geoLayer.style.highlight;
                     
             if (!layer.selected) layer.setStyle(highlightStyle);
             if ($.hasOwnProperty('label') && $.label.active) {
-                label.setContent(props[geo[parameters.dl].label]+'<br>' + $.label.text + ': '+props.data[data[parameters.dl].value]);
+                label.setContent(props[geo[region].label]+'<br>' + $.label.text + ': '+props.data[data[region][index].name][data[region][index].value]);
                 label.setLatLng(layer.getBounds().getCenter());
                 map.showLabel(label);
             }
@@ -1021,72 +1160,84 @@
     	}).addTo(map);
         
         if ($.debug) console.log("geojson",geojson);
-
         /*** ***/
+
+
 
         // Join tra dati e territori
         function joinData(region) {
             if ($.debug) console.log("joinDataFunction",arguments);
-            var numGeo = geo[region].resource.length,
-                numData = data[region].resource.length,
-                noData = true, numOkData = 0, numNoData = 0;
-            for (var i=0; i<geo[region].resource.length; i++) {
-                var geoID = geo[region].resource[i].properties[geo[region].id];
-                for (var j=0; j<numData; j++) {
-                    var dataID = data[region].resource[j][data[region].id];
-                    if (dataID == geoID) {
-                        numOkData++;
-                        geo[region].resource[i].properties.data = data[region].resource[j];
-                        for (var k in geo[region].resource[i].properties.data) {
-                            if (geo[region].resource[i].properties.data.hasOwnProperty(k)) {
-                                geo[region].resource[i].properties.data[k] = data[region].parse(geo[region].resource[i].properties.data[k]);
+
+            var geoID, dataID;
+            for (var i=0; i<geo[region].resource.length; i++) { // Ciclo sui territori del layer
+                geoID = geo[region].resource[i].properties[geo[region].id];
+                geo[region].resource[i].properties.data = {};
+                for (var h=0; h<data[region].length; h++) { // Ciclo sui dataset associati al layer
+                    data[region][h].active = !h;
+                    for (var j=0; j<data[region][h].resource.length; j++) { // Ciclo sulle righe del dataset
+                        var dataID = data[region][h].resource[j][data[region][h].id];
+                        if (dataID == geoID) {
+                            geo[region].resource[i].properties.data[data[region][h].name] = data[region][h].resource[j];
+                            for (var k in geo[region].resource[i].properties.data[data[region][h].name]) {
+                                if (geo[region].resource[i].properties.data[data[region][h].name].hasOwnProperty(k)) {
+                                    geo[region].resource[i].properties.data[data[region][h].name][k] = data[region][h].parse(geo[region].resource[i].properties.data[data[region][h].name][k]);
+                                }
                             }
+                            geo[region].resource[i].properties._layer = region;
                         }
-                        geo[region].resource[i].properties._layer = region;
-                        noData = false;
-                        break;
                     }
                 }
-                if (noData) {
-                    numNoData++;
+                if (!d3.keys(geo[region].resource[i].properties.data).length) {
                     geo[region].resource.splice(i,1);
                     i--;
-                } else {
-                    noData = true;
                 }
             }
+
         }
+
+
 
         // Binning della distribuzione dei dati
         function binData(region) {
             if ($.debug) console.log("binDataFunction",arguments);
+
+            var index = data[region].map(function(el) { return el.active; }).indexOf(true),
+                value = data[region][index].value;
+
             var geoLayer = $.geoLayers.filter(function(l) { return (l.type === "vector" && l.schema.name === region); })[0],
-                dataSet = $.dataSets.filter(function(l) { return l.schema.layer === region; })[0];
-            var serie = data[region].resource.map(function(el) { return el[data[region].value]; }); // Dynamic parsing
+                dataSet = $.dataSets.filter(function(l) { return l.schema.layer === region; })[index];
+
+            var serie = data[region][index].resource.map(function(el) { return el[value]; });
             var gs = new geostats(serie);
-            data[region].bins = gs.getJenks(serie.length > dataSet.bins ? dataSet.bins : serie.length-1);
-            data[region].ranges = gs.ranges;
+            data[region][index].bins = gs.getJenks(serie.length > dataSet.bins ? dataSet.bins : serie.length-1);
+            data[region][index].ranges = gs.ranges;
             legend.update(region);
         }
 
+
+
         // Caricamento asincrono dei dati
-        function loadData(region) { // region = regioni || province || comuni
+        function loadData(region, dataset) { // region = regioni || province || comuni
             
             if ($.debug) console.log("loadDataFunction",arguments);
             
             var geoLayer = $.geoLayers.filter(function(l) { return (l.type === "vector" && l.schema.name === region); })[0],
-                dataSet = $.dataSets.filter(function(l) { return l.schema.layer === region; })[0],
-                geoPath, dataPath, markersPath, q;
+                dataSets = $.dataSets.filter(function(l) { return l.schema.layer === region; }),
+                geoPath, dataPath, q;
             
-            d3.selectAll("nav#menu-ui a").classed("active", false);
-            d3.select("nav#menu-ui a#"+region).classed("active", true);
+            d3.selectAll("nav#geomenu-ui a").classed("active", false);
+            d3.select("nav#geomenu-ui a#"+region).classed("active", true);
+            d3.selectAll("nav#datamenu-ui a").classed("active", false);
+            d3.select("nav#datamenu-ui a#"+(dataset || dataSets[0].schema.name)).classed("active", true);
+            d3.select("nav#datamenu-ui select").attr("disabled",null);
+            
             parameters.dl = region;
             geojson.clearLayers();
 
             if ($.debug) console.log("geoLayer",geoLayer);
-            if ($.debug) console.log("dataSet",dataSet);
+            if ($.debug) console.log("dataSets",dataSets);
 
-            if (!geo[region].resource || !data[region].resource) { // Second condition in next loop
+            if (!geo[region].resource) { // || !data[region].resource) { // Second condition in next loop
                 
                 map.spin(true);
                 
@@ -1096,23 +1247,22 @@
                 q.defer(d3[geoLayer.format], geoPath); // Geojson
                 if ($.debug) console.log("geoPath",geoPath);
                 
-                // It will be a loop on data linked to the same geo layer
-                // Store data number for later in await callback
-                dataPath = dataSet.url.call(dataSet, region, (parameters.t ? defaultData[parameters.tl].id : undefined), parameters.t || undefined);
-                q.defer(d3[dataSet.format], dataPath); // Dati -> Loop with condition
-                if ($.debug) console.log("dataPath",dataPath);
+                for (var i=0; i<dataSets.length; i++) {
+                    dataPath = dataSets[i].url.call(dataSets[i], region, (parameters.t ? defaultData[parameters.tl].id : undefined), parameters.t || undefined); // CHECK!
+                    q.defer(d3[dataSets[i].format], dataPath); // Dati -> Loop with condition
+                    if ($.debug) console.log("dataPath", i, dataPath);
+                }
 
-                q.await(function(err, geojs, datajs, markersjs) { // Access results by arguments
+                q.await(function(err, geojs) { // Access results by arguments
                     if ($.debug) console.log("await",arguments);
                     
                     geo[region].resource = geoLayer.transform(geojs);
-                    data[region].resource = dataSet.transform(datajs); // Loop in object filtering data linked to current region
+
+                    for (var i=2; i<arguments.length; i++) {
+                        data[region][i-2].resource = dataSets[i-2].transform(arguments[i]);
+                    }
 
                     map.spin(false);
-                    
-                    /*if (region == 'comuni') {
-                        JSTERS['comuni'] = geo['comuni'].resource.map(function(el) { var arr = {}; arr[geo['regioni'].id] = el.properties[geo['regioni'].id]; arr[geo['province'].id] = el.properties[geo['province'].id]; arr[geo['comuni'].id] = el.properties[geo['comuni'].id]; arr[geo['comuni'].label] = el.properties[geo['comuni'].label]; return arr; });
-                    }*/
                     
                     joinData(region);
                     binData(region);
@@ -1131,13 +1281,18 @@
                     
                 });
             } else {
+                console.log(geo[region].resource);
+                binData(region);
                 geojson.addData(geo[region].resource);
                 delete parameters.i;
                 if (embedControl && embedControl.isAdded) embedControl.removeFrom(map);
+                legend.update(region);
                 info.update();
             }
         }
         /*** ***/
+
+
 
         /*** Inizializzazione ***/
         setTimeout(function () {
@@ -1145,5 +1300,8 @@
             loadData(parameters.dl);
         }, 3000);
         /*** ***/
+
+
+
     });
 })(mapConfig);

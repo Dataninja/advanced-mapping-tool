@@ -143,6 +143,9 @@ var mapConfig = {
                 // Key name of layer
                 name: 'regioni',
 
+                // Menu label for layer entry
+                menu: 'Regioni',
+
                 // Key of id values used for join
                 id: 'COD_REG',
 
@@ -159,11 +162,13 @@ var mapConfig = {
             
             schema: {
                 name: 'province',
+                menu: 'Province',
                 id: 'COD_PRO',
                 label: 'NOME_PRO'
             }
         },
         {
+            active: false,
             source: 'file',
             path: 'geo/',
             format: 'json',
@@ -172,6 +177,7 @@ var mapConfig = {
 
             schema: {
                 name: 'comuni',
+                menu: 'Comuni',
                 id: 'PRO_COM',
                 label: 'NOME_COM'
             }
@@ -197,7 +203,13 @@ var mapConfig = {
             palette: 'Reds',
             
             schema: {
+
+                // Key name of dataset
+                name: 'regioni1',
                 
+                // Menu label for layer entry
+                menu: 'Beni confiscati 1',
+
                 // Key name of layer data refer to
                 layer: 'regioni',
 
@@ -207,8 +219,55 @@ var mapConfig = {
                 // Key of label values (not used)
                 label: '',
 
-                // Key of data values shown on map on loading
-                value: 'Totale beni'
+                // Keys of data values shown on map on loading
+                values: [
+                    'Totale beni',
+                    'Totale immobili',
+                    'Totale aziende'
+                ]
+            },
+
+            /* Custom parse function name from string to number
+             * If missing, 'parseFloat' is the default
+             * You can also define a custom function (el) { return el; }
+             */
+            parse: 'parseInt'
+        },
+        {
+            
+            // Inherits attributes from dataSource named here
+            source: 'file',
+            path: 'data/',
+            filename: 'e2f0c989-929f-4e4d-87e2-097140f8880f.json',
+            format: 'json',
+            transform: function(res) {
+                return res.result.records;
+            },
+
+            // Inherits attributes from geoType named here
+            type: 'choropleth', // from dataTypes attributes
+            bins: 7,
+            palette: 'Greens',
+            
+            schema: {
+                
+                // Key name of dataset
+                name: 'regioni2',
+
+                // Menu label for layer entry
+                menu: 'Beni confiscati 2',
+
+                // Key name of layer data refer to
+                layer: 'regioni',
+
+                // Key of id values used for join
+                id: 'IdRegioneISTAT',
+                
+                // Key of label values (not used)
+                label: '',
+
+                // Keys of data values shown on map on loading
+                values: 'Totale beni'
             },
 
             /* Custom parse function name from string to number
@@ -228,10 +287,11 @@ var mapConfig = {
             palette: 'Blues',
 
             schema: {
+                name: 'province1',
                 layer: 'province',
                 id: 'IdProvinciaISTAT',
                 label: '',
-                value: 'Totale beni'
+                values: ['Totale beni']
             },
 
             parse: 'parseInt'
@@ -247,10 +307,11 @@ var mapConfig = {
             palette: 'Greens',
 
             schema: {
+                name: 'comuni1',
                 layer: 'comuni',
                 id: 'IdComuneISTAT',
                 label: '',
-                value: 'Totale beni'
+                values: ['Totale beni']
             },
 
             parse: 'parseInt'
@@ -816,9 +877,6 @@ var mapConfig = {
             // Enable or not
             active: true,
 
-            // Switchable in menù
-            inMenu: false,
-
             // Default source is a tile server defined in geoSources
             source: 'tileserver',
 
@@ -834,9 +892,6 @@ var mapConfig = {
 
             // Enable or not
             active: true,
-            
-            // Switchable in menu
-            inMenu: true,
             
             /* Layer style, with three presets:
              * - default
@@ -963,12 +1018,10 @@ var mapConfig = {
  * - geoTypes [object]
  *   - tile [object]
  *     - active [bool]
- *     - inMenu [bool]
  *     - source [string matching geoSources attributes]
  *     - options [object matching http://leafletjs.com/reference.html#tilelayer-options structure]
  *   - vector [object]
  *     - active [bool]
- *     - inMenu [bool]
  *     - style [object]
  *       - default [object matching http://leafletjs.com/reference.html#geojson-options style structure]
  *       - highlight [object]
@@ -983,8 +1036,10 @@ var mapConfig = {
  *     - schema [object]
  *       - layer [string matching a geoLayer.name for joining]
  *       - id [string]
+ *       - menu [string]
  *       - label [string]
- *       - value [string]
+ *       - values [string | array]
+ *         - [string]
  *     - parse [string] | [mixed] function( [string] )
  *     - (other attributes are inherited from dataSources and dataTypes and can be overrided)
  *   - ...
@@ -1001,6 +1056,7 @@ var mapConfig = {
  *     - type [string matching geoTypes attributes]
  *     - schema [object]
  *       - name [string]
+ *       - menu [string]
  *       - id [string]
  *       - label [string]
  *     - (other attributes are inherited from geoSources and geoTypes and can be overrided)

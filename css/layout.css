@@ -47,7 +47,7 @@ body.widget .legend i {
 }
 
 body.mobile .menu-ui a {
-    padding: 5px;
+    padding: 5px 10px;
 }
 
 body.widget img.reset, 
