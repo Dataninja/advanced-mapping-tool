@@ -9,15 +9,16 @@
 
     head.ready(function() {
 
+        // Global variables
         var $ = mapConfig, // Configuration object
             dtnj, // URL shortener via yourls-api lib
             parameters = Arg.query(), // Parsing URL GET parameters
             svgViewBox,
-            defaultGeo = {}, geo = {},
-            defaultData = {}, data = {},
-            menuLayers,
-            i, k,
-            map,
+            defaultGeo = {}, geo = {}, // Geo layers enabled and used
+            defaultData = {}, data = {}, // Data sets enabled and used
+            i, k, // Counter
+            map, // Map object
+            // Map controls
             attrib = L.control.attribution(),
             info,
             fullscreen,
@@ -27,15 +28,15 @@
             screenshot,
             detach,
             share,
-            menu,
+            geoMenu, dataMenu, varMenu,
             osmGeocoder,
-            legend,
-            sourceDef, typeDef;
+            legend;
 
-        // Configuration initialization
+        /*** Configuration initialization ***/
+        var sourceDef, typeDef;
+
+        // Geolayers
         for (i=0; i<$.geoLayers.length; i++) {
-
-            if ($.debug) console.log('geoLayer', i, $.geoLayers[i]);
 
             typeDef = $.geoTypes[$.geoLayers[i].type];
             for (k in typeDef) {
@@ -59,16 +60,20 @@
                 }
             }
 
+            // Ignore disabled geolayers
             if (!$.geoLayers[i].active) { $.geoLayers.splice(i,1); i--; }
         }
 
+        // Datasets
         for (i=0; i<$.dataSets.length; i++) {
+
             typeDef = $.dataTypes[$.dataSets[i].type];
             for (k in typeDef) {
                 if (typeDef.hasOwnProperty(k) && !$.dataSets[i].hasOwnProperty(k)) {
                     $.dataSets[i][k] = typeDef[k];
                 }
             }
+
             sourceDef = $.dataSources[$.dataSets[i].source];
             for (k in sourceDef) {
                 if (sourceDef.hasOwnProperty(k) && !$.dataSets[i].hasOwnProperty(k)) {
@@ -76,13 +81,14 @@
                 }
             }
             
-            var geoLayersData = $.geoLayers.filter(function(l) { return l.hasOwnProperty('schema') && l.schema.name === $.dataSets[i].schema.layer; });
-
-            //if ($.debug) console.log('geoLayersData', geoLayersData);
-
+            // Ignore datasets linked to disabled geolayers
+            var geoLayersData = $.geoLayers.filter(function(l) { 
+                return l.hasOwnProperty('schema') && l.schema.name === $.dataSets[i].schema.layer; 
+            });
             if (!geoLayersData.length || !geoLayersData[0].active) { $.dataSets.splice(i,1); i--; }
         }
 
+        // Downloads in infowindow
         if ($.hasOwnProperty('infowindow') && $.infowindow.active && $.infowindow.hasOwnProperty('downloads') && $.infowindow.downloads.active) {
             for (i=0; i<$.infowindow.downloads.files.length; i++) {
                 if ($.infowindow.downloads.files[i].active) {
@@ -96,6 +102,7 @@
             }
         }
 
+        // PointsSet
         if ($.hasOwnProperty('pointsSet') && $.pointsSet.active) {
             sourceDef = $.dataSources[$.pointsSet.source];
             for (k in sourceDef) {
@@ -106,6 +113,8 @@
         }
 
         if ($.debug) console.log("$",$);
+
+        /*** ***/
 
         // Url shortener initialization
         if ($.hasOwnProperty('urlShortener') && $.urlShortener.active) {
@@ -140,9 +149,11 @@
                 resource: null,
                 bins: [],
                 ranges: [],
-                palette: $.dataSets[i].palette
+                palette: $.dataSets[i].palette,
+                active: false
             };
 
+            // Parsing function for dataset values
             if (typeof $.dataSets[i].parse === "string") {
                 var parse = $.dataSets[i].parse;
                 defaultData[$.dataSets[i].schema.name].parse = function(el) { return isNaN(window[parse](el)) ? el : window[parse](el); };
@@ -155,7 +166,7 @@
 
         if ($.debug) console.log("defaultData",defaultData);
 
-        // URL GET parameters initialization
+        /*** URL GET parameters initialization ***/
         /* ie. http://viz.confiscatibene.it/anbsc/choropleth/?ls[0]=regioni&ls[1]=province&ls[2]=comuni&dl=regioni&t=1
             {
                 ls: Array(), // Livelli caricati: regioni, province, comuni (default: tutti) -- LAYERS
@@ -207,7 +218,6 @@
         }
                 
         if ($.debug) console.log("geo",geo);
-
         if ($.debug) console.log("data",data);
 
         /*** ***/
@@ -805,47 +815,104 @@
         }
         
         if ($.debug) console.log("share",share);
-
         /*** ***/
 
-        /*** Creazione del menù dei livelli ***/
-        menuLayers = $.geoLayers.filter(function(l) { return l.type != 'tile'; });
-        if (menuLayers.length > 1) {
-            menu = L.control({position: 'topleft'});
-            menu.onAdd = function(map) {
+
+
+        /*** Creazione del menù dei geolayers ***/
+        var menuGeoLayers = $.geoLayers.filter(function(l) { return l.type != 'tile'; });
+        if (menuGeoLayers.length > 1) {
+            geoMenu = L.control({position: 'topleft'});
+            geoMenu.onAdd = function(map) {
                 var nav = L.DomUtil.create('nav', 'menu-ui '+parameters.md);
-                nav.setAttribute('id','menu-ui');
+                nav.setAttribute('id','geomenu-ui');
                 if (parameters.md === 'widget') nav.setAttribute('style','display:none;');
                 return nav;
             };
             
-            menu.addTo(map);
+            geoMenu.addTo(map);
             
-            d3.select("nav#menu-ui").selectAll("a")
-                .data(d3.keys(defaultGeo))
+            d3.select("nav#geomenu-ui").selectAll("a")
+                .data(menuGeoLayers.map(function(el) { return el.schema; }))
                 .enter()
                 .append("a")
                 .attr("href", "#")
-                .attr("id", function(d) { return d; })
+                .attr("id", function(d) { return d.name; })
                 .classed("disabled", function(d) {
-                    return !(geo.hasOwnProperty(d));
+                    return !(geo.hasOwnProperty(d.name));
                 })
-                .on("click", function(d) {
-                    if (geo.hasOwnProperty(d)) {
+                .on("click", function(d,i) {
+                    if (geo.hasOwnProperty(d.name)) {
+                        var region = d.name;
+                        data[region][0].active = true;
+                        for (var i=0; i<data[region].length; i++) {
+                            if (i != 0) data[region][i].active = false;
+                        }
                         delete parameters.i;
                         if (embedControl && embedControl.isAdded) embedControl.removeFrom(map);
                         info.update();
                         legend.update();
-                        loadData(d);
+                        dataMenu.update(d.name);
+                        loadData(d.name);
                     }
                 })
-                .text(function(d) { return d; });
+                .text(function(d) { return d.menu; });
         }
        
-        if ($.debug) console.log("menuLayers",menuLayers);
-        if ($.debug) console.log("menu",menu);
-
+        if ($.debug) console.log("menuGeoLayers",menuGeoLayers);
+        if ($.debug) console.log("geoMenu",geoMenu);
         /*** ***/
+
+
+
+        /*** Creazione del menù dei datasets ***/
+        dataMenu = L.control({position: 'topleft'});
+
+        dataMenu.onAdd = function(map) {
+            var nav = L.DomUtil.create('nav', 'menu-ui '+parameters.md);
+            nav.setAttribute('id','datamenu-ui');
+            if (parameters.md === 'widget') nav.setAttribute('style','display:none;');
+            this._nav = nav;
+            return nav;
+        };
+
+        dataMenu.update = function(region) {
+            if (region) {
+                d3.select(this._nav).style('display',null).selectAll("a").remove();
+                var menuDataSets = $.dataSets.filter(function(l) { return l.schema.layer === region; });
+                if (menuDataSets.length > 1) {
+                    d3.select(this._nav).selectAll("a")
+                        .data(menuDataSets.map(function(el) { return el.schema; }))
+                        .enter()
+                        .append("a")
+                        .attr("href", "#")
+                        .attr("id", function(d) { return d.name; })
+                        .on("click", function(d,index) {
+                            var region = d.layer;
+                            data[region][index].active = true;
+                            for (var i=0; i<data[region].length; i++) {
+                                if (i != index) data[region][i].active = false;
+                            }
+                            delete parameters.i;
+                            if (embedControl && embedControl.isAdded) embedControl.removeFrom(map);
+                            info.update();
+                            legend.update();
+                            loadData(region, d.name);
+                        })
+                        .text(function(d) { return d.menu; });
+                } else {
+                    d3.select(this._nav).style('display','none');
+                }
+            }
+        };
+            
+        dataMenu.addTo(map);
+        dataMenu.update(menuGeoLayers[0].schema.name);
+       
+        if ($.debug) console.log("dataMenu",dataMenu);
+        /*** ***/
+
+
 
         /*** Funzione di ricerca del luogo ***/
         if ($.controls.hasOwnProperty('geocoder') && $.controls.geocoder.active) {
@@ -898,8 +965,9 @@
         }
         
         if ($.debug) console.log("osmGeocoder",osmGeocoder);
-
         /*** ***/
+
+
 
         /*** Legenda ***/
         if ($.hasOwnProperty('legend') && $.legend.active) {
@@ -933,8 +1001,9 @@
         }
         
         if ($.debug) console.log("legend",legend);
-
         /*** ***/
+
+
 
         /*** Caricamento asincrono del pointsSet ***/
         if ($.pointsSet && $.pointsSet.active && $.pointsSet.resourceId) {
@@ -963,8 +1032,9 @@
                 }
             });
         }
-
         /*** ***/
+
+
 
         /*** Gestione degli stili della choropleth ***/
         function getColor(d, bins, palette) {
@@ -986,8 +1056,9 @@
             currentStyle.fillColor = getColor(feature.properties.data[data[region][index].name][data[region][index].value], data[region][index].bins, data[region][index].palette); // Dynamic parsing
 	    	return currentStyle;
     	}
-
         /*** ***/
+
+
 
         /*** Gestione degli eventi ***/
         var geojson, label = new L.Label();
@@ -1051,8 +1122,9 @@
     	}).addTo(map);
         
         if ($.debug) console.log("geojson",geojson);
-
         /*** ***/
+
+
 
         // Join tra dati e territori
         function joinData(region) {
@@ -1085,6 +1157,8 @@
 
         }
 
+
+
         // Binning della distribuzione dei dati
         function binData(region) {
             if ($.debug) console.log("binDataFunction",arguments);
@@ -1099,15 +1173,13 @@
             var gs = new geostats(serie);
             data[region][index].bins = gs.getJenks(serie.length > dataSet.bins ? dataSet.bins : serie.length-1);
             data[region][index].ranges = gs.ranges;
-            data[region][index].active = true;
-            for (var i=0; i<data[region].length; i++) {
-                if (i != index) data[region][i].active = false;
-            }
             legend.update(region);
         }
 
+
+
         // Caricamento asincrono dei dati
-        function loadData(region) { // region = regioni || province || comuni
+        function loadData(region, dataset) { // region = regioni || province || comuni
             
             if ($.debug) console.log("loadDataFunction",arguments);
             
@@ -1115,8 +1187,11 @@
                 dataSets = $.dataSets.filter(function(l) { return l.schema.layer === region; }),
                 geoPath, dataPath, q;
             
-            d3.selectAll("nav#menu-ui a").classed("active", false);
-            d3.select("nav#menu-ui a#"+region).classed("active", true);
+            d3.selectAll("nav#geomenu-ui a").classed("active", false);
+            d3.select("nav#geomenu-ui a#"+region).classed("active", true);
+            d3.selectAll("nav#datamenu-ui a").classed("active", false);
+            d3.select("nav#datamenu-ui a#"+(dataset || dataSets[0].schema.name)).classed("active", true);
+            
             parameters.dl = region;
             geojson.clearLayers();
 
@@ -1150,10 +1225,6 @@
 
                     map.spin(false);
                     
-                    /*if (region == 'comuni') {
-                        JSTERS['comuni'] = geo['comuni'].resource.map(function(el) { var arr = {}; arr[geo['regioni'].id] = el.properties[geo['regioni'].id]; arr[geo['province'].id] = el.properties[geo['province'].id]; arr[geo['comuni'].id] = el.properties[geo['comuni'].id]; arr[geo['comuni'].label] = el.properties[geo['comuni'].label]; return arr; });
-                    }*/
-                    
                     joinData(region);
                     binData(region);
                     
@@ -1171,6 +1242,8 @@
                     
                 });
             } else {
+                console.log(geo[region].resource);
+                binData(region);
                 geojson.addData(geo[region].resource);
                 delete parameters.i;
                 if (embedControl && embedControl.isAdded) embedControl.removeFrom(map);
@@ -1180,11 +1253,16 @@
         }
         /*** ***/
 
+
+
         /*** Inizializzazione ***/
         setTimeout(function () {
             map.spin(false);
             loadData(parameters.dl);
         }, 3000);
         /*** ***/
+
+
+
     });
 })(mapConfig);

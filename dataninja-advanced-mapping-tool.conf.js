@@ -143,6 +143,9 @@ var mapConfig = {
                 // Key name of layer
                 name: 'regioni',
 
+                // Menu label for layer entry
+                menu: 'Regioni',
+
                 // Key of id values used for join
                 id: 'COD_REG',
 
@@ -159,6 +162,7 @@ var mapConfig = {
             
             schema: {
                 name: 'province',
+                menu: 'Province',
                 id: 'COD_PRO',
                 label: 'NOME_PRO'
             }
@@ -173,6 +177,7 @@ var mapConfig = {
 
             schema: {
                 name: 'comuni',
+                menu: 'Comuni',
                 id: 'PRO_COM',
                 label: 'NOME_COM'
             }
@@ -202,6 +207,9 @@ var mapConfig = {
                 // Key name of dataset
                 name: 'regioni1',
                 
+                // Menu label for layer entry
+                menu: 'Beni confiscati 1',
+
                 // Key name of layer data refer to
                 layer: 'regioni',
 
@@ -241,6 +249,9 @@ var mapConfig = {
                 
                 // Key name of dataset
                 name: 'regioni2',
+
+                // Menu label for layer entry
+                menu: 'Beni confiscati 2',
 
                 // Key name of layer data refer to
                 layer: 'regioni',
@@ -1021,6 +1032,7 @@ var mapConfig = {
  *     - schema [object]
  *       - layer [string matching a geoLayer.name for joining]
  *       - id [string]
+ *       - menu [string]
  *       - label [string]
  *       - value [string]
  *     - parse [string] | [mixed] function( [string] )
@@ -1039,6 +1051,7 @@ var mapConfig = {
  *     - type [string matching geoTypes attributes]
  *     - schema [object]
  *       - name [string]
+ *       - menu [string]
  *       - id [string]
  *       - label [string]
  *     - (other attributes are inherited from geoSources and geoTypes and can be overrided)
