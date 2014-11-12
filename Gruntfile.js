@@ -5,13 +5,17 @@ module.exports = function(grunt) {
         pkg: grunt.file.readJSON('package.json'),
         copy: {
             main: {
+                expand: true,
+                cwd: 'bower_components/',
                 src: [
-                    'bower_components/leaflet-control-osm-geocoder/images/*',
-                    'bower_components/leaflet-fullscreen/*.png',
-                    'bower_components/leaflet/dist/images/*'
+                    'leaflet-control-osm-geocoder/images/*',
+                    'leaflet-fullscreen/*.png',
+                    'leaflet/dist/images/*'
 
                 ],
                 dest: 'img/',
+                flatten: true,
+                filter: 'isFile'
             },
         },
         concat: {

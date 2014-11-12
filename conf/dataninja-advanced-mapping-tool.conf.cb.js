@@ -45,14 +45,14 @@ var mapConfig = {
 
                 // Bottom-left corner
                 southWest: {
-                    lat: 44.38596,
-                    lng: 11.14014
+                    lat: 35.568,
+                    lng: 1.537
                 },
 
                 // Top-right corner
                 northEast: {
-                    lat: 44.60514,
-                    lng: 11.60912
+                    lat: 47.843,
+                    lng: 23.203
                 },
             },
 
@@ -61,23 +61,22 @@ var mapConfig = {
 
                 // Bottom-left corner
                 southWest: {
-                    lat: 43,
-                    lng: 9
+                    lat: 22.472,
+                    lng: -16.523
                 },
 
                 // Top-right corner
                 northEast: {
-                    lat: 45,
-                    lng: 13
+                    lat: 62.083,
+                    lng: 73.828
                 },
             }
         },
 
         // Zoom options
         zoom: {
-            init: 12,
             max: 13,
-            min: 11,
+            min: 5,
             scrollWheel: true
         },
 
@@ -103,7 +102,7 @@ var mapConfig = {
          * [REGION NAME]
          * [text]: [value]
          */
-        text: 'Persone assistite'
+        text: 'Beni confiscati'
     },
 
     // Legend control
@@ -116,10 +115,10 @@ var mapConfig = {
         title: 'Legenda',
 
         // Description at the bottom
-        description: 'Persone assistite nell\'ambito dei PAI',
+        description: 'Numero totale di beni confiscati',
 
         // Label appended to legend items
-        itemLabel: 'persone assistite'
+        itemLabel: 'beni confiscati'
     },
 
     // Definition of geographic layers to load
@@ -134,7 +133,6 @@ var mapConfig = {
             // Inherits attributes from geoSource named here
             source: 'file',
             path: 'geo/',
-            filename: 'quartieri_bologna.json',
             format: 'json',
             
             // Inherits attributes from geoType named here
@@ -143,16 +141,45 @@ var mapConfig = {
             schema: {
 
                 // Key name of layer
-                name: 'quartieri',
+                name: 'regioni',
 
                 // Menu label for layer entry
-                menu: 'Quartieri',
+                menu: 'Regioni',
 
                 // Key of id values used for join
-                id: 'NUMQUART',
+                id: 'COD_REG',
 
                 // Key of label values used for label
-                label: 'NOMEQUART'
+                label: 'NOME_REG'
+            }
+        },
+        {
+            source: 'file',
+            path: 'geo/',
+            format: 'json',
+
+            type: 'vector',
+            
+            schema: {
+                name: 'province',
+                menu: 'Province',
+                id: 'COD_PRO',
+                label: 'NOME_PRO'
+            }
+        },
+        {
+            active: false,
+            source: 'file',
+            path: 'geo/',
+            format: 'json',
+
+            type: 'vector',
+
+            schema: {
+                name: 'comuni',
+                menu: 'Comuni',
+                id: 'PRO_COM',
+                label: 'NOME_COM'
             }
         }
     ],
@@ -164,44 +191,39 @@ var mapConfig = {
             // Inherits attributes from dataSource named here
             source: 'file',
             path: 'data/',
-            filename: 'WelfareBO-Programma-Assistenziale-Individualizzato-PAI-1966-2014-Quartieri-dei-servizi.csv',
-            format: 'csv',
+            filename: 'e2f0c989-929f-4e4d-87e2-097140f8880f.json',
+            format: 'json',
             transform: function(res) {
-                return res;
+                return res.result.records;
             },
 
             // Inherits attributes from geoType named here
             type: 'choropleth', // from dataTypes attributes
             bins: 7,
-            palette: 'Greens',
+            palette: 'Reds',
             
             schema: {
 
                 // Key name of dataset
-                name: 'servizi',
+                name: 'regioni1',
                 
                 // Menu label for layer entry
-                menu: 'Assistenza per servizio (PAI)',
+                menu: 'Beni confiscati 1',
 
                 // Key name of layer data refer to
-                layer: 'quartieri',
+                layer: 'regioni',
 
                 // Key of id values used for join
-                id: 'Id',
+                id: 'IdRegioneISTAT',
                 
                 // Key of label values (not used)
                 label: '',
 
                 // Keys of data values shown on map on loading
                 values: [
-                    'Numero PAI totale',
-                    'Donne',
-                    'Uomini',
-                    'Anziani',
-                    'Disagio adulto',
-                    'Famiglia e Minori',
-                    'Cittadinanza italiana',
-                    'Cittadinanza estera'
+                    'Totale beni',
+                    'Totale immobili',
+                    'Totale aziende'
                 ]
             },
 
@@ -216,10 +238,10 @@ var mapConfig = {
             // Inherits attributes from dataSource named here
             source: 'file',
             path: 'data/',
-            filename: 'WelfareBO-Programma-Assistenziale-Individualizzato-PAI-1966-2014-Quartieri-di-residenza.csv',
-            format: 'csv',
+            filename: 'e2f0c989-929f-4e4d-87e2-097140f8880f.json',
+            format: 'json',
             transform: function(res) {
-                return res;
+                return res.result.records;
             },
 
             // Inherits attributes from geoType named here
@@ -230,37 +252,68 @@ var mapConfig = {
             schema: {
                 
                 // Key name of dataset
-                name: 'residenza',
+                name: 'regioni2',
 
                 // Menu label for layer entry
-                menu: 'Assistenza per residenza (PAI)',
+                menu: 'Beni confiscati 2',
 
                 // Key name of layer data refer to
-                layer: 'quartieri',
+                layer: 'regioni',
 
                 // Key of id values used for join
-                id: 'Id',
+                id: 'IdRegioneISTAT',
                 
                 // Key of label values (not used)
                 label: '',
 
                 // Keys of data values shown on map on loading
-                values: [
-                    'Numero PAI totale',
-                    'Donne',
-                    'Uomini',
-                    'Anziani',
-                    'Disagio adulto',
-                    'Famiglia e Minori',
-                    'Cittadinanza italiana',
-                    'Cittadinanza estera'
-                ]
+                values: 'Totale beni'
             },
 
             /* Custom parse function name from string to number
              * If missing, 'parseFloat' is the default
              * You can also define a custom function (el) { return el; }
              */
+            parse: 'parseInt'
+        },
+        {
+            source: 'file',
+            path: 'data/',
+            filename: 'c18fa1ca-971f-4cfa-92e9-869785260dec.json',
+            format: 'json',
+
+            type: 'choropleth',
+            bins: 7,
+            palette: 'Blues',
+
+            schema: {
+                name: 'province1',
+                layer: 'province',
+                id: 'IdProvinciaISTAT',
+                label: '',
+                values: ['Totale beni']
+            },
+
+            parse: 'parseInt'
+        },
+        {
+            source: 'file',
+            path: 'data/',
+            filename: '69b2565e-0332-422f-ad57-b11491e33b08.json',
+            format: 'json',
+
+            type: 'choropleth',
+            bins: 7,
+            palette: 'Greens',
+
+            schema: {
+                name: 'comuni1',
+                layer: 'comuni',
+                id: 'IdComuneISTAT',
+                label: '',
+                values: ['Totale beni']
+            },
+
             parse: 'parseInt'
         }
     ],
@@ -292,10 +345,17 @@ var mapConfig = {
         content: {
 
             // Shown in normal view modes
-            default: '<p>La mappa mostra i dati dei servizi di assistenza del Comune di Bologna per ogni quartiere della città.</p>',
+            default: '<p>La mappa mostra il numero di beni confiscati per tutti i territori amministrativi italiani, secondo i dati ufficiali dell\'<a href="http://www.benisequestraticonfiscati.it" target="_blank">ANBSC</a> (sono esclusi i beni non confiscati in via autonoma). La corrispondenza tra il gradiente di colore e il numero complessivo di beni confiscati è dato nella legenda in basso a sinistra.</p>' + 
+                '<p>Mediante il selettore in alto a sinistra si possono caricare e visualizzare ulteriori livelli (regioni, province, comuni).</p>' +
+                '<p>Principali funzioni della mappa: <ul>' + 
+                '<li>cerca i dati relativi al tuo territorio cliccando sulla lente e inserendo il nome di un comune;</li>' + 
+                '<li>clicca sul territorio per visualizzare i dati in dettaglio, la composizione dei beni e per scaricarne la lista completa;</li>' + 
+                '<li>includi la vista corrente della mappa sul tuo sito con il codice di embed o scaricane uno screenshot (pulsanti in alto a destra).</li>' +
+                '</ul></p>' +
+                '<p>Tieniti aggiornato sul progetto visitando il sito ufficiale di <a href="http://www.confiscatibene.it" target="_blank">Confiscati Bene</a> o seguendo l\'account Twitter <a href="https://twitter.com/confiscatibene" target="_blank">@confiscatibene</a>, puoi anche scriverci all\'indirizzo <a href="mailto:info@confiscatibene.it" target="_blank">info@confiscatibene.it</a>.</p>',
 
             // Shown on little screen, ie. on mobile
-            mobile: 'I servizi di assistenza del Comune di Bologna per quartiere.',
+            mobile: '<a href="mailto:info@confiscatibene.it" target="_blank" style="margin-right: 30px;">Info</a>',
         },
 
         // Data downloads allowed and linked in the infowindow
@@ -390,10 +450,10 @@ var mapConfig = {
                 active: true,
 
                 // Text prepended to subject (+ region name)
-                subject: 'Servizi di assistenza del Comune di Bologna',
+                subject: 'Confiscati Bene',
 
                 // Text prepended to body (+ region name and URL)
-                body: 'I servizi di assistenza del Comune di Bologna'
+                body: 'Gli immobili e le aziende #confiscatibene'
             },
             permalink: {
 
@@ -411,12 +471,12 @@ var mapConfig = {
             // Inherits attributes from viewType named here
             type: 'table',
             options: {
-                /*bold: function(k,v) {
+                bold: function(k,v) {
                     return (k.indexOf('Totale') > -1);
                 },
                 filter: function(k,v) {
                     return (v != '0' && k.charAt(0) == k.charAt(0).toUpperCase() && k.slice(0,2) != "Id");
-                },*/
+                },
                 transform: function(k,v) {
                     return parseInt(v) || v;
                 }
@@ -447,10 +507,10 @@ var mapConfig = {
             title: '',
 
             // Image
-            image: 'img/logobo.jpg',
+            image: 'img/logo.png',
 
             // Link
-            link: 'http://www.comune.bologna.it/'
+            link: 'http://www.confiscatibene.it/'
         },
 
         // Reset the map at the initial status
@@ -470,7 +530,7 @@ var mapConfig = {
         embed: {
 
             // Enable or not
-            active: false,
+            active: true,
 
             // Title on mouseover
             title: 'Embed this map',
@@ -512,7 +572,7 @@ var mapConfig = {
         screenshot: {
 
             // Enable or not
-            active: false,
+            active: true,
 
             // Title on mouseover
             title: 'Take a screenshot',

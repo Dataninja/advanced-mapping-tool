@@ -186,22 +186,44 @@ html, body, #map {
 /* Menu */
 
 .menu-ui {
-	background: #fff;
+    background: transparent;
 	border-radius: 3px;
-	width: 70px;
+    overflow: hidden;
+}
+
+.menu-ui a,
+.menu-ui select {
+	background: #fff;
+	font-size: 13px;
+	font: 13px Arial, Helvetica, sans-serif;
 	border: 1px solid rgba(0,0,0,0.4);
+	color: #404040;
+	display: block;
+	margin: 0;
+	padding: 2px 10px;
+	text-decoration: none;
+	text-align: center;
 }
 
 .menu-ui a {
-	font-size: 13px;
-	font: 13px Arial, Helvetica, sans-serif;
-	color: #404040;
-	display: block;
-	margin: 0;padding: 0;
-	padding: 2px;
-	text-decoration: none;
-	border-bottom: 1px solid rgba(0,0,0,0.25);
-	text-align: center;
+    border-bottom-left-radius: 3px;
+    border-bottom-right-radius: 3px;
+    border-top-width: 0px;
+}
+
+.menu-ui a:first-child {
+    border-bottom-left-radius: 0px;
+    border-bottom-right-radius: 0px;
+    border-top-left-radius: 3px;
+    border-top-right-radius: 3px;
+    border-top-width: 1px;
+}
+
+.menu-ui select {
+    border-radius: 3px;
+    text-indent: 5px;
+    margin-top: 5px;
+    width: 100%;
 }
 
 .menu-ui a.disabled {
@@ -211,11 +233,6 @@ html, body, #map {
 
 .menu-ui a: first-child {
 	border-radius: 3px 3px 0 0;
-}
-
-.menu-ui a: last-child {
-	border: none;
-	border-radius: 0 0 3px 3px;
 }
 
 .menu-ui a: hover {
@@ -360,6 +377,18 @@ img.screenshot: hover {
     width: 30%;
 }
 
+/*** Dev utilities ***/
+.devutil {
+    background: white;
+    border: 1px solid rgba(0,0,0,0.25);
+    border-radius: 5px;
+    padding: 1em;
+}
+
+.devutil p {
+    margin-top: 2px;
+    margin-bottom: 2px;
+}
 
 /*** Sharing buttons ***/
 
