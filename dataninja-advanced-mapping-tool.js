@@ -27,6 +27,7 @@
             embed, embedControl,
             screenshot,
             detach,
+            devUtil,
             share,
             geoMenu, dataMenu, varMenu,
             osmGeocoder,
@@ -757,6 +758,53 @@
         if ($.debug) console.log("detach",detach);
 
         /*** ***/
+
+
+
+        /*** Dev utility ***/
+        if ($.debug) {
+            devUtil = L.control({position: 'topright'});
+            devUtil.onAdd = function(map) {
+                var div = L.DomUtil.create('div','devutil');
+
+                d3.select(div).append('p')
+                    .attr('id','devutil-coord');
+                d3.select(div).append('p')
+                    .attr('id','devutil-sw')
+                    .text('SouthWest bound: '+map.getBounds().getSouthWest().toString()),
+                d3.select(div).append('p')
+                    .attr('id','devutil-ne')
+                    .text('NorthEast bound: '+map.getBounds().getNorthEast().toString()),
+                d3.select(div).append('p')
+                    .attr('id','devutil-zoom')
+                    .text('Zoom level: '+map.getZoom());
+
+                d3.select(div)
+                    .on("mouseenter", function() {
+                        map.scrollWheelZoom.disable();
+                        map.doubleClickZoom.disable();
+                        map.dragging.disable();
+                    })
+                    .on("mouseleave", function() {
+                        map.scrollWheelZoom.enable();
+                        map.doubleClickZoom.enable();
+                        map.dragging.enable();
+                    });
+
+                return div;
+            };
+            devUtil.addTo(map);
+            map
+                .on('mousemove', function(e) { d3.select('#devutil-coord').text('Mouse position: '+e.latlng.toString()); })
+                .on('move', function(e) { 
+                    d3.select('#devutil-sw').text('SouthWest bound: '+map.getBounds().getSouthWest().toString()); 
+                    d3.select('#devutil-ne').text('NorthEast bound: '+map.getBounds().getNorthEast().toString()); 
+                })
+                .on('zoomend', function(e) { d3.select('#devutil-zoom').text('Zoom level: '+map.getZoom()); });
+        }
+        /*** ***/
+
+
 
         /*** Pulsanti di condivisione ***/
         if ($.controls.hasOwnProperty('socialButtons') && $.controls.socialButtons.active) {
