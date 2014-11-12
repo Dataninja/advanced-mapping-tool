@@ -186,17 +186,17 @@ html, body, #map {
 /* Menu */
 
 .menu-ui {
-	background: #fff;
+    background: transparent;
 	border-radius: 3px;
-	border: 1px solid rgba(0,0,0,0.4);
     overflow: hidden;
 }
 
 .menu-ui a,
 .menu-ui select {
+	background: #fff;
 	font-size: 13px;
 	font: 13px Arial, Helvetica, sans-serif;
-	border-bottom: 1px solid rgba(0,0,0,0.25);
+	border: 1px solid rgba(0,0,0,0.4);
 	color: #404040;
 	display: block;
 	margin: 0;
@@ -205,10 +205,24 @@ html, body, #map {
 	text-align: center;
 }
 
+.menu-ui a {
+    border-bottom-left-radius: 3px;
+    border-bottom-right-radius: 3px;
+    border-top-width: 0px;
+}
+
+.menu-ui a:first-child {
+    border-bottom-left-radius: 0px;
+    border-bottom-right-radius: 0px;
+    border-top-left-radius: 3px;
+    border-top-right-radius: 3px;
+    border-top-width: 1px;
+}
+
 .menu-ui select {
-    background: transparent;
-    border: none;
+    border-radius: 3px;
     text-indent: 5px;
+    margin-top: 5px;
 }
 
 .menu-ui a.disabled {
