@@ -209,7 +209,13 @@ var mapConfig = {
 
                 // Key of data values shown on map on loading
                 value: 'Totale beni'
-            }
+            },
+
+            /* Custom parse function name from string to number
+             * If missing, 'parseFloat' is the default
+             * You can also define a custom function (el) { return el; }
+             */
+            parse: 'parseInt'
         },
         {
             source: 'file',
@@ -226,7 +232,9 @@ var mapConfig = {
                 id: 'IdProvinciaISTAT',
                 label: '',
                 value: 'Totale beni'
-            }
+            },
+
+            parse: 'parseInt'
         },
         {
             source: 'file',
@@ -243,7 +251,9 @@ var mapConfig = {
                 id: 'IdComuneISTAT',
                 label: '',
                 value: 'Totale beni'
-            }
+            },
+
+            parse: 'parseInt'
         }
     ],
 
@@ -975,6 +985,7 @@ var mapConfig = {
  *       - id [string]
  *       - label [string]
  *       - value [string]
+ *     - parse [string] | [mixed] function( [string] )
  *     - (other attributes are inherited from dataSources and dataTypes and can be overrided)
  *   - ...
  * - pointsSet [object]

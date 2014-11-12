@@ -119,7 +119,7 @@
 
         /*** Data sets initialization ***/
         for (i=0; i<$.dataSets.length; i++) {
-            defaultData[$.dataSets[i].schema.layer] = {
+            defaultData[$.dataSets[i].schema.layer] = { // Layer in the object, key will be the name
                 id: $.dataSets[i].schema.id,
                 label: $.dataSets[i].schema.label,
                 value: $.dataSets[i].schema.value,
@@ -130,6 +130,15 @@
                 ranges: [],
                 palette: $.dataSets[i].palette
             };
+
+            if (typeof $.dataSets[i].parse === "string") {
+                var parse = $.dataSets[i].parse;
+                defaultData[$.dataSets[i].schema.layer].parse = function(el) { return isNaN(window[parse](el)) ? el : window[parse](el); };
+            } else if (typeof $.dataSets[i].parse === "function") {
+                defaultData[$.dataSets[i].schema.layer].parse = $.dataSets[i].parse;
+            } else {
+                defaultData[$.dataSets[i].schema.layer].parse = function(el) { return isNaN(parseFloat(el)) ? el : parseFloat(el); };
+            }
         }
 
         if ($.debug) console.log("defaultData",defaultData);
@@ -914,7 +923,7 @@
             var region = feature.properties._layer,
                 geoLayer = $.geoLayers.filter(function(l) { return (l.type === "vector" && l.schema.name === region); })[0],
                 currentStyle = geoLayer.style.default;
-            currentStyle.fillColor = getColor(parseInt(feature.properties.data[data[region].value]), data[region].bins, data[region].palette);
+            currentStyle.fillColor = getColor(feature.properties.data[data[region].value], data[region].bins, data[region].palette); // Dynamic parsing
 	    	return currentStyle;
     	}
 
@@ -997,6 +1006,11 @@
                     if (dataID == geoID) {
                         numOkData++;
                         geo[region].resource[i].properties.data = data[region].resource[j];
+                        for (var k in geo[region].resource[i].properties.data) {
+                            if (geo[region].resource[i].properties.data.hasOwnProperty(k)) {
+                                geo[region].resource[i].properties.data[k] = data[region].parse(geo[region].resource[i].properties.data[k]);
+                            }
+                        }
                         geo[region].resource[i].properties._layer = region;
                         noData = false;
                         break;
@@ -1017,7 +1031,7 @@
             if ($.debug) console.log("binDataFunction",arguments);
             var geoLayer = $.geoLayers.filter(function(l) { return (l.type === "vector" && l.schema.name === region); })[0],
                 dataSet = $.dataSets.filter(function(l) { return l.schema.layer === region; })[0];
-            var serie = data[region].resource.map(function(el) { return parseInt(el[data[region].value]); });
+            var serie = data[region].resource.map(function(el) { return el[data[region].value]; }); // Dynamic parsing
             var gs = new geostats(serie);
             data[region].bins = gs.getJenks(serie.length > dataSet.bins ? dataSet.bins : serie.length-1);
             data[region].ranges = gs.ranges;
@@ -1041,18 +1055,21 @@
             if ($.debug) console.log("geoLayer",geoLayer);
             if ($.debug) console.log("dataSet",dataSet);
 
-            if (!geo[region].resource || !data[region].resource) {
-                geoPath = geoLayer.url.call(geoLayer, region, (parameters.t ? parameters.tl : undefined), parameters.t || undefined);
-                dataPath = dataSet.url.call(dataSet, region, (parameters.t ? defaultData[parameters.tl].id : undefined), parameters.t || undefined);
+            if (!geo[region].resource || !data[region].resource) { // Second condition in next loop
                 
                 map.spin(true);
-
-                if ($.debug) console.log("geoPath",geoPath);
-                if ($.debug) console.log("dataPath",dataPath);
-
+                
                 q = queue();
+
+                geoPath = geoLayer.url.call(geoLayer, region, (parameters.t ? parameters.tl : undefined), parameters.t || undefined);
                 q.defer(d3[geoLayer.format], geoPath); // Geojson
-                q.defer(d3[dataSet.format], dataPath); // Dati
+                if ($.debug) console.log("geoPath",geoPath);
+                
+                // It will be a loop on data linked to the same geo layer
+                // Store data number for later in await callback
+                dataPath = dataSet.url.call(dataSet, region, (parameters.t ? defaultData[parameters.tl].id : undefined), parameters.t || undefined);
+                q.defer(d3[dataSet.format], dataPath); // Dati -> Loop with condition
+                if ($.debug) console.log("dataPath",dataPath);
 
                 if ($.pointsSet.resourceId) {
                     markersPath = $.pointsSet.url.call($.pointsSet, region);
@@ -1060,18 +1077,24 @@
                     q.defer(d3[$.pointsSet.format], markersPath);
                 }
 
-                q.await(function(err, geojs, datajs, markersjs) {
+                q.await(function(err, geojs, datajs, markersjs) { // Access results by arguments
                     if ($.debug) console.log("await",arguments);
+                    
                     geo[region].resource = geoLayer.transform(geojs);
-                    data[region].resource = dataSet.transform(datajs);
+                    data[region].resource = dataSet.transform(datajs); // Loop in object filtering data linked to current region
                     data[region].markers = (markersjs ? $.pointsSet.transform(markersjs) : null);
+
                     map.spin(false);
+                    
                     /*if (region == 'comuni') {
                         JSTERS['comuni'] = geo['comuni'].resource.map(function(el) { var arr = {}; arr[geo['regioni'].id] = el.properties[geo['regioni'].id]; arr[geo['province'].id] = el.properties[geo['province'].id]; arr[geo['comuni'].id] = el.properties[geo['comuni'].id]; arr[geo['comuni'].label] = el.properties[geo['comuni'].label]; return arr; });
                     }*/
+                    
                     joinData(region);
                     binData(region);
+                    
 	    	        geojson.addData(geo[region].resource);
+
                     if (!svgViewBox) svgViewBox = d3.select(".leaflet-overlay-pane svg").attr("viewBox").split(" ");
                     if (parameters.t) { map.fitBounds(geojson.getBounds()); }
                     if (parameters.i) {
@@ -1081,6 +1104,7 @@
                             }
                         });
                     }
+                    
                     if (data[region].markers) {
                         var clusters = new L.MarkerClusterGroup({ showCoverageOnHover: false }),
                             markers = [],
