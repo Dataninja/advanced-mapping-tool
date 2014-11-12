@@ -449,6 +449,9 @@ var mapConfig = {
             // Image
             image: 'img/logobo.jpg',
 
+            // Border
+            border: true,
+
             // Link
             link: 'http://www.comune.bologna.it/'
         },
@@ -1018,6 +1021,7 @@ var mapConfig = {
  *         - lat [float]
  *         - lng [float]
  *   - zoom [object]
+ *     - init [int]
  *     - min [int]
  *     - max [int]
  *     - scrollWheel [bool]
@@ -1090,6 +1094,7 @@ var mapConfig = {
  *     - active [bool]
  *     - title [string]
  *     - image [string]
+ *     - border [bool]
  *     - link [string]
  *   - reset [object]
  *     - active [bool]

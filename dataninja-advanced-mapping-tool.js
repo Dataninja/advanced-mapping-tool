@@ -553,7 +553,7 @@
                 logo = L.control({position: 'topleft'});
                 logo.onAdd = function(map) {
                     var a = L.DomUtil.create('a','logo '+parameters.md),
-                        img = L.DomUtil.create('img','logo',a);
+                        img = L.DomUtil.create('img','logo' + ($.controls.logo.border ? ' border' : ''),a);
                     a.setAttribute('href', $.controls.logo.link || '#');
                     a.setAttribute('target','_blank');
                     img.setAttribute('id','logo');
@@ -771,7 +771,8 @@
                 var div = L.DomUtil.create('div','devutil');
 
                 d3.select(div).append('p')
-                    .attr('id','devutil-coord');
+                    .attr('id','devutil-coord')
+                    .text('Mouse position: ...');
                 d3.select(div).append('p')
                     .attr('id','devutil-sw')
                     .text('SouthWest bound: '+map.getBounds().getSouthWest().toString()),
