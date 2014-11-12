@@ -6,13 +6,13 @@
 var mapConfig = {
 
     // Debug mode activation with logs in console
-    debug: false,
+    debug: true,
 
     // URL shortener service configuration (via yourls)
     urlShortener: {
 
         // Enable or not
-        active: true,
+        active: false,
 
         // Domain without trailing slash (only for remote file)
         domain: '', 
@@ -126,9 +126,7 @@ var mapConfig = {
         {
 
             // Inherits attributes from geoType named here
-            type: 'tile',
-            domain: '',
-            path: '/api/geoiq/{s}/{z}/{x}/{y}.png' // ie. http://{s}.acetate.geoiq.com/tiles/acetate/{z}/{x}/{y}.png
+            type: 'tile'
         },
         {
 
@@ -144,6 +142,9 @@ var mapConfig = {
 
                 // Key name of layer
                 name: 'regioni',
+
+                // Menu label for layer entry
+                menu: 'Regioni',
 
                 // Key of id values used for join
                 id: 'COD_REG',
@@ -161,11 +162,13 @@ var mapConfig = {
             
             schema: {
                 name: 'province',
+                menu: 'Province',
                 id: 'COD_PRO',
                 label: 'NOME_PRO'
             }
         },
         {
+            active: false,
             source: 'file',
             path: 'geo/',
             format: 'json',
@@ -174,6 +177,7 @@ var mapConfig = {
 
             schema: {
                 name: 'comuni',
+                menu: 'Comuni',
                 id: 'PRO_COM',
                 label: 'NOME_COM'
             }
@@ -185,15 +189,27 @@ var mapConfig = {
         {
             
             // Inherits attributes from dataSource named here
-            source: 'dkan',
-            resourceId: 'e2f0c989-929f-4e4d-87e2-097140f8880f',
+            source: 'file',
+            path: 'data/',
+            filename: 'e2f0c989-929f-4e4d-87e2-097140f8880f.json',
+            format: 'json',
+            transform: function(res) {
+                return res.result.records;
+            },
 
             // Inherits attributes from geoType named here
             type: 'choropleth', // from dataTypes attributes
             bins: 7,
+            palette: 'Reds',
             
             schema: {
+
+                // Key name of dataset
+                name: 'regioni1',
                 
+                // Menu label for layer entry
+                menu: 'Beni confiscati 1',
+
                 // Key name of layer data refer to
                 layer: 'regioni',
 
@@ -203,37 +219,102 @@ var mapConfig = {
                 // Key of label values (not used)
                 label: '',
 
-                // Key of data values shown on map on loading
-                value: 'Totale beni'
-            }
+                // Keys of data values shown on map on loading
+                values: [
+                    'Totale beni',
+                    'Totale immobili',
+                    'Totale aziende'
+                ]
+            },
+
+            /* Custom parse function name from string to number
+             * If missing, 'parseFloat' is the default
+             * You can also define a custom function (el) { return el; }
+             */
+            parse: 'parseInt'
         },
         {
-            source: 'dkan',
-            resourceId: 'c18fa1ca-971f-4cfa-92e9-869785260dec',
+            
+            // Inherits attributes from dataSource named here
+            source: 'file',
+            path: 'data/',
+            filename: 'e2f0c989-929f-4e4d-87e2-097140f8880f.json',
+            format: 'json',
+            transform: function(res) {
+                return res.result.records;
+            },
+
+            // Inherits attributes from geoType named here
+            type: 'choropleth', // from dataTypes attributes
+            bins: 7,
+            palette: 'Greens',
+            
+            schema: {
+                
+                // Key name of dataset
+                name: 'regioni2',
+
+                // Menu label for layer entry
+                menu: 'Beni confiscati 2',
+
+                // Key name of layer data refer to
+                layer: 'regioni',
+
+                // Key of id values used for join
+                id: 'IdRegioneISTAT',
+                
+                // Key of label values (not used)
+                label: '',
+
+                // Keys of data values shown on map on loading
+                values: 'Totale beni'
+            },
+
+            /* Custom parse function name from string to number
+             * If missing, 'parseFloat' is the default
+             * You can also define a custom function (el) { return el; }
+             */
+            parse: 'parseInt'
+        },
+        {
+            source: 'file',
+            path: 'data/',
+            filename: 'c18fa1ca-971f-4cfa-92e9-869785260dec.json',
+            format: 'json',
 
             type: 'choropleth',
             bins: 7,
+            palette: 'Blues',
 
             schema: {
+                name: 'province1',
                 layer: 'province',
                 id: 'IdProvinciaISTAT',
                 label: '',
-                value: 'Totale beni'
-            }
+                values: ['Totale beni']
+            },
+
+            parse: 'parseInt'
         },
         {
-            source: 'dkan',
-            resourceId: '69b2565e-0332-422f-ad57-b11491e33b08',
+            source: 'file',
+            path: 'data/',
+            filename: '69b2565e-0332-422f-ad57-b11491e33b08.json',
+            format: 'json',
 
             type: 'choropleth',
             bins: 7,
+            palette: 'Greens',
 
             schema: {
+                name: 'comuni1',
                 layer: 'comuni',
                 id: 'IdComuneISTAT',
                 label: '',
-                value: 'Totale beni'
-            }
+                values: ['Totale beni']
+            },
+
+            parse: 'parseInt'
         }
     ],
 
@@ -241,7 +322,7 @@ var mapConfig = {
     pointsSet: {
 
         // Enable or not
-        active: true,
+        active: false,
 
         // Inherits attributes from dataSource named here
         source: 'dkan',
@@ -267,8 +348,8 @@ var mapConfig = {
             default: '<p>La mappa mostra il numero di beni confiscati per tutti i territori amministrativi italiani, secondo i dati ufficiali dell\'<a href="http://www.benisequestraticonfiscati.it" target="_blank">ANBSC</a> (sono esclusi i beni non confiscati in via autonoma). La corrispondenza tra il gradiente di colore e il numero complessivo di beni confiscati è dato nella legenda in basso a sinistra.</p>' + 
                 '<p>Mediante il selettore in alto a sinistra si possono caricare e visualizzare ulteriori livelli (regioni, province, comuni).</p>' +
                 '<p>Principali funzioni della mappa: <ul>' + 
-                '<li>cerca i dati relativi al tuo region cliccando sulla lente e inserendo il nome di un comune;</li>' + 
-                '<li>clicca sul region per visualizzare i dati in dettaglio, la composizione dei beni e per scaricarne la lista completa;</li>' + 
+                '<li>cerca i dati relativi al tuo territorio cliccando sulla lente e inserendo il nome di un comune;</li>' + 
+                '<li>clicca sul territorio per visualizzare i dati in dettaglio, la composizione dei beni e per scaricarne la lista completa;</li>' + 
                 '<li>includi la vista corrente della mappa sul tuo sito con il codice di embed o scaricane uno screenshot (pulsanti in alto a destra).</li>' +
                 '</ul></p>' +
                 '<p>Tieniti aggiornato sul progetto visitando il sito ufficiale di <a href="http://www.confiscatibene.it" target="_blank">Confiscati Bene</a> o seguendo l\'account Twitter <a href="https://twitter.com/confiscatibene" target="_blank">@confiscatibene</a>, puoi anche scriverci all\'indirizzo <a href="mailto:info@confiscatibene.it" target="_blank">info@confiscatibene.it</a>.</p>',
@@ -281,7 +362,7 @@ var mapConfig = {
         downloads: {
 
             // Enable or not
-            active: true,
+            active: false,
             license: 'Creative Commons Attribution <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank">CC-BY 4.0 International</a>.',
             files: [
                 {
@@ -292,9 +373,6 @@ var mapConfig = {
                     // Inherits attributes from dataSource named here
                     source: 'dkan',
                     resourceId: 'e5b4d63a-e1e8-40a3-acec-1d351f03ee56',
-                    transform: function(res) {
-                        return res.result.records;
-                    },
 
                     // Name of the download, used to build filename
                     name: 'immobili',
@@ -310,11 +388,10 @@ var mapConfig = {
                 },
                 {
                     active: true,
+
                     source: 'dkan',
                     resourceId: '8b7e12f1-6484-47f0-9cf6-88b446297dbc',
-                    transform: function(res) {
-                        return res.result.records;
-                    },
+
                     name: 'aziende',
                     filebase: 'confiscatibene',
                     title: 'Scarica l\'elenco delle aziende',
@@ -577,7 +654,7 @@ var mapConfig = {
         geocoder: {
 
             // Enable or not
-            active: true,
+            active: false,
 
             // Geo layer name map shows after geocoding
             layer: 'comuni',
@@ -651,7 +728,7 @@ var mapConfig = {
             // Complete file name if single file (with extension)
             filename: '',
 
-            // File format (used as extension in file name template for multiple files)
+            // File format (used also as extension in file name template for multiple files)
             format: '',
 
             // URL generator based on region and a filter
@@ -780,7 +857,7 @@ var mapConfig = {
             domain: 'http://{s}.tile.openstreetmap.org',
 
             // Template of the path to image (ie. xyz will be replaced by integers)
-            path: '/${z}/${x}/${y}.png',
+            path: '/{z}/{x}/{y}.png',
 
             // URL generator
             url: function() {
@@ -800,9 +877,6 @@ var mapConfig = {
             // Enable or not
             active: true,
 
-            // Switchable in menù
-            inMenu: false,
-
             // Default source is a tile server defined in geoSources
             source: 'tileserver',
 
@@ -818,9 +892,6 @@ var mapConfig = {
 
             // Enable or not
             active: true,
-            
-            // Switchable in menu
-            inMenu: true,
             
             /* Layer style, with three presets:
              * - default
@@ -947,12 +1018,10 @@ var mapConfig = {
  * - geoTypes [object]
  *   - tile [object]
  *     - active [bool]
- *     - inMenu [bool]
  *     - source [string matching geoSources attributes]
  *     - options [object matching http://leafletjs.com/reference.html#tilelayer-options structure]
  *   - vector [object]
  *     - active [bool]
- *     - inMenu [bool]
  *     - style [object]
  *       - default [object matching http://leafletjs.com/reference.html#geojson-options style structure]
  *       - highlight [object]
@@ -967,8 +1036,11 @@ var mapConfig = {
  *     - schema [object]
  *       - layer [string matching a geoLayer.name for joining]
  *       - id [string]
+ *       - menu [string]
  *       - label [string]
- *       - value [string]
+ *       - values [string | array]
+ *         - [string]
+ *     - parse [string] | [mixed] function( [string] )
  *     - (other attributes are inherited from dataSources and dataTypes and can be overrided)
  *   - ...
  * - pointsSet [object]
@@ -984,6 +1056,7 @@ var mapConfig = {
  *     - type [string matching geoTypes attributes]
  *     - schema [object]
  *       - name [string]
+ *       - menu [string]
  *       - id [string]
  *       - label [string]
  *     - (other attributes are inherited from geoSources and geoTypes and can be overrided)
