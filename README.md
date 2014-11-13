@@ -18,5 +18,5 @@ Edit the configuration file dataninja-advanced-mapping-tool.conf.js accordingly 
 
 For development and debugging browse to debug.html.
 
-For deploying run `grunt` and browse to index.html.
+For normal use browse to index.html.
 
