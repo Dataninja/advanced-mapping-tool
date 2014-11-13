@@ -227,26 +227,40 @@
 
 
         /*** Inizializzazione della mappa ***/
-	    var southWest = L.latLng($.map.bounds.init.southWest),
-            northEast = L.latLng($.map.bounds.init.northEast),
-            mapBounds = L.latLngBounds(southWest, northEast),
-        	southWestB = L.latLng($.map.bounds.max.southWest),
-            northEastB = L.latLng($.map.bounds.max.northEast),
-            maxMapBounds = L.latLngBounds(southWestB, northEastB);
+	    var southWest,
+            northEast,
+            mapBounds,
+        	southWestB,
+            northEastB,
+            maxMapBounds;
+
+        if ($.map.hasOwnProperty('bounds')) {
+            if ($.map.bounds.hasOwnProperty('init')) {
+        	    southWest = L.latLng($.map.bounds.init.southWest);
+                northEast = L.latLng($.map.bounds.init.northEast);
+                mapBounds = L.latLngBounds(southWest, northEast);
+            }
+
+            if ($.map.bounds.hasOwnProperty('max')) {
+            	southWestB = L.latLng($.map.bounds.max.southWest);
+                northEastB = L.latLng($.map.bounds.max.northEast);
+                maxMapBounds = L.latLngBounds(southWestB, northEastB);
+            }
+        }
 
         map = L.map('map', { 
             maxZoom: $.map.zoom.max || null, 
             minZoom: $.map.zoom.min || null, 
             zoom: $.map.zoom.init || null,
-            center: ($.map.zoom.init ? mapBounds.getCenter() : null),
+            center: ($.map.center || (mapBounds ? mapBounds.getCenter() : null)),
             scrollWheelZoom: $.map.zoom.scrollWheel || true, 
             attributionControl: !$.map.attribution.length,
-            maxBounds: maxMapBounds
+            maxBounds: maxMapBounds || null
         });
 
-        if ($.debug) console.log("map",map);
+        if (!$.map.zoom.init && mapBounds) map.fitBounds(mapBounds);
 
-        if (!$.map.zoom.init) map.fitBounds(mapBounds);
+        if ($.debug) console.log("map",map);
 
         // Tile layers
         var tileLayers = $.geoLayers.filter(function(l) { return l.type === 'tile'; });
@@ -795,56 +809,6 @@
 
 
 
-        /*** Dev utility ***/
-        if ($.debug) {
-            devUtil = L.control({position: 'topright'});
-            devUtil.onAdd = function(map) {
-                var div = L.DomUtil.create('div','devutil');
-
-                d3.select(div).append('p')
-                    .attr('id','devutil-coord')
-                    .text('Mouse position: ...');
-                d3.select(div).append('p')
-                    .attr('id','devutil-sw')
-                    .text('SouthWest bound: '+map.getBounds().getSouthWest().toString()),
-                d3.select(div).append('p')
-                    .attr('id','devutil-ne')
-                    .text('NorthEast bound: '+map.getBounds().getNorthEast().toString()),
-                d3.select(div).append('p')
-                    .attr('id','devutil-center')
-                    .text('Map center: '+map.getCenter().toString());
-                d3.select(div).append('p')
-                    .attr('id','devutil-zoom')
-                    .text('Zoom level: '+map.getZoom());
-
-                d3.select(div)
-                    .on("mouseenter", function() {
-                        map.scrollWheelZoom.disable();
-                        map.doubleClickZoom.disable();
-                        map.dragging.disable();
-                    })
-                    .on("mouseleave", function() {
-                        map.scrollWheelZoom.enable();
-                        map.doubleClickZoom.enable();
-                        map.dragging.enable();
-                    });
-
-                return div;
-            };
-            devUtil.addTo(map);
-            map
-                .on('mousemove', function(e) { d3.select('#devutil-coord').text('Mouse position: '+e.latlng.toString()); })
-                .on('move', function(e) { 
-                    d3.select('#devutil-sw').text('SouthWest bound: '+map.getBounds().getSouthWest().toString()); 
-                    d3.select('#devutil-ne').text('NorthEast bound: '+map.getBounds().getNorthEast().toString()); 
-                    d3.select('#devutil-center').text('Map center: '+map.getCenter().toString());
-                })
-                .on('zoomend', function(e) { d3.select('#devutil-zoom').text('Zoom level: '+map.getZoom()); });
-        }
-        /*** ***/
-
-
-
         /*** Pulsanti di condivisione ***/
         if ($.controls.hasOwnProperty('socialButtons') && $.controls.socialButtons.active) {
             if (!parameters.md) {
@@ -1090,6 +1054,56 @@
         }
         
         if ($.debug) console.log("osmGeocoder",osmGeocoder);
+        /*** ***/
+
+
+
+        /*** Dev utility ***/
+        if ($.debug) {
+            devUtil = L.control({position: 'bottomleft'});
+            devUtil.onAdd = function(map) {
+                var div = L.DomUtil.create('div','devutil');
+
+                d3.select(div).append('p')
+                    .attr('id','devutil-coord')
+                    .text('Mouse position: ...');
+                d3.select(div).append('p')
+                    .attr('id','devutil-sw')
+                    .text('SouthWest bound: '+map.getBounds().getSouthWest().toString()),
+                d3.select(div).append('p')
+                    .attr('id','devutil-ne')
+                    .text('NorthEast bound: '+map.getBounds().getNorthEast().toString()),
+                d3.select(div).append('p')
+                    .attr('id','devutil-center')
+                    .text('Map center: '+map.getCenter().toString());
+                d3.select(div).append('p')
+                    .attr('id','devutil-zoom')
+                    .text('Zoom level: '+map.getZoom());
+
+                d3.select(div)
+                    .on("mouseenter", function() {
+                        map.scrollWheelZoom.disable();
+                        map.doubleClickZoom.disable();
+                        map.dragging.disable();
+                    })
+                    .on("mouseleave", function() {
+                        map.scrollWheelZoom.enable();
+                        map.doubleClickZoom.enable();
+                        map.dragging.enable();
+                    });
+
+                return div;
+            };
+            devUtil.addTo(map);
+            map
+                .on('mousemove', function(e) { d3.select('#devutil-coord').text('Mouse position: '+e.latlng.toString()); })
+                .on('move', function(e) { 
+                    d3.select('#devutil-sw').text('SouthWest bound: '+map.getBounds().getSouthWest().toString()); 
+                    d3.select('#devutil-ne').text('NorthEast bound: '+map.getBounds().getNorthEast().toString()); 
+                    d3.select('#devutil-center').text('Map center: '+map.getCenter().toString());
+                })
+                .on('zoomend', function(e) { d3.select('#devutil-zoom').text('Zoom level: '+map.getZoom()); });
+        }
         /*** ***/
 
 
