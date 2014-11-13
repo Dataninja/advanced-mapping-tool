@@ -85,3 +85,65 @@ body.widget .leaflet-bar a:hover {
 body.widget .leaflet-control-zoom-out {
     font-size: 16px;
 }
+
+div.description {
+    margin: 0;
+    padding: 0;
+    border: none;
+}
+
+div.description > div {
+    padding-left: 1em;
+    padding-right: 1em;
+}
+
+body.description.left #map,
+body.description.right #map {
+    width: 75%;
+    height: 100%;
+}
+
+body.description.left #map {
+    float: right;
+}
+
+body.description.right #map {
+    float: left;
+}
+
+body.description.top #map,
+body.description.bottom #map {
+    width: 100%;
+    height: 75%;
+}
+
+body.description.right .leaflet-control-attribution {
+    right: initial;
+    left: 0;
+}
+
+div.description.left,
+div.description.right {
+    width: 25%;
+    height: 100%;
+    overflow: auto;
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+
+div.description.left {
+    float: left;
+}
+
+div.description.right {
+    float: right;
+}
+
+div.description.top,
+div.description.bottom {
+    width: 100%;
+    height: 25%;
+    overflow: auto;
+    overflow-x:auto;
+    overflow-y: hidden;
+}

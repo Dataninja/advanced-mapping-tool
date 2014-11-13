@@ -18,8 +18,9 @@
             defaultData = {}, data = {}, // Data sets enabled and used
             i, k, // Counter
             map, // Map object
+            description,
             // Map controls
-            attrib = L.control.attribution(),
+            attrib,
             info,
             fullscreen,
             logo,
@@ -221,8 +222,9 @@
                 
         if ($.debug) console.log("geo",geo);
         if ($.debug) console.log("data",data);
-
         /*** ***/
+
+
 
         /*** Inizializzazione della mappa ***/
 	    var southWest = L.latLng($.map.bounds.init.southWest),
@@ -258,15 +260,36 @@
         map.spin(true);
         
         // Attribution notices
+        attrib = L.control.attribution();
         for (i=0; i<$.map.attribution.length; i++) {
             attrib.addAttribution($.map.attribution[i]);
         }
         
         if ($.debug) console.log("attrib",attrib);
 
-        attrib.addTo(map);
-        
+        attrib.addTo(map);        
         /*** ***/
+
+
+
+        /*** Description ***/
+        if ($.hasOwnProperty('description') && $.description.active && parameters.md != 'widget') {
+            $.description.position = $.description.position || 'right';
+            d3.select('body').classed('description '+$.description.position, true);
+            if ($.description.position === 'top' || $.description.position === 'left') {
+                description = d3.select('body').insert('div','#map');
+            } else {
+                description = d3.select('body').append('div');
+            }
+            description
+                .attr('id','map-description')
+                .attr("class","description "+$.description.position)
+                .append('div')
+                .html($.description.content || '');
+        }
+        /*** ***/
+
+
 
         /*** Gestione dell'infowindow al click ***/
         if ($.hasOwnProperty('infowindow') && $.infowindow.active) {

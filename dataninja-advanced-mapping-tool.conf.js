@@ -93,6 +93,19 @@ var mapConfig = {
         ]
     },
 
+    // External div for long text description
+    description: {
+
+        // Enable or not
+        active: true,
+
+        // Position respect to map
+        position: 'right',
+
+        // HTML content of the description
+        content: '<h1>Questa è una mappa</h1><h2>Fatta dai dataninja</h2><p>E questo è il div voluto dal nelson</p>'
+    },
+
     // Label control on mouse over regions in vectorial geolayers
     label: {
 
@@ -1035,6 +1048,10 @@ var mapConfig = {
  *   - attribution [array]
  *     - [string]
  *     - ...
+ * - description [object]
+ *   - active [bool]
+ *   - position [string]
+ *   - content [string]
  * - urlShortener [object]
  *   - active [bool]
  *   - domain [string]
