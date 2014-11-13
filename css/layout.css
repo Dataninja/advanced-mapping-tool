@@ -86,10 +86,15 @@ body.widget .leaflet-control-zoom-out {
     font-size: 16px;
 }
 
-div.description {
+div.description,
+div.info.external {
     margin: 0;
     padding: 0;
     border: none;
+    max-height: initial;
+    border-radius: 0;
+    box-shadow: none;
+    background: white;
 }
 
 div.description > div {
@@ -123,7 +128,9 @@ body.description.right .leaflet-control-attribution {
 }
 
 div.description.left,
-div.description.right {
+div.description.right,
+div.info.left,
+div.info.right {
     width: 25%;
     height: 100%;
     overflow: auto;
@@ -131,16 +138,20 @@ div.description.right {
     overflow-y: auto;
 }
 
-div.description.left {
+div.description.left,
+div.info.left {
     float: left;
 }
 
-div.description.right {
+div.description.right,
+div.info.right {
     float: right;
 }
 
 div.description.top,
-div.description.bottom {
+div.description.bottom,
+div.info.top,
+div.info.bottom {
     width: 100%;
     height: 25%;
     overflow: auto;

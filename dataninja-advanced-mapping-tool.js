@@ -295,7 +295,15 @@
         if ($.hasOwnProperty('infowindow') && $.infowindow.active) {
             if (parameters.md === 'widget') {
                 info = {};
-                info._div = d3.select('body').append('div').attr('id','infowindow').classed("info", true).node();
+                info._div = d3.select('body').append('div').attr('id','infowindow').attr("class", "info bottom").node();
+            } else if ($.infowindow.hasOwnProperty('position') && $.infowindow.position != 'inside') {
+                info = {};
+                d3.select('body').classed('description '+$.infowindow.position, true);
+                if ($.infowindow.position === 'top' || $.infowindow.position === 'left') {
+                     info._div = d3.select('body').insert('div','#map').attr('id','infowindow').attr("class", "info external "+$.infowindow.position).node();
+                } else if ($.infowindow.position === 'right' || $.infowindow.position === 'bottom') {
+                    info._div = d3.select('body').append('div').attr('id','infowindow').attr("class", "info external "+$.infowindow.position).node();
+                }
             } else {
                 info = L.control({position: 'bottomright'});
                 info.onAdd = function (map) {
@@ -540,7 +548,7 @@
                 }
     	    };
                 
-            if (parameters.md === 'widget') {
+            if (parameters.md === 'widget' || ($.infowindow.hasOwnProperty('position') && $.infowindow.position != 'inside')) {
                 info.update();
             } else {
                 info.addTo(map);

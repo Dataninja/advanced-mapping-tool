@@ -97,7 +97,7 @@ var mapConfig = {
     description: {
 
         // Enable or not
-        active: true,
+        active: false,
 
         // Position respect to map
         position: 'right',
@@ -306,6 +306,9 @@ var mapConfig = {
 
         // Enable or not
         active: true,
+
+        // Position respect to map (default 'inside', bottom-right corner)
+        position: 'left',
 
         // Default content when no region is selected
         content: {
@@ -1061,6 +1064,7 @@ var mapConfig = {
  *   - url [string] function ( )
  * - infowindow [object]
  *   - active [bool]
+ *   - position [string]
  *   - content [object]
  *     - default [string]
  *     - mobile [string]
