@@ -390,6 +390,7 @@ img.screenshot: hover {
     border: 1px solid rgba(0,0,0,0.25);
     border-radius: 5px;
     padding: 1em;
+    text-align: left;
 }
 
 .devutil p {

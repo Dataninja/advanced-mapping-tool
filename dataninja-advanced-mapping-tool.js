@@ -780,6 +780,9 @@
                     .attr('id','devutil-ne')
                     .text('NorthEast bound: '+map.getBounds().getNorthEast().toString()),
                 d3.select(div).append('p')
+                    .attr('id','devutil-center')
+                    .text('Map center: '+map.getCenter().toString());
+                d3.select(div).append('p')
                     .attr('id','devutil-zoom')
                     .text('Zoom level: '+map.getZoom());
 
@@ -803,6 +806,7 @@
                 .on('move', function(e) { 
                     d3.select('#devutil-sw').text('SouthWest bound: '+map.getBounds().getSouthWest().toString()); 
                     d3.select('#devutil-ne').text('NorthEast bound: '+map.getBounds().getNorthEast().toString()); 
+                    d3.select('#devutil-center').text('Map center: '+map.getCenter().toString());
                 })
                 .on('zoomend', function(e) { d3.select('#devutil-zoom').text('Zoom level: '+map.getZoom()); });
         }
@@ -1333,7 +1337,6 @@
                     
                 });
             } else {
-                console.log(geo[region].resource);
                 binData(region);
                 geojson.addData(geo[region].resource);
                 delete parameters.i;
