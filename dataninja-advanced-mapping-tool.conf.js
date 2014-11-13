@@ -26,7 +26,7 @@ var mapConfig = {
         signature: 'efe758b8d3',
 
         // If prefix is not empty, short url will be [prefix]+md5([long url])
-        prefix: 'confiscatibene-', // ie. confiscatibene-
+        prefix: 'welfarebo-',
             
         // URL generator based on region and a filter
         url: function() {
@@ -86,10 +86,10 @@ var mapConfig = {
          */
         attribution: [
             'Powered by <a href="http://www.dataninja.it/" target="_blank">Dataninja</a>',
-            'tileset from <a href="http://www.geoiq.com/" target="_blank">GeoIQ</a>',
+            'tileset from <a href="http://mapnik.org/" target="_blank">OSM Mapnik</a>',
             'icons from <a href="http://www.flaticon.com/" target="_blank">Freepik</a> and <a href="http://www.simplesharebuttons.com/" target="_blank">Simple Share Buttons</a>',
-            'geocoding by <a href="http://wiki.openstreetmap.org/wiki/Nominatim" target="_blank">OSM Nominatim</a>',
-            'code on <a href="https://github.com/Dataninja/confiscatibene-choropleth" target="_blank">GitHub</a>.'
+            //'geocoding by <a href="http://wiki.openstreetmap.org/wiki/Nominatim" target="_blank">OSM Nominatim</a>',
+            'code on <a href="https://github.com/Dataninja/advanced-mapping-tool" target="_blank">GitHub</a>.'
         ]
     },
 
@@ -192,6 +192,9 @@ var mapConfig = {
                 // Key of label values (not used)
                 label: '',
 
+                // Legend description (not used)
+                legend: '',
+
                 // Keys of data values shown on map on loading
                 values: [
                     'Numero PAI totale',
@@ -225,7 +228,7 @@ var mapConfig = {
             // Inherits attributes from geoType named here
             type: 'choropleth', // from dataTypes attributes
             bins: 7,
-            palette: 'Greens',
+            palette: 'Blues',
             
             schema: {
                 
@@ -243,6 +246,9 @@ var mapConfig = {
                 
                 // Key of label values (not used)
                 label: '',
+
+                // Legend description
+                legend: '',
 
                 // Keys of data values shown on map on loading
                 values: [
@@ -356,10 +362,10 @@ var mapConfig = {
                 active: true,
 
                 // Mention after sharing
-                via: 'confiscatibene',
+                via: 'Twiperbole',
 
                 // Text appended to tweet content, hashtags here (+ region name)
-                text: 'Immobili e aziende #confiscatibene' // ie. Tweet
+                text: 'Servizi assistenziali a Bologna' // ie. Tweet
             },
 
             // Facebook share icon
@@ -504,7 +510,7 @@ var mapConfig = {
                 active: true,
 
                 // File name for downloaded image
-                filename: 'confiscatibene_map.svg',
+                filename: 'welfarebo_map.svg',
 
                 // Icon of the control
                 image: 'img/svg.png'
@@ -524,7 +530,7 @@ var mapConfig = {
             image: 'img/screenshot.png',
 
             // File name for downloaded image
-            filename: 'confiscatibene_map.png',
+            filename: 'welfarebo_map.png',
         },
 
         // Open the map in an other window or tab (only in embed mode)
@@ -554,10 +560,10 @@ var mapConfig = {
 
                 // Specific options from Twitter Dev
                 // See https://dev.twitter.com/web/tweet-button
-                via: 'confiscatibene',
+                via: 'Twiperbole',
                 lang: 'it',
-                related: 'jenkin27:Data scientist at Dataninja',
-                hashtags: 'confiscatibene,dataninja',
+                related: 'dataninjait:Data journalism made in Italy',
+                hashtags: 'dataninja',
                 count: 'vertical',
 
                 // Text on the button
@@ -568,7 +574,7 @@ var mapConfig = {
             facebook: {
 
                 // Enable or not
-                active: true,
+                active: false,
 
                 // Specific options from Facebook Dev
                 // See https://developers.facebook.com/docs/plugins/like-button
@@ -981,6 +987,7 @@ var mapConfig = {
  *       - id [string]
  *       - menu [string]
  *       - label [string]
+ *       - legend [string]
  *       - values [string | array]
  *         - [string]
  *     - parse [string] | [mixed] function( [string] )
