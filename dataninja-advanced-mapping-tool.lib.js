@@ -21119,7 +21119,8 @@ L.Map.include({
 });
 
 
-}(window, document));;/**
+}(window, document));
+;/**
  * Copyright (c) 2011-2014 Felix Gnass
  * Licensed under the MIT license
  */
