@@ -45,14 +45,14 @@ var mapConfig = {
 
                 // Bottom-left corner
                 southWest: {
-                    lat: 44.38596,
-                    lng: 11.14014
+                    lat: 44.3705,
+                    lng: 11.15765
                 },
 
                 // Top-right corner
                 northEast: {
-                    lat: 44.60514,
-                    lng: 11.60912
+                    lat: 44.60025,
+                    lng: 11.59676
                 },
             },
 
@@ -61,14 +61,14 @@ var mapConfig = {
 
                 // Bottom-left corner
                 southWest: {
-                    lat: 43,
-                    lng: 9
+                    lat: 44,
+                    lng: 11
                 },
 
                 // Top-right corner
                 northEast: {
                     lat: 45,
-                    lng: 13
+                    lng: 12
                 },
             }
         },
@@ -81,6 +81,12 @@ var mapConfig = {
             scrollWheel: true
         },
 
+        // Center of the map
+        /*center: {
+            lat: 43,
+            lng: 9
+        },*/
+
         /* Attribution line, see http://leafletjs.com/reference.html#control-attribution
          * Set a string item per service
          */
@@ -91,6 +97,19 @@ var mapConfig = {
             //'geocoding by <a href="http://wiki.openstreetmap.org/wiki/Nominatim" target="_blank">OSM Nominatim</a>',
             'code on <a href="https://github.com/Dataninja/advanced-mapping-tool" target="_blank">GitHub</a>.'
         ]
+    },
+
+    // External div for long text description
+    description: {
+
+        // Enable or not
+        active: false,
+
+        // Position respect to map
+        position: 'right',
+
+        // HTML content of the description
+        content: '<h1>Questa è una mappa</h1><h2>Fatta dai dataninja</h2><p>E questo è il div voluto dal nelson</p>'
     },
 
     // Label control on mouse over regions in vectorial geolayers
@@ -164,61 +183,6 @@ var mapConfig = {
             // Inherits attributes from dataSource named here
             source: 'file',
             path: 'data/',
-            filename: 'WelfareBO-Programma-Assistenziale-Individualizzato-PAI-1966-2014-Quartieri-dei-servizi.csv',
-            format: 'csv',
-            transform: function(res) {
-                return res;
-            },
-
-            // Inherits attributes from geoType named here
-            type: 'choropleth', // from dataTypes attributes
-            bins: 7,
-            palette: 'Greens',
-            
-            schema: {
-
-                // Key name of dataset
-                name: 'servizi',
-                
-                // Menu label for layer entry
-                menu: 'Assistenza per servizio (PAI)',
-
-                // Key name of layer data refer to
-                layer: 'quartieri',
-
-                // Key of id values used for join
-                id: 'Id',
-                
-                // Key of label values (not used)
-                label: '',
-
-                // Legend description (not used)
-                legend: '',
-
-                // Keys of data values shown on map on loading
-                values: [
-                    'Numero PAI totale',
-                    'Donne',
-                    'Uomini',
-                    'Anziani',
-                    'Disagio adulto',
-                    'Famiglia e Minori',
-                    'Cittadinanza italiana',
-                    'Cittadinanza estera'
-                ]
-            },
-
-            /* Custom parse function name from string to number
-             * If missing, 'parseFloat' is the default
-             * You can also define a custom function (el) { return el; }
-             */
-            parse: 'parseInt'
-        },
-        {
-            
-            // Inherits attributes from dataSource named here
-            source: 'file',
-            path: 'data/',
             filename: 'WelfareBO-Programma-Assistenziale-Individualizzato-PAI-1966-2014-Quartieri-di-residenza.csv',
             format: 'csv',
             transform: function(res) {
@@ -233,7 +197,7 @@ var mapConfig = {
             schema: {
                 
                 // Key name of dataset
-                name: 'residenza',
+                name: 'assistenza',
 
                 // Menu label for layer entry
                 menu: 'Assistenza per residenza (PAI)',
@@ -268,6 +232,113 @@ var mapConfig = {
              * You can also define a custom function (el) { return el; }
              */
             parse: 'parseInt'
+        },
+        {
+            
+            // Inherits attributes from dataSource named here
+            source: 'file',
+            path: 'data/',
+            filename: 'WelfareBO-Interventi-1966-2014-Quartieri-di-residenza.csv',
+            format: 'csv',
+            transform: function(res) {
+                return res;
+            },
+
+            // Inherits attributes from geoType named here
+            type: 'choropleth', // from dataTypes attributes
+            bins: 7,
+            palette: 'Blues',
+            
+            schema: {
+                
+                // Key name of dataset
+                name: 'interventi',
+
+                // Menu label for layer entry
+                menu: 'Interventi per residenza',
+
+                // Key name of layer data refer to
+                layer: 'quartieri',
+
+                // Key of id values used for join
+                id: 'Id',
+                
+                // Key of label values (not used)
+                label: '',
+
+                // Legend description
+                legend: '',
+
+                // Keys of data values shown on map on loading
+                values: [
+                    'Numero interventi totale',
+                    'Donne',
+                    'Uomini',
+                    'Anziani',
+                    'Disagio adulto',
+                    'Famiglia e Minori',
+                    'Cittadinanza italiana',
+                    'Cittadinanza estera'
+                ]
+            },
+
+            /* Custom parse function name from string to number
+             * If missing, 'parseFloat' is the default
+             * You can also define a custom function (el) { return el; }
+             */
+            parse: 'parseInt'
+        },
+        {
+            
+            // Inherits attributes from dataSource named here
+            source: 'file',
+            path: 'data/',
+            filename: 'WelfareBO-Sportelli-sociali-2013-Quartiere-del-nodo.csv',
+            format: 'csv',
+            transform: function(res) {
+                return res;
+            },
+
+            // Inherits attributes from geoType named here
+            type: 'choropleth', // from dataTypes attributes
+            bins: 7,
+            palette: 'Blues',
+            
+            schema: {
+                
+                // Key name of dataset
+                name: 'sportelli',
+
+                // Menu label for layer entry
+                menu: 'Segnalazioni per residenza',
+
+                // Key name of layer data refer to
+                layer: 'quartieri',
+
+                // Key of id values used for join
+                id: 'Id',
+                
+                // Key of label values (not used)
+                label: '',
+
+                // Legend description
+                legend: '',
+
+                // Keys of data values shown on map on loading
+                values: [
+                    'Numero richieste totali',
+                    'Anziani',
+                    'Disabili',
+                    'Disagio adulto',
+                    'Famiglia e Minori'
+                ]
+            },
+
+            /* Custom parse function name from string to number
+             * If missing, 'parseFloat' is the default
+             * You can also define a custom function (el) { return el; }
+             */
+            parse: 'parseInt'
         }
     ],
 
@@ -293,6 +364,9 @@ var mapConfig = {
 
         // Enable or not
         active: true,
+
+        // Position respect to map (default 'inside', bottom-right corner)
+        position: 'inside',
 
         // Default content when no region is selected
         content: {
@@ -1032,9 +1106,16 @@ var mapConfig = {
  *     - min [int]
  *     - max [int]
  *     - scrollWheel [bool]
+ *   - center [object]
+ *     - lat [float]
+ *     - lng [float]
  *   - attribution [array]
  *     - [string]
  *     - ...
+ * - description [object]
+ *   - active [bool]
+ *   - position [string]
+ *   - content [string]
  * - urlShortener [object]
  *   - active [bool]
  *   - domain [string]
@@ -1044,6 +1125,7 @@ var mapConfig = {
  *   - url [string] function ( )
  * - infowindow [object]
  *   - active [bool]
+ *   - position [string]
  *   - content [object]
  *     - default [string]
  *     - mobile [string]
