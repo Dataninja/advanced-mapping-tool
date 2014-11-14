@@ -6,7 +6,7 @@
 var mapConfig = {
 
     // Debug mode activation with logs in console
-    debug: true,
+    debug: false,
 
     // URL shortener service configuration (via yourls)
     urlShortener: {
