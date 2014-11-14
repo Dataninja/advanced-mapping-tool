@@ -905,7 +905,7 @@
                         info.update();
                         legend.update();
                         dataMenu.update(d.name);
-                        dataMenu.onChange(data[d.name][0].values);
+                        dataMenu.onChange(d.name);
                         loadData(d.name);
                     }
                 })
