@@ -137,11 +137,13 @@ var mapConfig = {
         // Title at the top of the control
         title: '',
 
-        // Description at the bottom
+        // Description at the bottom, overridable by dataset configuration
         description: '',
 
         // Label appended to legend items
-        itemLabel: '',
+        label: function(min,max,label) {
+            return label + ": " + min + " - " + max;
+        }
 
     },
 
@@ -219,7 +221,10 @@ var mapConfig = {
                 id: '',
                 
                 // Key of label values (in legend)
-                label: '',
+                labels: [],
+
+                // Texts for legend and infowindow descriptions
+                descriptions: [],
 
                 // Keys of data values shown on map on loading
                 values: ['var1']
@@ -939,7 +944,10 @@ var mapConfig = {
  *       - layer [string matching a geoLayer.name for joining]
  *       - id [string]
  *       - menu [string]
- *       - label [string]
+ *       - labels [string | array]
+ *         - [string]
+ *       - descriptions [string | array]
+ *         - [string]
  *       - values [string | array]
  *         - [string]
  *     - parse [string] | [mixed] function( [string] )
@@ -1051,7 +1059,7 @@ var mapConfig = {
  *   - active [bool]
  *   - title [string]
  *   - description [string]
- *   - itemLabel [string]
+ *   - label [string] function ( [float], [float] )
  * - controls [object]
  *   - active [bool]
  *   - fullscreen [object]

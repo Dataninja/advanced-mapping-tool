@@ -182,7 +182,6 @@
                 menu: $.dataSets[i].schema.menu,
                 layer: $.dataSets[i].schema.layer,
                 id: $.dataSets[i].schema.id,
-                label: $.dataSets[i].schema.label,
                 values: (typeof $.dataSets[i].schema.values === "string" ? [$.dataSets[i].schema.values] : $.dataSets[i].schema.values),
                 value: (typeof $.dataSets[i].schema.values === "string" ? $.dataSets[i].schema.values : $.dataSets[i].schema.values[0]),
                 resourceId: $.dataSets[i].resourceId, // HMMM
@@ -194,6 +193,22 @@
                 ranges: [],
                 active: false
             };
+
+            if ($.dataSets[i].schema.hasOwnProperty('descriptions') && $.dataSets[i].schema.descriptions.length) {
+                defaultData[$.dataSets[i].schema.name].descriptions = (typeof $.dataSets[i].schema.descriptions === "string" ? [$.dataSets[i].schema.descriptions] : $.dataSets[i].schema.descriptions);
+                defaultData[$.dataSets[i].schema.name].description = (typeof $.dataSets[i].schema.descriptions === "string" ? $.dataSets[i].schema.descriptions : $.dataSets[i].schema.descriptions[0]);
+            } else {
+                defaultData[$.dataSets[i].schema.name].descriptions = defaultData[$.dataSets[i].schema.name].values;
+                defaultData[$.dataSets[i].schema.name].description = defaultData[$.dataSets[i].schema.name].value;
+            }
+
+            if ($.dataSets[i].schema.hasOwnProperty('labels') && $.dataSets[i].schema.labels.length) {
+                defaultData[$.dataSets[i].schema.name].labels = (typeof $.dataSets[i].schema.labels === "string" ? [$.dataSets[i].schema.labels] : $.dataSets[i].schema.labels);
+                defaultData[$.dataSets[i].schema.name].label = (typeof $.dataSets[i].schema.labels === "string" ? $.dataSets[i].schema.labels : $.dataSets[i].schema.labels[0]);
+            } else {
+                defaultData[$.dataSets[i].schema.name].labels = defaultData[$.dataSets[i].schema.name].values;
+                defaultData[$.dataSets[i].schema.name].label = defaultData[$.dataSets[i].schema.name].value;
+            }
 
             // Parsing function for dataset values
             if (typeof $.dataSets[i].parse === "string") {
@@ -384,8 +399,8 @@
                         today = new Date(),
                         stoday = d3.time.format('%Y%m%d')(today),
                         region = props._layer,
-                        index = data[region].map(function(el) { return el.active; }).indexOf(true),
-                        filterKey = data[region][index].id,
+                        dataSet = data[region].filter(function(el) { return el.active; })[0],
+                        filterKey = dataSet.id,
                         filterValue = props[geo[region].id],
                         buttons = [], btnTitle, btnUrl, btnPlace,
                         dnlBtn = [];
@@ -484,7 +499,7 @@
 
                     var tbody;
                     if ($.infowindow.hasOwnProperty('view') && $.infowindow.view.active && $.viewTypes.hasOwnProperty($.infowindow.view.type)) {
-                        tbody = $.viewTypes[$.infowindow.view.type](props.data[data[region][index].name], $.infowindow.view.options, data[region][index].formatter);
+                        tbody = $.viewTypes[$.infowindow.view.type](props.data[dataSet.name], $.infowindow.view.options, dataSet.formatter);
                         if (!(tbody.indexOf('<tbody>') > -1)) {
                             tbody = '<tbody>' + tbody + '</tbody>';
                         }
@@ -990,6 +1005,8 @@
                         var selectedIndex = d3.select(this).property('selectedIndex'),
                             d = d3.select(this).selectAll("option")[0][selectedIndex].__data__;
                         data[region][index].value = d;
+                        data[region][index].label = data[region][index].labels[selectedIndex];
+                        data[region][index].description = data[region][index].descriptions[selectedIndex];
                         loadData(region,data[region][index].name);
                     })
                     .selectAll('option')
@@ -1161,18 +1178,19 @@
                                 var num = parseFloat(el);
                                 return (dataSet.formatter(dataSet.value, num) ? d3.format(dataSet.formatter(dataSet.value, num))(num) : (d3.format(",d")(num) || d3.format(",.2f")(num) || num)); 
                             }).join(" - ");
-                        });
+                        }),
+                        description = dataSet.description || $.legend.description || '';
 
-                    this._div.innerHTML = (parameters.md != 'widget' ? '<h4 title="'+$.legend.description+'">'+$.legend.title+'</h4>' : '');
+                    console.log(dataSet);
+                    this._div.innerHTML = (parameters.md != 'widget' ? '<h4 title="'+description+'">'+$.legend.title+'</h4>' : '');
                     for (var i=0; i<grades.length; i++) {
                         var color = (colorbrewer[dataSet.palette][grades.length] ? colorbrewer[dataSet.palette][grades.length][i] : colorbrewer[dataSet.palette][3][i]);
-                        this._div.innerHTML += '<i title="Tra ' + 
-                            grades[i].replace("-","e") + 
-                            ' ' + $.legend.itemLabel+'" style="background:' + 
+                        this._div.innerHTML += '<i title="'+($.legend.hasOwnProperty('label') ? $.legend.label(grades[i].split(" - ")[0],grades[i].split(" - ")[1],dataSet.label) : grades[i])+'" '+
+                            'style="background:' + 
                             color + '"></i> ' + 
                             (parameters.md != 'widget' ? grades[i] : '') + '<br>';
                     }
-                    if (parameters.md != 'widget') this._div.innerHTML += '<br>'+$.legend.description;
+                    if (parameters.md != 'widget') this._div.innerHTML += '<br>'+description;
                 } else {
                     this._div.innerHTML = (parameters.md != 'widget' ? '<h4>'+$.legend.title+'</h4>' : '');
                 }
@@ -1232,9 +1250,9 @@
             //if ($.debug) console.log("styleFunction",arguments);
             var region = feature.properties._layer,
                 geoLayer = $.geoLayers.filter(function(l) { return (l.type === "vector" && l.schema.name === region); })[0],
-                index = data[region].map(function(el) { return el.active; }).indexOf(true),
+                dataSet = data[region].filter(function(el) { return el.active; })[0],
                 currentStyle = geoLayer.style.default;
-            currentStyle.fillColor = getColor(feature.properties.data[data[region][index].name][data[region][index].value], data[region][index].bins, data[region][index].palette); // Dynamic parsing
+            currentStyle.fillColor = getColor(feature.properties.data[dataSet.name][dataSet.value], dataSet.bins, dataSet.palette); // Dynamic parsing
 	    	return currentStyle;
     	}
         /*** ***/
@@ -1250,12 +1268,13 @@
                 props = layer.feature.properties,
                 region = layer.feature.properties._layer,
                 geoLayer = $.geoLayers.filter(function(l) { return (l.type === "vector" && l.schema.name === region); })[0],
-                index = data[region].map(function(el) { return el.active; }).indexOf(true),
-                highlightStyle = geoLayer.style.highlight;
+                dataSet = data[region].filter(function(el) { return el.active; })[0],
+                highlightStyle = geoLayer.style.highlight,
+                num = props.data[dataSet.name][dataSet.value];
                     
             if (!layer.selected) layer.setStyle(highlightStyle);
             if ($.hasOwnProperty('label') && $.label.active) {
-                label.setContent(props[geo[region].label]+'<br>' + $.label.text + ': '+props.data[data[region][index].name][data[region][index].value]);
+                label.setContent(props[geo[region].label]+'<br>' + dataSet.label + ': '+ (dataSet.formatter(dataSet.value, num) ? d3.format(dataSet.formatter(dataSet.value, num))(num) : (d3.format(",d")(num) || d3.format(",.2f")(num) || num)));
                 label.setLatLng(layer.getBounds().getCenter());
                 map.showLabel(label);
             }
