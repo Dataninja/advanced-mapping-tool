@@ -8,6 +8,9 @@ var mapConfig = {
     // Debug mode activation with logs in console
     debug: false,
 
+    // Language code in ISO 639-1:2002 format (see http://en.wikipedia.org/wiki/List_of_ISO_639-1_codes)
+    language: 'it',
+
     // URL shortener service configuration (via yourls)
     urlShortener: {
 
@@ -134,11 +137,14 @@ var mapConfig = {
         // Title at the top of the control
         title: '',
 
-        // Description at the bottom
+        // Description at the bottom, overridable by dataset configuration
         description: '',
 
         // Label appended to legend items
-        itemLabel: ''
+        label: function(min,max,label) {
+            return label + ": " + min + " - " + max;
+        }
+
     },
 
     // Definition of geographic layers to load
@@ -185,9 +191,15 @@ var mapConfig = {
             path: 'data/',
             filename: '',
             format: '',
+            
             transform: function(res) {
                 return res;
             },
+            
+            formatter: function(k,v) {
+                return '';
+            }, 
+
 
             // Inherits attributes from geoType named here
             type: 'choropleth', // from dataTypes attributes
@@ -208,11 +220,11 @@ var mapConfig = {
                 // Key of id values used for join
                 id: '',
                 
-                // Key of label values (not used)
-                label: '',
+                // Key of label values (in legend)
+                labels: [],
 
-                // Legend description
-                legend: '',
+                // Texts for legend and infowindow descriptions
+                descriptions: [],
 
                 // Keys of data values shown on map on loading
                 values: ['var1']
@@ -369,9 +381,6 @@ var mapConfig = {
                 },
                 filter: function(k,v) {
                     return true;
-                },
-                transform: function(k,v) {
-                    return parseInt(v) || v;
                 }
             }
         }
@@ -827,22 +836,22 @@ var mapConfig = {
          * here a structure of the body can be defined
          * returning the tbody element, see http://www.w3schools.com/tags/tag_tbody.asp
          */
-        table: function(data, options) {
+        table: function(data, options, formatter) {
             if (!data) return '';
 
             /* Default options can be overrided (include and exclude filters are evaluated in this order):
+             * - formatter string defines how to format numbers in printing
              * - include array has data keys to include
              * - exclude array has data keys to exclude
              * - bold function defines a rule to boldify a row
              * - filter function defines a custom filter after include and exclude filters
-             * - transform function defines a transformation (ie. casting) on data values
              */
             var defaultOptions = {
                     include: [],
                     exclude: [],
                     bold: function(key, value) { return false; },
                     filter: function(key, value) { return true; },
-                    transform: function(key, value) { return value; }
+                    formatter: formatter || function(key, value) { return ''; }
                 },
                 options = options || {},
                 tbody = '',
@@ -859,7 +868,7 @@ var mapConfig = {
                     if (!options.include.length || options.include.indexOf(k) > -1) {
                         if (!options.exclude.length || !(options.exclude.indexOf(k) > -1)) {
                             if (options.filter(k,data[k])) {
-                                var val = options.transform(k,data[k]),
+                                var val = (options.formatter(k,data[k]) ? d3.format(options.formatter(k,data[k]))(num) : d3.format(",d")(num) || d3.format(",.2f")(num) || num),
                                     isBold = options.bold(k,data[k]);
                                 tbody += '<tr>' + 
                                     '<td>' + (isBold ? '<b>'+k+'</b>' : k) + '</td>' +
@@ -879,8 +888,9 @@ var mapConfig = {
 /*
  * Map configuration complete structure:
  *
- * - debug: [bool]
- * - dataSources: [object]
+ * - debug [bool]
+ * - language [string]
+ * - dataSources [object]
  *   - file [object]
  *     - domain [string]
  *     - path [string]
@@ -929,12 +939,15 @@ var mapConfig = {
  *     - active [bool]
  *     - source [string matching dataSources attributes]
  *     - type [string matching dataTypes attributes]
+ *     - formatter [string] function ( [string], [mixed] )
  *     - schema [object]
  *       - layer [string matching a geoLayer.name for joining]
  *       - id [string]
  *       - menu [string]
- *       - label [string]
- *       - legend [string]
+ *       - labels [string | array]
+ *         - [string]
+ *       - descriptions [string | array]
+ *         - [string]
  *       - values [string | array]
  *         - [string]
  *     - parse [string] | [mixed] function( [string] )
@@ -1046,7 +1059,7 @@ var mapConfig = {
  *   - active [bool]
  *   - title [string]
  *   - description [string]
- *   - itemLabel [string]
+ *   - label [string] function ( [float], [float] )
  * - controls [object]
  *   - active [bool]
  *   - fullscreen [object]

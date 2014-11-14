@@ -14,6 +14,7 @@
             dtnj, // URL shortener via yourls-api lib
             parameters = Arg.query(), // Parsing URL GET parameters
             svgViewBox,
+            myFormat,
             defaultGeo = {}, geo = {}, // Geo layers enabled and used
             defaultData = {}, data = {}, // Data sets enabled and used
             i, k, // Counter
@@ -33,6 +34,41 @@
             geoMenu, dataMenu, varMenu,
             osmGeocoder,
             legend;
+
+
+
+        /*** Language formatter ***/
+        if ($.hasOwnProperty('language')) {
+
+            switch($.language) {
+
+                case 'it':
+                    myFormat = d3.locale({
+                        "decimal": ",",
+                        "thousands": ".",
+                        "grouping": [3],
+                        "currency": ["€ ", ""],
+                        "dateTime": "%a %b %e %X %Y",
+                        "date": "%d/%m/%Y",
+                        "time": "%H:%M:%S",
+                        "periods": ["AM", "PM"],
+                        "days": ["Domenica", "Lunedì", "Martedì", "Mercoledì", "Giovedì", "Venerdì", "Sabato"],
+                        "shortDays": ["Dom", "Lun", "Mar", "Mer", "Gio", "Ven", "Sab"],
+                        "months": ["Gennaio", "Febbraio", "Marzo", "Aprile", "Maggio", "Giugno", "Luglio", "Agosto", "Settembre", "Ottobre", "Novembre", "Dicembre"],
+                        "shortMonths": ["Gen", "Feb", "Mar", "Apr", "Mag", "Giu", "Lug", "Ago", "Set", "Ott", "Nov", "Dic"]
+                    });
+                    break;
+
+                default:
+                    myFormat = d3.locale();
+
+            }
+
+            d3.format = myFormat.numberFormat;
+            d3.time.format = myFormat.timeFormat;
+        }
+
+
 
         /*** Configuration initialization ***/
         var sourceDef, typeDef;
@@ -142,28 +178,45 @@
         /*** Data sets initialization ***/
         for (i=0; i<$.dataSets.length; i++) {
             defaultData[$.dataSets[i].schema.name] = {
-                id: $.dataSets[i].schema.id,
-                label: $.dataSets[i].schema.label,
-                value: (typeof $.dataSets[i].schema.values === "string" ? $.dataSets[i].schema.values : $.dataSets[i].schema.values[0]),
-                values: (typeof $.dataSets[i].schema.values === "string" ? [$.dataSets[i].schema.values] : $.dataSets[i].schema.values),
-                layer: $.dataSets[i].schema.layer,
                 name: $.dataSets[i].schema.name,
-                resourceId: $.dataSets[i].resourceId,
+                menu: $.dataSets[i].schema.menu,
+                layer: $.dataSets[i].schema.layer,
+                id: $.dataSets[i].schema.id,
+                values: (typeof $.dataSets[i].schema.values === "string" ? [$.dataSets[i].schema.values] : $.dataSets[i].schema.values),
+                value: (typeof $.dataSets[i].schema.values === "string" ? $.dataSets[i].schema.values : $.dataSets[i].schema.values[0]),
+                resourceId: $.dataSets[i].resourceId, // HMMM
+                palette: $.dataSets[i].palette,
+                transform: $.dataSets[i].transform || function(k,v) { return v; },
+                formatter: $.dataSets[i].formatter || function() { return ''; },
                 resource: null,
                 bins: [],
                 ranges: [],
-                palette: $.dataSets[i].palette,
                 active: false
             };
 
+            if ($.dataSets[i].schema.hasOwnProperty('descriptions') && $.dataSets[i].schema.descriptions.length) {
+                defaultData[$.dataSets[i].schema.name].descriptions = (typeof $.dataSets[i].schema.descriptions === "string" ? [$.dataSets[i].schema.descriptions] : $.dataSets[i].schema.descriptions);
+                defaultData[$.dataSets[i].schema.name].description = (typeof $.dataSets[i].schema.descriptions === "string" ? $.dataSets[i].schema.descriptions : $.dataSets[i].schema.descriptions[0]);
+            } else {
+                defaultData[$.dataSets[i].schema.name].descriptions = defaultData[$.dataSets[i].schema.name].values;
+                defaultData[$.dataSets[i].schema.name].description = defaultData[$.dataSets[i].schema.name].value;
+            }
+
+            if ($.dataSets[i].schema.hasOwnProperty('labels') && $.dataSets[i].schema.labels.length) {
+                defaultData[$.dataSets[i].schema.name].labels = (typeof $.dataSets[i].schema.labels === "string" ? [$.dataSets[i].schema.labels] : $.dataSets[i].schema.labels);
+                defaultData[$.dataSets[i].schema.name].label = (typeof $.dataSets[i].schema.labels === "string" ? $.dataSets[i].schema.labels : $.dataSets[i].schema.labels[0]);
+            } else {
+                defaultData[$.dataSets[i].schema.name].labels = defaultData[$.dataSets[i].schema.name].values;
+                defaultData[$.dataSets[i].schema.name].label = defaultData[$.dataSets[i].schema.name].value;
+            }
+
             // Parsing function for dataset values
             if (typeof $.dataSets[i].parse === "string") {
-                var parse = $.dataSets[i].parse;
-                defaultData[$.dataSets[i].schema.name].parse = function(el) { return isNaN(window[parse](el)) ? el : window[parse](el); };
+                defaultData[$.dataSets[i].schema.name].parse = function(el) { return window[$.dataSets[i].parse](el) || el; };
             } else if (typeof $.dataSets[i].parse === "function") {
                 defaultData[$.dataSets[i].schema.name].parse = $.dataSets[i].parse;
             } else {
-                defaultData[$.dataSets[i].schema.name].parse = function(el) { return isNaN(parseFloat(el)) ? el : parseFloat(el); };
+                defaultData[$.dataSets[i].schema.name].parse = function(el) { return parseInt(el) || parseFloat(el) || el; };
             }
         }
 
@@ -346,8 +399,8 @@
                         today = new Date(),
                         stoday = d3.time.format('%Y%m%d')(today),
                         region = props._layer,
-                        index = data[region].map(function(el) { return el.active; }).indexOf(true),
-                        filterKey = data[region][index].id,
+                        dataSet = data[region].filter(function(el) { return el.active; })[0],
+                        filterKey = dataSet.id,
                         filterValue = props[geo[region].id],
                         buttons = [], btnTitle, btnUrl, btnPlace,
                         dnlBtn = [];
@@ -446,7 +499,7 @@
 
                     var tbody;
                     if ($.infowindow.hasOwnProperty('view') && $.infowindow.view.active && $.viewTypes.hasOwnProperty($.infowindow.view.type)) {
-                        tbody = $.viewTypes[$.infowindow.view.type](props.data[data[region][index].name], $.infowindow.view.options);
+                        tbody = $.viewTypes[$.infowindow.view.type](props.data[dataSet.name], $.infowindow.view.options, dataSet.formatter);
                         if (!(tbody.indexOf('<tbody>') > -1)) {
                             tbody = '<tbody>' + tbody + '</tbody>';
                         }
@@ -952,6 +1005,8 @@
                         var selectedIndex = d3.select(this).property('selectedIndex'),
                             d = d3.select(this).selectAll("option")[0][selectedIndex].__data__;
                         data[region][index].value = d;
+                        data[region][index].label = data[region][index].labels[selectedIndex];
+                        data[region][index].description = data[region][index].descriptions[selectedIndex];
                         loadData(region,data[region][index].name);
                     })
                     .selectAll('option')
@@ -1117,20 +1172,25 @@
             };
             legend.update = function(region) {
                 if (region) {
-                    var index = data[region].map(function(el) { return el.active; }).indexOf(true),
-                        dataSet = $.dataSets.filter(function(l) { return l.schema.layer === region; })[index];
-    
-                    var grades = data[region][index].ranges;
-                    this._div.innerHTML = (parameters.md != 'widget' ? '<h4 title="'+$.legend.description+'">'+$.legend.title+'</h4>' : '');
+                    var dataSet = data[region].filter(function(el) { return el.active; })[0], 
+                        grades = dataSet.ranges.map(function(el) { 
+                            return el.split(" - ").map(function(el) { 
+                                var num = parseFloat(el);
+                                return (dataSet.formatter(dataSet.value, num) ? d3.format(dataSet.formatter(dataSet.value, num))(num) : (d3.format(",d")(num) || d3.format(",.2f")(num) || num)); 
+                            }).join(" - ");
+                        }),
+                        description = dataSet.description || $.legend.description || '';
+
+                    console.log(dataSet);
+                    this._div.innerHTML = (parameters.md != 'widget' ? '<h4 title="'+description+'">'+$.legend.title+'</h4>' : '');
                     for (var i=0; i<grades.length; i++) {
                         var color = (colorbrewer[dataSet.palette][grades.length] ? colorbrewer[dataSet.palette][grades.length][i] : colorbrewer[dataSet.palette][3][i]);
-                        this._div.innerHTML += '<i title="Tra ' + 
-                            grades[i].replace("-","e") + 
-                            ' ' + $.legend.itemLabel+'" style="background:' + 
+                        this._div.innerHTML += '<i title="'+($.legend.hasOwnProperty('label') ? $.legend.label(grades[i].split(" - ")[0],grades[i].split(" - ")[1],dataSet.label) : grades[i])+'" '+
+                            'style="background:' + 
                             color + '"></i> ' + 
                             (parameters.md != 'widget' ? grades[i] : '') + '<br>';
                     }
-                    if (parameters.md != 'widget') this._div.innerHTML += '<br>'+$.legend.description;
+                    if (parameters.md != 'widget') this._div.innerHTML += '<br>'+description;
                 } else {
                     this._div.innerHTML = (parameters.md != 'widget' ? '<h4>'+$.legend.title+'</h4>' : '');
                 }
@@ -1190,9 +1250,9 @@
             //if ($.debug) console.log("styleFunction",arguments);
             var region = feature.properties._layer,
                 geoLayer = $.geoLayers.filter(function(l) { return (l.type === "vector" && l.schema.name === region); })[0],
-                index = data[region].map(function(el) { return el.active; }).indexOf(true),
+                dataSet = data[region].filter(function(el) { return el.active; })[0],
                 currentStyle = geoLayer.style.default;
-            currentStyle.fillColor = getColor(feature.properties.data[data[region][index].name][data[region][index].value], data[region][index].bins, data[region][index].palette); // Dynamic parsing
+            currentStyle.fillColor = getColor(feature.properties.data[dataSet.name][dataSet.value], dataSet.bins, dataSet.palette); // Dynamic parsing
 	    	return currentStyle;
     	}
         /*** ***/
@@ -1208,12 +1268,13 @@
                 props = layer.feature.properties,
                 region = layer.feature.properties._layer,
                 geoLayer = $.geoLayers.filter(function(l) { return (l.type === "vector" && l.schema.name === region); })[0],
-                index = data[region].map(function(el) { return el.active; }).indexOf(true),
-                highlightStyle = geoLayer.style.highlight;
+                dataSet = data[region].filter(function(el) { return el.active; })[0],
+                highlightStyle = geoLayer.style.highlight,
+                num = props.data[dataSet.name][dataSet.value];
                     
             if (!layer.selected) layer.setStyle(highlightStyle);
             if ($.hasOwnProperty('label') && $.label.active) {
-                label.setContent(props[geo[region].label]+'<br>' + $.label.text + ': '+props.data[data[region][index].name][data[region][index].value]);
+                label.setContent(props[geo[region].label]+'<br>' + dataSet.label + ': '+ (dataSet.formatter(dataSet.value, num) ? d3.format(dataSet.formatter(dataSet.value, num))(num) : (d3.format(",d")(num) || d3.format(",.2f")(num) || num)));
                 label.setLatLng(layer.getBounds().getCenter());
                 map.showLabel(label);
             }

@@ -221,7 +221,6 @@ html, body, #map {
 
 .menu-ui select {
     border-radius: 3px;
-    text-indent: 5px;
     margin-top: 5px;
     width: 100%;
 }
