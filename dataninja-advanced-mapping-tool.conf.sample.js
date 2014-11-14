@@ -8,6 +8,9 @@ var mapConfig = {
     // Debug mode activation with logs in console
     debug: false,
 
+    // Language code in ISO 639-1:2002 format (see http://en.wikipedia.org/wiki/List_of_ISO_639-1_codes)
+    language: 'it',
+
     // URL shortener service configuration (via yourls)
     urlShortener: {
 
@@ -138,7 +141,12 @@ var mapConfig = {
         description: '',
 
         // Label appended to legend items
-        itemLabel: ''
+        itemLabel: '',
+
+        // transform function defines a transformation (ie. casting) on data values before printing
+        transform: function(k,v) {
+            return v;
+        }
     },
 
     // Definition of geographic layers to load
@@ -842,7 +850,7 @@ var mapConfig = {
                     exclude: [],
                     bold: function(key, value) { return false; },
                     filter: function(key, value) { return true; },
-                    transform: function(key, value) { return value; }
+                    transform: function(key, value) { return d3.format(",d")(value) || d3.format(",.2f")(value) || value; }
                 },
                 options = options || {},
                 tbody = '',
@@ -879,8 +887,9 @@ var mapConfig = {
 /*
  * Map configuration complete structure:
  *
- * - debug: [bool]
- * - dataSources: [object]
+ * - debug [bool]
+ * - language [string]
+ * - dataSources [object]
  *   - file [object]
  *     - domain [string]
  *     - path [string]
@@ -1047,6 +1056,7 @@ var mapConfig = {
  *   - title [string]
  *   - description [string]
  *   - itemLabel [string]
+ *   - transform [mixed] function ( [string], [mixed] )
  * - controls [object]
  *   - active [bool]
  *   - fullscreen [object]

@@ -14,6 +14,7 @@
             dtnj, // URL shortener via yourls-api lib
             parameters = Arg.query(), // Parsing URL GET parameters
             svgViewBox,
+            myFormat,
             defaultGeo = {}, geo = {}, // Geo layers enabled and used
             defaultData = {}, data = {}, // Data sets enabled and used
             i, k, // Counter
@@ -33,6 +34,41 @@
             geoMenu, dataMenu, varMenu,
             osmGeocoder,
             legend;
+
+
+
+        /*** Language formatter ***/
+        if ($.hasOwnProperty('language')) {
+
+            switch($.language) {
+
+                case 'it':
+                    myFormat = d3.locale({
+                        "decimal": ",",
+                        "thousands": ".",
+                        "grouping": [3],
+                        "currency": ["€", ""],
+                        "dateTime": "%a %b %e %X %Y",
+                        "date": "%d/%m/%Y",
+                        "time": "%H:%M:%S",
+                        "periods": ["AM", "PM"],
+                        "days": ["Domenica", "Lunedì", "Martedì", "Mercoledì", "Giovedì", "Venerdì", "Sabato"],
+                        "shortDays": ["Dom", "Lun", "Mar", "Mer", "Gio", "Ven", "Sab"],
+                        "months": ["Gennaio", "Febbraio", "Marzo", "Aprile", "Maggio", "Giugno", "Luglio", "Agosto", "Settembre", "Ottobre", "Novembre", "Dicembre"],
+                        "shortMonths": ["Gen", "Feb", "Mar", "Apr", "Mag", "Giu", "Lug", "Ago", "Set", "Ott", "Nov", "Dic"]
+                    });
+                    break;
+
+                default:
+                    myFormat = d3.locale();
+
+            }
+
+            d3.format = myFormat.numberFormat;
+            d3.time.format = myFormat.timeFormat;
+        }
+
+
 
         /*** Configuration initialization ***/
         var sourceDef, typeDef;
@@ -1117,10 +1153,14 @@
             };
             legend.update = function(region) {
                 if (region) {
-                    var index = data[region].map(function(el) { return el.active; }).indexOf(true),
-                        dataSet = $.dataSets.filter(function(l) { return l.schema.layer === region; })[index];
-    
-                    var grades = data[region][index].ranges;
+                    var dataSet = data[region].filter(function(el) { return el.active; })[0], 
+                        grades = dataSet.ranges.map(function(el) { 
+                            return el.split(" - ").map(function(el) { 
+                                var num = ($.legend.hasOwnProperty('transform') ? $.legend.transform(dataSet.value, parseFloat(el)) : parseFloat(el)); 
+                                return d3.format(",d")(num) || d3.format(",.2f")(num) || num; 
+                            }).join(" - ");
+                        });
+
                     this._div.innerHTML = (parameters.md != 'widget' ? '<h4 title="'+$.legend.description+'">'+$.legend.title+'</h4>' : '');
                     for (var i=0; i<grades.length; i++) {
                         var color = (colorbrewer[dataSet.palette][grades.length] ? colorbrewer[dataSet.palette][grades.length][i] : colorbrewer[dataSet.palette][3][i]);
