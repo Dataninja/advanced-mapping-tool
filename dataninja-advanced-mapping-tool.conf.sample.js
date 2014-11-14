@@ -20,13 +20,13 @@ var mapConfig = {
         /* Relative or absolute path (ie. [prepath]/yourls-api.php)
          * See http://yourls.org/#API
          */
-        path: '/api/dtnj/yourls-api.php',
+        path: '',
 
         // Signature, see https://github.com/YOURLS/YOURLS/wiki/PasswordlessAPI
-        signature: 'efe758b8d3',
+        signature: '',
 
         // If prefix is not empty, short url will be [prefix]+md5([long url])
-        prefix: 'confiscatibene-', // ie. confiscatibene-
+        prefix: '',
             
         // URL generator based on region and a filter
         url: function() {
@@ -45,14 +45,14 @@ var mapConfig = {
 
                 // Bottom-left corner
                 southWest: {
-                    lat: 35.568,
-                    lng: 1.537
+                    lat: 40,
+                    lng: 10
                 },
 
                 // Top-right corner
                 northEast: {
-                    lat: 47.843,
-                    lng: 23.203
+                    lat: 45,
+                    lng: 15
                 },
             },
 
@@ -61,42 +61,55 @@ var mapConfig = {
 
                 // Bottom-left corner
                 southWest: {
-                    lat: 22.472,
-                    lng: -16.523
+                    lat: 44,
+                    lng: 11
                 },
 
                 // Top-right corner
                 northEast: {
-                    lat: 62.083,
-                    lng: 73.828
+                    lat: 45,
+                    lng: 12
                 },
             }
         },
 
         // Zoom options
         zoom: {
-            //init: 11,
-            max: 13,
-            min: 5,
+            init: 9,
+            max: 18,
+            min: 1,
             scrollWheel: true
         },
 
         // Center of the map
-        /*center: {
+        center: {
             lat: 43,
             lng: 9
-        },*/
+        },
 
         /* Attribution line, see http://leafletjs.com/reference.html#control-attribution
          * Set a string item per service
          */
         attribution: [
             'Powered by <a href="http://www.dataninja.it/" target="_blank">Dataninja</a>',
-            'tileset from <a href="http://www.geoiq.com/" target="_blank">GeoIQ</a>',
+            'tileset from <a href="http://mapnik.org/" target="_blank">OSM Mapnik</a>',
             'icons from <a href="http://www.flaticon.com/" target="_blank">Freepik</a> and <a href="http://www.simplesharebuttons.com/" target="_blank">Simple Share Buttons</a>',
-            'geocoding by <a href="http://wiki.openstreetmap.org/wiki/Nominatim" target="_blank">OSM Nominatim</a>',
-            'code on <a href="https://github.com/Dataninja/confiscatibene-choropleth" target="_blank">GitHub</a>.'
+            //'geocoding by <a href="http://wiki.openstreetmap.org/wiki/Nominatim" target="_blank">OSM Nominatim</a>',
+            'code on <a href="https://github.com/Dataninja/advanced-mapping-tool" target="_blank">GitHub</a>.'
         ]
+    },
+
+    // External div for long text description
+    description: {
+
+        // Enable or not
+        active: false,
+
+        // Position respect to map
+        position: 'right',
+
+        // HTML content of the description
+        content: '<p></p>'
     },
 
     // Label control on mouse over regions in vectorial geolayers
@@ -109,7 +122,7 @@ var mapConfig = {
          * [REGION NAME]
          * [text]: [value]
          */
-        text: 'Beni confiscati'
+        text: ''
     },
 
     // Legend control
@@ -119,13 +132,13 @@ var mapConfig = {
         active: true,
 
         // Title at the top of the control
-        title: 'Legenda',
+        title: '',
 
         // Description at the bottom
-        description: 'Numero totale di beni confiscati',
+        description: '',
 
         // Label appended to legend items
-        itemLabel: 'beni confiscati'
+        itemLabel: ''
     },
 
     // Definition of geographic layers to load
@@ -140,7 +153,8 @@ var mapConfig = {
             // Inherits attributes from geoSource named here
             source: 'file',
             path: 'geo/',
-            format: 'json',
+            filename: '',
+            format: '',
             
             // Inherits attributes from geoType named here
             type: 'vector',
@@ -148,45 +162,16 @@ var mapConfig = {
             schema: {
 
                 // Key name of layer
-                name: 'regioni',
+                name: 'layer1',
 
                 // Menu label for layer entry
-                menu: 'Regioni',
+                menu: 'layer1',
 
                 // Key of id values used for join
-                id: 'COD_REG',
+                id: '',
 
                 // Key of label values used for label
-                label: 'NOME_REG'
-            }
-        },
-        {
-            source: 'file',
-            path: 'geo/',
-            format: 'json',
-
-            type: 'vector',
-            
-            schema: {
-                name: 'province',
-                menu: 'Province',
-                id: 'COD_PRO',
-                label: 'NOME_PRO'
-            }
-        },
-        {
-            active: true,
-            source: 'file',
-            path: 'geo/',
-            format: 'json',
-
-            type: 'vector',
-
-            schema: {
-                name: 'comuni',
-                menu: 'Comuni',
-                id: 'PRO_COM',
-                label: 'NOME_COM'
+                label: ''
             }
         }
     ],
@@ -198,10 +183,10 @@ var mapConfig = {
             // Inherits attributes from dataSource named here
             source: 'file',
             path: 'data/',
-            filename: 'e2f0c989-929f-4e4d-87e2-097140f8880f.json',
-            format: 'json',
+            filename: '',
+            format: '',
             transform: function(res) {
-                return res.result.records;
+                return res;
             },
 
             // Inherits attributes from geoType named here
@@ -210,83 +195,34 @@ var mapConfig = {
             palette: 'Reds',
             
             schema: {
-
-                // Key name of dataset
-                name: 'regioni',
                 
+                // Key name of dataset
+                name: 'dataset1',
+
                 // Menu label for layer entry
-                menu: 'Beni confiscati 1',
+                menu: 'dataset1',
 
                 // Key name of layer data refer to
-                layer: 'regioni',
+                layer: 'layer1',
 
                 // Key of id values used for join
-                id: 'IdRegioneISTAT',
+                id: '',
                 
                 // Key of label values (not used)
                 label: '',
 
+                // Legend description
+                legend: '',
+
                 // Keys of data values shown on map on loading
-                values: [
-                    'Totale beni',
-                    'Totale immobili',
-                    'Totale aziende'
-                ]
+                values: ['var1']
             },
 
             /* Custom parse function name from string to number
              * If missing, 'parseFloat' is the default
              * You can also define a custom function (el) { return el; }
              */
-            parse: 'parseInt'
-        },
-        {
-            source: 'file',
-            path: 'data/',
-            filename: 'c18fa1ca-971f-4cfa-92e9-869785260dec.json',
-            format: 'json',
-
-            type: 'choropleth',
-            bins: 7,
-            palette: 'Blues',
-
-            schema: {
-                name: 'province',
-                layer: 'province',
-                id: 'IdProvinciaISTAT',
-                label: '',
-                values: [
-                    'Totale beni',
-                    'Totale immobili',
-                    'Totale aziende'
-                ]
-            },
-
-            parse: 'parseInt'
-        },
-        {
-            source: 'file',
-            path: 'data/',
-            filename: '69b2565e-0332-422f-ad57-b11491e33b08.json',
-            format: 'json',
-
-            type: 'choropleth',
-            bins: 7,
-            palette: 'Greens',
-
-            schema: {
-                name: 'comuni',
-                layer: 'comuni',
-                id: 'IdComuneISTAT',
-                label: '',
-                values: [
-                    'Totale beni',
-                    'Totale immobili',
-                    'Totale aziende'
-                ]
-            },
-
-            parse: 'parseInt'
+            parse: 'parseFloat'
         }
     ],
 
@@ -313,21 +249,17 @@ var mapConfig = {
         // Enable or not
         active: true,
 
+        // Position respect to map (default 'inside', bottom-right corner)
+        position: 'inside',
+
         // Default content when no region is selected
         content: {
 
             // Shown in normal view modes
-            default: '<p>La mappa mostra il numero di beni confiscati per tutti i territori amministrativi italiani, secondo i dati ufficiali dell\'<a href="http://www.benisequestraticonfiscati.it" target="_blank">ANBSC</a> (sono esclusi i beni non confiscati in via autonoma). La corrispondenza tra il gradiente di colore e il numero complessivo di beni confiscati è dato nella legenda in basso a sinistra.</p>' + 
-                '<p>Mediante il selettore in alto a sinistra si possono caricare e visualizzare ulteriori livelli (regioni, province, comuni).</p>' +
-                '<p>Principali funzioni della mappa: <ul>' + 
-                '<li>cerca i dati relativi al tuo territorio cliccando sulla lente e inserendo il nome di un comune;</li>' + 
-                '<li>clicca sul territorio per visualizzare i dati in dettaglio, la composizione dei beni e per scaricarne la lista completa;</li>' + 
-                '<li>includi la vista corrente della mappa sul tuo sito con il codice di embed o scaricane uno screenshot (pulsanti in alto a destra).</li>' +
-                '</ul></p>' +
-                '<p>Tieniti aggiornato sul progetto visitando il sito ufficiale di <a href="http://www.confiscatibene.it" target="_blank">Confiscati Bene</a> o seguendo l\'account Twitter <a href="https://twitter.com/confiscatibene" target="_blank">@confiscatibene</a>, puoi anche scriverci all\'indirizzo <a href="mailto:info@confiscatibene.it" target="_blank">info@confiscatibene.it</a>.</p>',
+            default: '<p></p>',
 
             // Shown on little screen, ie. on mobile
-            mobile: '<a href="mailto:info@confiscatibene.it" target="_blank" style="margin-right: 30px;">Info</a>',
+            mobile: '',
         },
 
         // Data downloads allowed and linked in the infowindow
@@ -344,30 +276,19 @@ var mapConfig = {
                     
                     // Inherits attributes from dataSource named here
                     source: 'dkan',
-                    resourceId: 'e5b4d63a-e1e8-40a3-acec-1d351f03ee56',
+                    resourceId: '',
 
                     // Name of the download, used to build filename
-                    name: 'immobili',
+                    name: 'dwn1',
                     
                     // Filebase of the filename
-                    filebase: 'confiscatibene',
+                    filebase: 'dwn1',
 
                     // Title for download icon
-                    title: 'Scarica l\'elenco degli immobili',
+                    title: '',
 
                     // Download icon
                     image: 'img/house109-dnl.png'
-                },
-                {
-                    active: true,
-
-                    source: 'dkan',
-                    resourceId: '8b7e12f1-6484-47f0-9cf6-88b446297dbc',
-
-                    name: 'aziende',
-                    filebase: 'confiscatibene',
-                    title: 'Scarica l\'elenco delle aziende',
-                    image: 'img/factory6-dnl.png'
                 }
             ]
         },
@@ -379,7 +300,7 @@ var mapConfig = {
             active: true,
 
             // Text prepended to title of each share icon (+ 'su [Twitter | Facebook | Google Plus | Linkedin | ...]')
-            title: 'Condividi la situazione',
+            title: 'Condividi',
 
             // Twitter share icon
             twitter: {
@@ -388,10 +309,10 @@ var mapConfig = {
                 active: true,
 
                 // Mention after sharing
-                via: 'confiscatibene',
+                via: '',
 
                 // Text appended to tweet content, hashtags here (+ region name)
-                text: 'Immobili e aziende #confiscatibene' // ie. Tweet
+                text: 'Tweet'
             },
 
             // Facebook share icon
@@ -422,10 +343,10 @@ var mapConfig = {
                 active: true,
 
                 // Text prepended to subject (+ region name)
-                subject: 'Confiscati Bene',
+                subject: '',
 
                 // Text prepended to body (+ region name and URL)
-                body: 'Gli immobili e le aziende #confiscatibene'
+                body: ''
             },
             permalink: {
 
@@ -444,10 +365,10 @@ var mapConfig = {
             type: 'table',
             options: {
                 bold: function(k,v) {
-                    return (k.indexOf('Totale') > -1);
+                    return false;
                 },
                 filter: function(k,v) {
-                    return (v != '0' && k.charAt(0) == k.charAt(0).toUpperCase() && k.slice(0,2) != "Id");
+                    return true;
                 },
                 transform: function(k,v) {
                     return parseInt(v) || v;
@@ -466,7 +387,7 @@ var mapConfig = {
             active: true,
 
             // Title on mouseover
-            title: 'Fullscreen mode',
+            title: 'Fullscreen',
         },
 
         // Logo at the top-right corner
@@ -481,8 +402,11 @@ var mapConfig = {
             // Image
             image: 'img/logo.png',
 
+            // Border
+            border: true,
+
             // Link
-            link: 'http://www.confiscatibene.it/'
+            link: ''
         },
 
         // Reset the map at the initial status
@@ -502,7 +426,7 @@ var mapConfig = {
         embed: {
 
             // Enable or not
-            active: true,
+            active: false,
 
             // Title on mouseover
             title: 'Embed this map',
@@ -533,7 +457,7 @@ var mapConfig = {
                 active: true,
 
                 // File name for downloaded image
-                filename: 'confiscatibene_map.svg',
+                filename: 'map.svg',
 
                 // Icon of the control
                 image: 'img/svg.png'
@@ -544,7 +468,7 @@ var mapConfig = {
         screenshot: {
 
             // Enable or not
-            active: true,
+            active: false,
 
             // Title on mouseover
             title: 'Take a screenshot',
@@ -553,7 +477,7 @@ var mapConfig = {
             image: 'img/screenshot.png',
 
             // File name for downloaded image
-            filename: 'confiscatibene_map.png',
+            filename: 'map.png',
         },
 
         // Open the map in an other window or tab (only in embed mode)
@@ -583,10 +507,10 @@ var mapConfig = {
 
                 // Specific options from Twitter Dev
                 // See https://dev.twitter.com/web/tweet-button
-                via: 'confiscatibene',
-                lang: 'it',
-                related: 'jenkin27:Data scientist at Dataninja',
-                hashtags: 'confiscatibene,dataninja',
+                via: '',
+                lang: 'en',
+                related: '',
+                hashtags: 'dataninja',
                 count: 'vertical',
 
                 // Text on the button
@@ -597,11 +521,11 @@ var mapConfig = {
             facebook: {
 
                 // Enable or not
-                active: true,
+                active: false,
 
                 // Specific options from Facebook Dev
                 // See https://developers.facebook.com/docs/plugins/like-button
-                appId: '470290923072583', // appID dei Dataninja
+                appId: '', // appID dei Dataninja
                 layout: 'box_count',
                 action: 'like',
                 'show-faces': false,
@@ -629,16 +553,16 @@ var mapConfig = {
             active: false,
 
             // Geo layer name map shows after geocoding
-            layer: 'comuni',
+            layer: 'layer1',
 
             // Input text is shown only after mouseover on icon
             collapsed: true,
 
             // Text on send form button
-            title: 'Cerca il tuo comune',
+            title: 'Search',
 
             // Email contact for Nominatim
-            email: 'jenkin@dataninja.it',
+            email: '',
 
             // Zoom of map after geocoding
             zoom: 10,
@@ -658,10 +582,10 @@ var mapConfig = {
                 path: 'geo/',
             
                 // Complete file name if single file (with extension)
-                filename: 'lista_comuni.json',
+                filename: 'list.json',
 
                 // File prefix (used as extension in file name template for multiple files)
-                prefix: 'lista_comuni-', // ie. geo/lista_comuni-
+                prefix: 'list-', // ie. geo/lista_comuni-
             
                 // File format (used as extension in file name template for multiple files)
                 format: 'json',
@@ -731,7 +655,7 @@ var mapConfig = {
             /* Relative or absolute path (ie. [prepath]/action/datastore/search.json)
              * See http://docs.getdkan.com/docs/dkan-documentation/dkan-api/datastore-api#Datastore_API_URL_
              */
-            path: '/api/confiscatibene/action/datastore/search.json',
+            path: '',
 
             /* Request parameters for Dkan API
              * See http://docs.getdkan.com/docs/dkan-documentation/dkan-api/datastore-api#Request_Parameters
@@ -1010,6 +934,7 @@ var mapConfig = {
  *       - id [string]
  *       - menu [string]
  *       - label [string]
+ *       - legend [string]
  *       - values [string | array]
  *         - [string]
  *     - parse [string] | [mixed] function( [string] )
@@ -1050,12 +975,20 @@ var mapConfig = {
  *         - lat [float]
  *         - lng [float]
  *   - zoom [object]
+ *     - init [int]
  *     - min [int]
  *     - max [int]
  *     - scrollWheel [bool]
+ *   - center [object]
+ *     - lat [float]
+ *     - lng [float]
  *   - attribution [array]
  *     - [string]
  *     - ...
+ * - description [object]
+ *   - active [bool]
+ *   - position [string]
+ *   - content [string]
  * - urlShortener [object]
  *   - active [bool]
  *   - domain [string]
@@ -1065,6 +998,7 @@ var mapConfig = {
  *   - url [string] function ( )
  * - infowindow [object]
  *   - active [bool]
+ *   - position [string]
  *   - content [object]
  *     - default [string]
  *     - mobile [string]
@@ -1122,6 +1056,7 @@ var mapConfig = {
  *     - active [bool]
  *     - title [string]
  *     - image [string]
+ *     - border [bool]
  *     - link [string]
  *   - reset [object]
  *     - active [bool]
