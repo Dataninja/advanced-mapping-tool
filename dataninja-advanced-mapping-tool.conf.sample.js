@@ -143,10 +143,6 @@ var mapConfig = {
         // Label appended to legend items
         itemLabel: '',
 
-        // transform function defines a transformation (ie. casting) on data values before printing
-        transform: function(k,v) {
-            return v;
-        }
     },
 
     // Definition of geographic layers to load
@@ -193,9 +189,15 @@ var mapConfig = {
             path: 'data/',
             filename: '',
             format: '',
+            
             transform: function(res) {
                 return res;
             },
+            
+            formatter: function(k,v) {
+                return '';
+            }, 
+
 
             // Inherits attributes from geoType named here
             type: 'choropleth', // from dataTypes attributes
@@ -216,11 +218,8 @@ var mapConfig = {
                 // Key of id values used for join
                 id: '',
                 
-                // Key of label values (not used)
+                // Key of label values (in legend)
                 label: '',
-
-                // Legend description
-                legend: '',
 
                 // Keys of data values shown on map on loading
                 values: ['var1']
@@ -377,9 +376,6 @@ var mapConfig = {
                 },
                 filter: function(k,v) {
                     return true;
-                },
-                transform: function(k,v) {
-                    return parseInt(v) || v;
                 }
             }
         }
@@ -835,22 +831,22 @@ var mapConfig = {
          * here a structure of the body can be defined
          * returning the tbody element, see http://www.w3schools.com/tags/tag_tbody.asp
          */
-        table: function(data, options) {
+        table: function(data, options, formatter) {
             if (!data) return '';
 
             /* Default options can be overrided (include and exclude filters are evaluated in this order):
+             * - formatter string defines how to format numbers in printing
              * - include array has data keys to include
              * - exclude array has data keys to exclude
              * - bold function defines a rule to boldify a row
              * - filter function defines a custom filter after include and exclude filters
-             * - transform function defines a transformation (ie. casting) on data values
              */
             var defaultOptions = {
                     include: [],
                     exclude: [],
                     bold: function(key, value) { return false; },
                     filter: function(key, value) { return true; },
-                    transform: function(key, value) { return d3.format(",d")(value) || d3.format(",.2f")(value) || value; }
+                    formatter: formatter || function(key, value) { return ''; }
                 },
                 options = options || {},
                 tbody = '',
@@ -867,7 +863,7 @@ var mapConfig = {
                     if (!options.include.length || options.include.indexOf(k) > -1) {
                         if (!options.exclude.length || !(options.exclude.indexOf(k) > -1)) {
                             if (options.filter(k,data[k])) {
-                                var val = options.transform(k,data[k]),
+                                var val = (options.formatter(k,data[k]) ? d3.format(options.formatter(k,data[k]))(num) : d3.format(",d")(num) || d3.format(",.2f")(num) || num),
                                     isBold = options.bold(k,data[k]);
                                 tbody += '<tr>' + 
                                     '<td>' + (isBold ? '<b>'+k+'</b>' : k) + '</td>' +
@@ -938,12 +934,12 @@ var mapConfig = {
  *     - active [bool]
  *     - source [string matching dataSources attributes]
  *     - type [string matching dataTypes attributes]
+ *     - formatter [string] function ( [string], [mixed] )
  *     - schema [object]
  *       - layer [string matching a geoLayer.name for joining]
  *       - id [string]
  *       - menu [string]
  *       - label [string]
- *       - legend [string]
  *       - values [string | array]
  *         - [string]
  *     - parse [string] | [mixed] function( [string] )
@@ -1056,7 +1052,6 @@ var mapConfig = {
  *   - title [string]
  *   - description [string]
  *   - itemLabel [string]
- *   - transform [mixed] function ( [string], [mixed] )
  * - controls [object]
  *   - active [bool]
  *   - fullscreen [object]

@@ -47,7 +47,7 @@
                         "decimal": ",",
                         "thousands": ".",
                         "grouping": [3],
-                        "currency": ["€", ""],
+                        "currency": ["€ ", ""],
                         "dateTime": "%a %b %e %X %Y",
                         "date": "%d/%m/%Y",
                         "time": "%H:%M:%S",
@@ -178,28 +178,30 @@
         /*** Data sets initialization ***/
         for (i=0; i<$.dataSets.length; i++) {
             defaultData[$.dataSets[i].schema.name] = {
+                name: $.dataSets[i].schema.name,
+                menu: $.dataSets[i].schema.menu,
+                layer: $.dataSets[i].schema.layer,
                 id: $.dataSets[i].schema.id,
                 label: $.dataSets[i].schema.label,
-                value: (typeof $.dataSets[i].schema.values === "string" ? $.dataSets[i].schema.values : $.dataSets[i].schema.values[0]),
                 values: (typeof $.dataSets[i].schema.values === "string" ? [$.dataSets[i].schema.values] : $.dataSets[i].schema.values),
-                layer: $.dataSets[i].schema.layer,
-                name: $.dataSets[i].schema.name,
-                resourceId: $.dataSets[i].resourceId,
+                value: (typeof $.dataSets[i].schema.values === "string" ? $.dataSets[i].schema.values : $.dataSets[i].schema.values[0]),
+                resourceId: $.dataSets[i].resourceId, // HMMM
+                palette: $.dataSets[i].palette,
+                transform: $.dataSets[i].transform || function(k,v) { return v; },
+                formatter: $.dataSets[i].formatter || function() { return ''; },
                 resource: null,
                 bins: [],
                 ranges: [],
-                palette: $.dataSets[i].palette,
                 active: false
             };
 
             // Parsing function for dataset values
             if (typeof $.dataSets[i].parse === "string") {
-                var parse = $.dataSets[i].parse;
-                defaultData[$.dataSets[i].schema.name].parse = function(el) { return isNaN(window[parse](el)) ? el : window[parse](el); };
+                defaultData[$.dataSets[i].schema.name].parse = function(el) { return window[$.dataSets[i].parse](el) || el; };
             } else if (typeof $.dataSets[i].parse === "function") {
                 defaultData[$.dataSets[i].schema.name].parse = $.dataSets[i].parse;
             } else {
-                defaultData[$.dataSets[i].schema.name].parse = function(el) { return isNaN(parseFloat(el)) ? el : parseFloat(el); };
+                defaultData[$.dataSets[i].schema.name].parse = function(el) { return parseInt(el) || parseFloat(el) || el; };
             }
         }
 
@@ -482,7 +484,7 @@
 
                     var tbody;
                     if ($.infowindow.hasOwnProperty('view') && $.infowindow.view.active && $.viewTypes.hasOwnProperty($.infowindow.view.type)) {
-                        tbody = $.viewTypes[$.infowindow.view.type](props.data[data[region][index].name], $.infowindow.view.options);
+                        tbody = $.viewTypes[$.infowindow.view.type](props.data[data[region][index].name], $.infowindow.view.options, data[region][index].formatter);
                         if (!(tbody.indexOf('<tbody>') > -1)) {
                             tbody = '<tbody>' + tbody + '</tbody>';
                         }
@@ -1156,8 +1158,8 @@
                     var dataSet = data[region].filter(function(el) { return el.active; })[0], 
                         grades = dataSet.ranges.map(function(el) { 
                             return el.split(" - ").map(function(el) { 
-                                var num = ($.legend.hasOwnProperty('transform') ? $.legend.transform(dataSet.value, parseFloat(el)) : parseFloat(el)); 
-                                return d3.format(",d")(num) || d3.format(",.2f")(num) || num; 
+                                var num = parseFloat(el);
+                                return (dataSet.formatter(dataSet.value, num) ? d3.format(dataSet.formatter(dataSet.value, num))(num) : (d3.format(",d")(num) || d3.format(",.2f")(num) || num)); 
                             }).join(" - ");
                         });
 
