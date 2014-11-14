@@ -1,5 +1,6 @@
 bower_components/
 node_modules/
-geo/*
-data/*
 tmp/
+demo/welfarebo/
+demo/donnechecontano/
+dataninja-advanced-mapping-tool.conf.js

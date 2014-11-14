@@ -18,8 +18,9 @@
             defaultData = {}, data = {}, // Data sets enabled and used
             i, k, // Counter
             map, // Map object
+            description,
             // Map controls
-            attrib = L.control.attribution(),
+            attrib,
             info,
             fullscreen,
             logo,
@@ -221,30 +222,45 @@
                 
         if ($.debug) console.log("geo",geo);
         if ($.debug) console.log("data",data);
-
         /*** ***/
 
+
+
         /*** Inizializzazione della mappa ***/
-	    var southWest = L.latLng($.map.bounds.init.southWest),
-            northEast = L.latLng($.map.bounds.init.northEast),
-            mapBounds = L.latLngBounds(southWest, northEast),
-        	southWestB = L.latLng($.map.bounds.max.southWest),
-            northEastB = L.latLng($.map.bounds.max.northEast),
-            maxMapBounds = L.latLngBounds(southWestB, northEastB);
+	    var southWest,
+            northEast,
+            mapBounds,
+        	southWestB,
+            northEastB,
+            maxMapBounds;
+
+        if ($.map.hasOwnProperty('bounds')) {
+            if ($.map.bounds.hasOwnProperty('init')) {
+        	    southWest = L.latLng($.map.bounds.init.southWest);
+                northEast = L.latLng($.map.bounds.init.northEast);
+                mapBounds = L.latLngBounds(southWest, northEast);
+            }
+
+            if ($.map.bounds.hasOwnProperty('max')) {
+            	southWestB = L.latLng($.map.bounds.max.southWest);
+                northEastB = L.latLng($.map.bounds.max.northEast);
+                maxMapBounds = L.latLngBounds(southWestB, northEastB);
+            }
+        }
 
         map = L.map('map', { 
             maxZoom: $.map.zoom.max || null, 
             minZoom: $.map.zoom.min || null, 
             zoom: $.map.zoom.init || null,
-            center: ($.map.zoom.init ? mapBounds.getCenter() : null),
+            center: ($.map.center || (mapBounds ? mapBounds.getCenter() : null)),
             scrollWheelZoom: $.map.zoom.scrollWheel || true, 
             attributionControl: !$.map.attribution.length,
-            maxBounds: maxMapBounds
+            maxBounds: maxMapBounds || null
         });
 
-        if ($.debug) console.log("map",map);
+        if (!$.map.zoom.init && mapBounds) map.fitBounds(mapBounds);
 
-        if (!$.map.zoom.init) map.fitBounds(mapBounds);
+        if ($.debug) console.log("map",map);
 
         // Tile layers
         var tileLayers = $.geoLayers.filter(function(l) { return l.type === 'tile'; });
@@ -258,21 +274,50 @@
         map.spin(true);
         
         // Attribution notices
+        attrib = L.control.attribution();
         for (i=0; i<$.map.attribution.length; i++) {
             attrib.addAttribution($.map.attribution[i]);
         }
         
         if ($.debug) console.log("attrib",attrib);
 
-        attrib.addTo(map);
-        
+        attrib.addTo(map);        
         /*** ***/
+
+
+
+        /*** Description ***/
+        if ($.hasOwnProperty('description') && $.description.active && parameters.md != 'widget') {
+            $.description.position = $.description.position || 'right';
+            d3.select('body').classed('description '+$.description.position, true);
+            if ($.description.position === 'top' || $.description.position === 'left') {
+                description = d3.select('body').insert('div','#map');
+            } else {
+                description = d3.select('body').append('div');
+            }
+            description
+                .attr('id','map-description')
+                .attr("class","description "+$.description.position)
+                .append('div')
+                .html($.description.content || '');
+        }
+        /*** ***/
+
+
 
         /*** Gestione dell'infowindow al click ***/
         if ($.hasOwnProperty('infowindow') && $.infowindow.active) {
             if (parameters.md === 'widget') {
                 info = {};
-                info._div = d3.select('body').append('div').attr('id','infowindow').classed("info", true).node();
+                info._div = d3.select('body').append('div').attr('id','infowindow').attr("class", "info bottom").node();
+            } else if ($.infowindow.hasOwnProperty('position') && $.infowindow.position != 'inside') {
+                info = {};
+                d3.select('body').classed('description '+$.infowindow.position, true);
+                if ($.infowindow.position === 'top' || $.infowindow.position === 'left') {
+                     info._div = d3.select('body').insert('div','#map').attr('id','infowindow').attr("class", "info external "+$.infowindow.position).node();
+                } else if ($.infowindow.position === 'right' || $.infowindow.position === 'bottom') {
+                    info._div = d3.select('body').append('div').attr('id','infowindow').attr("class", "info external "+$.infowindow.position).node();
+                }
             } else {
                 info = L.control({position: 'bottomright'});
                 info.onAdd = function (map) {
@@ -517,7 +562,7 @@
                 }
     	    };
                 
-            if (parameters.md === 'widget') {
+            if (parameters.md === 'widget' || ($.infowindow.hasOwnProperty('position') && $.infowindow.position != 'inside')) {
                 info.update();
             } else {
                 info.addTo(map);
@@ -553,7 +598,7 @@
                 logo = L.control({position: 'topleft'});
                 logo.onAdd = function(map) {
                     var a = L.DomUtil.create('a','logo '+parameters.md),
-                        img = L.DomUtil.create('img','logo',a);
+                        img = L.DomUtil.create('img','logo' + ($.controls.logo.border ? ' border' : ''),a);
                     a.setAttribute('href', $.controls.logo.link || '#');
                     a.setAttribute('target','_blank');
                     img.setAttribute('id','logo');
@@ -764,51 +809,6 @@
 
 
 
-        /*** Dev utility ***/
-        if ($.debug) {
-            devUtil = L.control({position: 'topright'});
-            devUtil.onAdd = function(map) {
-                var div = L.DomUtil.create('div','devutil');
-
-                d3.select(div).append('p')
-                    .attr('id','devutil-coord');
-                d3.select(div).append('p')
-                    .attr('id','devutil-sw')
-                    .text('SouthWest bound: '+map.getBounds().getSouthWest().toString()),
-                d3.select(div).append('p')
-                    .attr('id','devutil-ne')
-                    .text('NorthEast bound: '+map.getBounds().getNorthEast().toString()),
-                d3.select(div).append('p')
-                    .attr('id','devutil-zoom')
-                    .text('Zoom level: '+map.getZoom());
-
-                d3.select(div)
-                    .on("mouseenter", function() {
-                        map.scrollWheelZoom.disable();
-                        map.doubleClickZoom.disable();
-                        map.dragging.disable();
-                    })
-                    .on("mouseleave", function() {
-                        map.scrollWheelZoom.enable();
-                        map.doubleClickZoom.enable();
-                        map.dragging.enable();
-                    });
-
-                return div;
-            };
-            devUtil.addTo(map);
-            map
-                .on('mousemove', function(e) { d3.select('#devutil-coord').text('Mouse position: '+e.latlng.toString()); })
-                .on('move', function(e) { 
-                    d3.select('#devutil-sw').text('SouthWest bound: '+map.getBounds().getSouthWest().toString()); 
-                    d3.select('#devutil-ne').text('NorthEast bound: '+map.getBounds().getNorthEast().toString()); 
-                })
-                .on('zoomend', function(e) { d3.select('#devutil-zoom').text('Zoom level: '+map.getZoom()); });
-        }
-        /*** ***/
-
-
-
         /*** Pulsanti di condivisione ***/
         if ($.controls.hasOwnProperty('socialButtons') && $.controls.socialButtons.active) {
             if (!parameters.md) {
@@ -905,7 +905,7 @@
                         info.update();
                         legend.update();
                         dataMenu.update(d.name);
-                        dataMenu.onChange(data[d.name][0].values);
+                        dataMenu.onChange(d.name);
                         loadData(d.name);
                     }
                 })
@@ -1054,6 +1054,56 @@
         }
         
         if ($.debug) console.log("osmGeocoder",osmGeocoder);
+        /*** ***/
+
+
+
+        /*** Dev utility ***/
+        if ($.debug) {
+            devUtil = L.control({position: 'bottomleft'});
+            devUtil.onAdd = function(map) {
+                var div = L.DomUtil.create('div','devutil');
+
+                d3.select(div).append('p')
+                    .attr('id','devutil-coord')
+                    .text('Mouse position: ...');
+                d3.select(div).append('p')
+                    .attr('id','devutil-sw')
+                    .text('SouthWest bound: '+map.getBounds().getSouthWest().toString()),
+                d3.select(div).append('p')
+                    .attr('id','devutil-ne')
+                    .text('NorthEast bound: '+map.getBounds().getNorthEast().toString()),
+                d3.select(div).append('p')
+                    .attr('id','devutil-center')
+                    .text('Map center: '+map.getCenter().toString());
+                d3.select(div).append('p')
+                    .attr('id','devutil-zoom')
+                    .text('Zoom level: '+map.getZoom());
+
+                d3.select(div)
+                    .on("mouseenter", function() {
+                        map.scrollWheelZoom.disable();
+                        map.doubleClickZoom.disable();
+                        map.dragging.disable();
+                    })
+                    .on("mouseleave", function() {
+                        map.scrollWheelZoom.enable();
+                        map.doubleClickZoom.enable();
+                        map.dragging.enable();
+                    });
+
+                return div;
+            };
+            devUtil.addTo(map);
+            map
+                .on('mousemove', function(e) { d3.select('#devutil-coord').text('Mouse position: '+e.latlng.toString()); })
+                .on('move', function(e) { 
+                    d3.select('#devutil-sw').text('SouthWest bound: '+map.getBounds().getSouthWest().toString()); 
+                    d3.select('#devutil-ne').text('NorthEast bound: '+map.getBounds().getNorthEast().toString()); 
+                    d3.select('#devutil-center').text('Map center: '+map.getCenter().toString());
+                })
+                .on('zoomend', function(e) { d3.select('#devutil-zoom').text('Zoom level: '+map.getZoom()); });
+        }
         /*** ***/
 
 
@@ -1332,7 +1382,6 @@
                     
                 });
             } else {
-                console.log(geo[region].resource);
                 binData(region);
                 geojson.addData(geo[region].resource);
                 delete parameters.i;
