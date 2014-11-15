@@ -11,6 +11,12 @@ var mapConfig = {
     // Language code in ISO 639-1:2002 format (see http://en.wikipedia.org/wiki/List_of_ISO_639-1_codes)
     language: 'it',
 
+    // Google Analytics code for tracking, see http://www.google.it/intl/it/analytics/
+    analytics: {
+        active: true,
+        ua: ''
+    },
+
     // URL shortener service configuration (via yourls)
     urlShortener: {
 
@@ -890,6 +896,9 @@ var mapConfig = {
  *
  * - debug [bool]
  * - language [string]
+ * - analytics [object]
+ *   - active [bool]
+ *   - ua [string]
  * - dataSources [object]
  *   - file [object]
  *     - domain [string]
