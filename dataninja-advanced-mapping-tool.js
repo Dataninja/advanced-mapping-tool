@@ -11,35 +11,15 @@
 
         // Global variables
         var $ = mapConfig, // Configuration object
-            dtnj, // URL shortener via yourls-api lib
-            parameters = Arg.query(), // Parsing URL GET parameters
             svgViewBox,
-            myFormat,
-            defaultGeo = {}, geo = {}, // Geo layers enabled and used
-            defaultData = {}, data = {}, // Data sets enabled and used
-            i, k, // Counter
-            map, // Map object
-            description,
-            // Map controls
-            attrib,
-            info,
-            fullscreen,
-            logo,
-            reset,
-            embed, embedControl,
-            screenshot,
-            detach,
-            devUtil,
-            share,
-            geoMenu, dataMenu, varMenu,
-            osmGeocoder,
-            legend;
+            h, i, j, k;
 
 
 
         /*** Language formatter ***/
         if ($.hasOwnProperty('language')) {
 
+            var myFormat;
             switch($.language) {
 
                 case 'it':
@@ -155,6 +135,7 @@
         /*** ***/
 
         // Url shortener initialization
+        var dtnj; // URL shortener via yourls-api lib
         if ($.hasOwnProperty('urlShortener') && $.urlShortener.active) {
             dtnj = yourls.connect($.urlShortener.url.call($.urlShortener), { signature: $.urlShortener.signature });
         }
@@ -162,6 +143,7 @@
         if ($.debug) console.log("dtnj",dtnj);
 
         /*** Geo layers initialization ***/
+        var defaultGeo = {}, geo = {}; // Geo layers enabled and used
         for (i=0; i<$.geoLayers.length; i++) {
             if ($.geoLayers[i].type === 'vector') {
                 defaultGeo[$.geoLayers[i].schema.name] = {
@@ -176,6 +158,7 @@
         if ($.debug) console.log("defaultGeo",defaultGeo);
 
         /*** Data sets initialization ***/
+        var defaultData = {}, data = {}; // Data sets enabled and used
         for (i=0; i<$.dataSets.length; i++) {
             defaultData[$.dataSets[i].schema.name] = {
                 name: $.dataSets[i].schema.name,
@@ -224,6 +207,8 @@
         if ($.debug) console.log("defaultData",defaultData);
 
         /*** URL GET parameters initialization ***/
+        var parameters = Arg.query(); // Parsing URL GET parameters
+
         /* ie. http://viz.confiscatibene.it/anbsc/choropleth/?ls[0]=regioni&ls[1]=province&ls[2]=comuni&dl=regioni&t=1
             {
                 ls: Array(), // Livelli caricati: regioni, province, comuni (default: tutti) -- LAYERS
@@ -281,7 +266,8 @@
 
 
         /*** Inizializzazione della mappa ***/
-	    var southWest,
+	    var map,
+            southWest,
             northEast,
             mapBounds,
         	southWestB,
@@ -328,7 +314,7 @@
         map.spin(true);
         
         // Attribution notices
-        attrib = L.control.attribution();
+        var attrib = L.control.attribution();
         for (i=0; i<$.map.attribution.length; i++) {
             attrib.addAttribution($.map.attribution[i]);
         }
@@ -341,6 +327,7 @@
 
 
         /*** Description ***/
+        var description;
         if ($.hasOwnProperty('description') && $.description.active && parameters.md != 'widget') {
             $.description.position = $.description.position || 'right';
             d3.select('body').classed('description '+$.description.position, true);
@@ -360,6 +347,7 @@
 
 
         /*** Gestione dell'infowindow al click ***/
+        var info;
         if ($.hasOwnProperty('infowindow') && $.infowindow.active) {
             if (parameters.md === 'widget') {
                 info = {};
@@ -628,6 +616,7 @@
         /*** ***/
 
         /*** Fullscreen ***/
+        var fullscreen;
         if ($.controls.hasOwnProperty('fullscreen') && $.controls.fullscreen.active) {
             if (parameters.md != 'widget' && parameters.md != 'embed') {
                 fullscreen = L.control.fullscreen({title: $.controls.fullscreen.title}).addTo(map);
@@ -639,6 +628,7 @@
         /*** ***/
 
         /*** Logo ***/
+        var logo;
         if ($.controls.hasOwnProperty('logo') && $.controls.logo.active) {
             if (parameters.md === 'widget') {
                 logo = d3.select('body').insert('div','#map').attr('id','logo-widget')
@@ -668,6 +658,7 @@
         /*** ***/
 
         /*** Pulsante di reset ***/
+        var reset;
         if ($.controls.hasOwnProperty('reset') && $.controls.reset.active) {
             reset = L.control({position: (parameters.md === 'mobile' ? 'bottomleft' : 'topright')});
             reset.onAdd = function(map) {
@@ -689,6 +680,7 @@
         /*** ***/
 
         /*** Pulsante di embed ***/
+        var embed, embedControl;
         if ($.controls.hasOwnProperty('embed') && $.controls.embed.active) {
             embedControl = L.control({position: (parameters.md === 'mobile' ? 'bottomleft' : 'topright')});
             embedControl.isAdded = false;
@@ -798,6 +790,7 @@
         /*** ***/
 
         /*** Screenshot map ***/
+        var screenshot;
         if ($.controls.hasOwnProperty('screenshot') && $.controls.screenshot.active) {
             if (parameters.md != 'widget') {
                 screenshot = L.control({position: (parameters.md === 'mobile' ? 'bottomleft' : 'topright')});
@@ -837,6 +830,7 @@
         /*** ***/
 
         /*** Detach map ***/
+        var detach;
         if ($.controls.hasOwnProperty('detach') && $.controls.detach.active) {
             if (parameters.md === 'embed' || parameters.md === 'widget') {
                 detach = L.control({position: 'topright'});
@@ -864,6 +858,7 @@
 
 
         /*** Pulsanti di condivisione ***/
+        var share;
         if ($.controls.hasOwnProperty('socialButtons') && $.controls.socialButtons.active) {
             if (!parameters.md) {
                 share = L.control({position: 'bottomleft'});
@@ -926,7 +921,9 @@
 
 
         /*** Creazione del menù dei geolayers ***/
-        var menuGeoLayers = $.geoLayers.filter(function(l) { return l.type != 'tile'; });
+        var geoMenu,
+            menuGeoLayers = $.geoLayers.filter(function(l) { return l.type != 'tile'; });
+
         if (menuGeoLayers.length > 1) {
             geoMenu = L.control({position: 'topleft'});
             geoMenu.onAdd = function(map) {
@@ -973,7 +970,7 @@
 
 
         /*** Creazione del menù dei datasets ***/
-        dataMenu = L.control({position: 'topleft'});
+        var dataMenu = L.control({position: 'topleft'});
 
         dataMenu.onAdd = function(map) {
             var nav = L.DomUtil.create('nav', 'menu-ui '+parameters.md);
@@ -1060,6 +1057,7 @@
 
 
         /*** Funzione di ricerca del luogo ***/
+        var osmGeocoder;
         if ($.controls.hasOwnProperty('geocoder') && $.controls.geocoder.active) {
             if (parameters.md != 'widget' && parameters.md != 'mobile') {
                 osmGeocoder = new L.Control.OSMGeocoder(
@@ -1115,6 +1113,7 @@
 
 
         /*** Dev utility ***/
+        var devUtil;
         if ($.debug) {
             devUtil = L.control({position: 'bottomleft'});
             devUtil.onAdd = function(map) {
@@ -1165,6 +1164,7 @@
 
 
         /*** Legenda ***/
+        var legend;
         if ($.hasOwnProperty('legend') && $.legend.active) {
 		    legend = L.control({position: 'bottomleft'});
     	    legend.onAdd = function (map) {
