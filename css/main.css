@@ -195,7 +195,6 @@ html, body, #map {
 .menu-ui select {
 	background: #fff;
 	font-size: 13px;
-	font: 13px Arial, Helvetica, sans-serif;
 	border: 1px solid rgba(0,0,0,0.4);
 	color: #404040;
 	display: block;
@@ -257,7 +256,7 @@ html, body, #map {
 
 .info {
 	padding: 6px 8px;
-	font: 12px/14px Arial, Helvetica, sans-serif;
+	font-size: 12px/14px;
 	background: white;
 	background: rgba(255,255,255,0.8);
 	box-shadow: 0 0 15px rgba(0,0,0,0.2);
