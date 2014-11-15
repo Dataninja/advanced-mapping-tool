@@ -212,7 +212,8 @@
 
             // Parsing function for dataset values
             if (typeof $.dataSets[i].parse === "string") {
-                defaultData[$.dataSets[i].schema.name].parse = function(el) { return window[$.dataSets[i].parse](el) || el; };
+                var parseFn = window[$.dataSets[i].parse];
+                defaultData[$.dataSets[i].schema.name].parse = function(el) { return parseFn(el) || el; };
             } else if (typeof $.dataSets[i].parse === "function") {
                 defaultData[$.dataSets[i].schema.name].parse = $.dataSets[i].parse;
             } else {
@@ -1181,7 +1182,6 @@
                         }),
                         description = dataSet.description || $.legend.description || '';
 
-                    console.log(dataSet);
                     this._div.innerHTML = (parameters.md != 'widget' ? '<h4 title="'+description+'">'+$.legend.title+'</h4>' : '');
                     for (var i=0; i<grades.length; i++) {
                         var color = (colorbrewer[dataSet.palette][grades.length] ? colorbrewer[dataSet.palette][grades.length][i] : colorbrewer[dataSet.palette][3][i]);
