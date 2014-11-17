@@ -174,47 +174,39 @@
         /*** Data sets initialization ***/
         var defaultData = {}, data = {}; // Data sets enabled and used
         for (i=0; i<$.dataSets.length; i++) {
-            defaultData[$.dataSets[i].schema.name] = {
-                name: $.dataSets[i].schema.name,
-                menu: $.dataSets[i].schema.menu,
-                layer: $.dataSets[i].schema.layer,
-                id: $.dataSets[i].schema.id,
-                values: (typeof $.dataSets[i].schema.values === "string" ? [$.dataSets[i].schema.values] : $.dataSets[i].schema.values),
-                value: (typeof $.dataSets[i].schema.values === "string" ? $.dataSets[i].schema.values : $.dataSets[i].schema.values[0]),
-                resourceId: $.dataSets[i].resourceId, // HMMM
-                palette: $.dataSets[i].palette,
-                transform: $.dataSets[i].transform || function(k,v) { return v; },
-                formatter: $.dataSets[i].formatter || function() { return ''; },
+            var dataSet = $.dataSets[i];
+            defaultData[dataSet.schema.name] = {
+                name: dataSet.schema.name,
+                menuLabel: dataSet.schema.label || dataSet.schema.name,
+                layer: dataSet.schema.layer,
+                id: dataSet.schema.id,
+                columns: (dataSet.schema.hasOwnProperty('menu') && dataSet.schema.menu.length ? dataSet.schema.menu.map(function(el) { return el.column; }) : null),
+                labels: (dataSet.schema.hasOwnProperty('menu') && dataSet.schema.menu.length ? dataSet.schema.menu.map(function(el) { return el.label || el.column; }) : null),
+                descriptions: (dataSet.schema.hasOwnProperty('menu') && dataSet.schema.menu.length ? dataSet.schema.menu.map(function(el) { return el.description || (el.label ? el.label + '>' + el.column : el.column); }) : null),
+                resourceId: dataSet.resourceId, // HMMM
+                palette: dataSet.palette,
+                transform: dataSet.transform || function(k,v) { return v; },
+                formatter: dataSet.formatter || function() { return ''; },
                 resource: null,
+                binsNums: (dataSet.schema.hasOwnProperty('menu') && dataSet.schema.menu.length ? dataSet.schema.menu.map(function(el) { return el.bins || dataSet.bins; }) : null),
                 bins: [],
                 ranges: [],
                 active: false
             };
 
-            if ($.dataSets[i].schema.hasOwnProperty('descriptions') && $.dataSets[i].schema.descriptions.length) {
-                defaultData[$.dataSets[i].schema.name].descriptions = (typeof $.dataSets[i].schema.descriptions === "string" ? [$.dataSets[i].schema.descriptions] : $.dataSets[i].schema.descriptions);
-                defaultData[$.dataSets[i].schema.name].description = (typeof $.dataSets[i].schema.descriptions === "string" ? $.dataSets[i].schema.descriptions : $.dataSets[i].schema.descriptions[0]);
-            } else {
-                defaultData[$.dataSets[i].schema.name].descriptions = defaultData[$.dataSets[i].schema.name].values;
-                defaultData[$.dataSets[i].schema.name].description = defaultData[$.dataSets[i].schema.name].value;
-            }
+            defaultData[dataSet.schema.name].column = defaultData[dataSet.schema.name].columns[0];
+            defaultData[dataSet.schema.name].label = defaultData[dataSet.schema.name].labels[0];
+            defaultData[dataSet.schema.name].description = defaultData[dataSet.schema.name].descriptions[0];
+            defaultData[dataSet.schema.name].binsNum = defaultData[dataSet.schema.name].binsNums[0];
 
-            if ($.dataSets[i].schema.hasOwnProperty('labels') && $.dataSets[i].schema.labels.length) {
-                defaultData[$.dataSets[i].schema.name].labels = (typeof $.dataSets[i].schema.labels === "string" ? [$.dataSets[i].schema.labels] : $.dataSets[i].schema.labels);
-                defaultData[$.dataSets[i].schema.name].label = (typeof $.dataSets[i].schema.labels === "string" ? $.dataSets[i].schema.labels : $.dataSets[i].schema.labels[0]);
+            // Parsing function for dataset columns
+            if (typeof dataSet.parse === "string") {
+                var parseFn = window[dataSet.parse];
+                defaultData[dataSet.schema.name].parse = function(el) { return parseFn(el) || el; };
+            } else if (typeof dataSet.parse === "function") {
+                defaultData[dataSet.schema.name].parse = dataSet.parse;
             } else {
-                defaultData[$.dataSets[i].schema.name].labels = defaultData[$.dataSets[i].schema.name].values;
-                defaultData[$.dataSets[i].schema.name].label = defaultData[$.dataSets[i].schema.name].value;
-            }
-
-            // Parsing function for dataset values
-            if (typeof $.dataSets[i].parse === "string") {
-                var parseFn = window[$.dataSets[i].parse];
-                defaultData[$.dataSets[i].schema.name].parse = function(el) { return parseFn(el) || el; };
-            } else if (typeof $.dataSets[i].parse === "function") {
-                defaultData[$.dataSets[i].schema.name].parse = $.dataSets[i].parse;
-            } else {
-                defaultData[$.dataSets[i].schema.name].parse = function(el) { return parseInt(el) || parseFloat(el) || el; };
+                defaultData[dataSet.schema.name].parse = function(el) { return parseInt(el) || parseFloat(el) || el; };
             }
         }
 
@@ -1008,21 +1000,22 @@
         dataMenu.onChange = function(region, index) {
             d3.select(this._nav).select('select').remove();
             var index = index || 0,
-                values = data[region][index].values;
-            if (values && values.length > 1) {
+                dataSet = data[region][index];
+            if (dataSet.columns && dataSet.columns.length > 1) {
                 d3.select(this._nav)
                     .append('select')
                     .attr('disabled','disabled')
                     .on('change', function() {
                         var selectedIndex = d3.select(this).property('selectedIndex'),
                             d = d3.select(this).selectAll("option")[0][selectedIndex].__data__;
-                        data[region][index].value = d;
-                        data[region][index].label = data[region][index].labels[selectedIndex];
-                        data[region][index].description = data[region][index].descriptions[selectedIndex];
-                        loadData(region,data[region][index].name);
+                        dataSet.column = d;
+                        dataSet.label = dataSet.labels[selectedIndex];
+                        dataSet.description = dataSet.descriptions[selectedIndex];
+                        dataSet.binsNum = dataSet.binsNums[selectedIndex];
+                        loadData(region,dataSet.name);
                     })
                     .selectAll('option')
-                    .data(values)
+                    .data(dataSet.labels)
                     .enter()
                     .append('option')
                     .text(function(d) { return d; });
@@ -1032,10 +1025,10 @@
         dataMenu.update = function(region) {
             d3.select(this._nav).style('display',null).selectAll("a, select").remove();
             if (region) {
-                var menuDataSets = $.dataSets.filter(function(l) { return l.schema.layer === region; });
-                if (menuDataSets.length > 1) {
+                var dataSets = data[region];
+                if (dataSets.length > 1) {
                     d3.select(this._nav).selectAll("a")
-                        .data(menuDataSets.map(function(el) { return el.schema; }))
+                        .data(dataSets)
                         .enter()
                         .append("a")
                         .attr("href", "#")
@@ -1053,7 +1046,7 @@
                             dataMenu.onChange(region, index);
                             loadData(region, d.name);
                         })
-                        .text(function(d) { return d.menu; });
+                        .text(function(d) { return d.menuLabel; });
 
                 } else {
                     d3.select(this._nav).style('display','none');
@@ -1191,7 +1184,7 @@
                         grades = dataSet.ranges.map(function(el) { 
                             return el.split(" - ").map(function(el) { 
                                 var num = parseFloat(el);
-                                return (dataSet.formatter(dataSet.value, num) ? d3.format(dataSet.formatter(dataSet.value, num))(num) : (d3.format(",d")(num) || d3.format(",.2f")(num) || num)); 
+                                return (dataSet.formatter(dataSet.column, num) ? d3.format(dataSet.formatter(dataSet.column, num))(num) : (d3.format(",d")(num) || d3.format(",.2f")(num) || num)); 
                             }).join(" - ");
                         }),
                         description = dataSet.description || $.legend.description || '';
@@ -1266,7 +1259,7 @@
                 geoLayer = $.geoLayers.filter(function(l) { return (l.type === "vector" && l.schema.name === region); })[0],
                 dataSet = data[region].filter(function(el) { return el.active; })[0],
                 currentStyle = geoLayer.style.default;
-            currentStyle.fillColor = getColor(feature.properties.data[dataSet.name][dataSet.value], dataSet.bins, dataSet.palette); // Dynamic parsing
+            currentStyle.fillColor = getColor(feature.properties.data[dataSet.name][dataSet.column], dataSet.bins, dataSet.palette); // Dynamic parsing
 	    	return currentStyle;
     	}
         /*** ***/
@@ -1284,11 +1277,11 @@
                 geoLayer = $.geoLayers.filter(function(l) { return (l.type === "vector" && l.schema.name === region); })[0],
                 dataSet = data[region].filter(function(el) { return el.active; })[0],
                 highlightStyle = geoLayer.style.highlight,
-                num = props.data[dataSet.name][dataSet.value];
+                num = props.data[dataSet.name][dataSet.column];
                     
             if (!layer.selected) layer.setStyle(highlightStyle);
             if ($.hasOwnProperty('label') && $.label.active) {
-                label.setContent(props[geo[region].label]+'<br>' + dataSet.label + ': '+ (dataSet.formatter(dataSet.value, num) ? d3.format(dataSet.formatter(dataSet.value, num))(num) : (d3.format(",d")(num) || d3.format(",.2f")(num) || num)));
+                label.setContent(props[geo[region].label]+'<br>' + dataSet.label + ': '+ (dataSet.formatter(dataSet.column, num) ? d3.format(dataSet.formatter(dataSet.column, num))(num) : (d3.format(",d")(num) || d3.format(",.2f")(num) || num)));
                 label.setLatLng(layer.getBounds().getCenter());
                 map.showLabel(label);
             }
@@ -1377,16 +1370,30 @@
         function binData(region) {
             if ($.debug) console.log("binDataFunction",arguments);
 
-            var index = data[region].map(function(el) { return el.active; }).indexOf(true),
-                value = data[region][index].value;
+            var dataSet = data[region].filter(function(el) { return el.active; })[0],
+                geoLayer = $.geoLayers.filter(function(l) { return (l.type === "vector" && l.schema.name === region); })[0];
 
-            var geoLayer = $.geoLayers.filter(function(l) { return (l.type === "vector" && l.schema.name === region); })[0],
-                dataSet = $.dataSets.filter(function(l) { return l.schema.layer === region; })[index];
-
-            var serie = data[region][index].resource.map(function(el) { return el[value]; });
+            var serie = dataSet.resource.map(function(el) { return el[dataSet.column]; });
             var gs = new geostats(serie);
-            data[region][index].bins = gs.getJenks(serie.length > dataSet.bins ? dataSet.bins : serie.length-1);
-            data[region][index].ranges = gs.ranges;
+
+            if (serie.length > 3) {
+                if (dataSet.binsNum > serie.length) {
+                    dataSet.binsNum = serie.length-1;
+                }
+            } else {
+                dataSet.binsNum = 3;
+            }
+            
+            bins = gs.getJenks(dataSet.binsNum);
+
+            var uniqBins = _.uniq(bins);
+            if (dataSet.binsNum > 3 && uniqBins.length < bins.length) {
+                dataSet.binsNum = uniqBins.length-1;
+                bins = gs.getJenks(dataSet.binsNum);
+            }
+
+            dataSet.bins = bins.map(function(el) { return parseInt(el) || parseFloat(el) || el; });
+            dataSet.ranges = gs.ranges;
             legend.update(region);
         }
 

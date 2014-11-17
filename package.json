@@ -21,6 +21,7 @@
   "files": [
     "bower_components/headjs/dist/1.0.0/head.js",
     "bower_components/queue-async/queue.js",
+    "bower_components/underscore/underscore.js",
     "bower_components/d3/d3.js",
     "bower_components/geostats/lib/geostats.js",
     "bower_components/colorbrewer2/colorbrewer.js",

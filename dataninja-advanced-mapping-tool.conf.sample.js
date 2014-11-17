@@ -218,22 +218,25 @@ var mapConfig = {
                 name: 'dataset1',
 
                 // Menu label for layer entry
-                menu: 'dataset1',
+                label: 'dataset1',
 
                 // Key name of layer data refer to
                 layer: 'layer1',
 
                 // Key of id values used for join
                 id: '',
+
+                // Choroplethable columns with custom lable, description and bins number
+                menu: [
+                    {
+                        column: '',
+                        label: '',
+                        description: '',
+                        bins: 3
+                    }
+                    //...
+                ]
                 
-                // Key of label values (in legend)
-                labels: [],
-
-                // Texts for legend and infowindow descriptions
-                descriptions: [],
-
-                // Keys of data values shown on map on loading
-                values: ['var1']
             },
 
             /* Custom parse function name from string to number
@@ -950,15 +953,15 @@ var mapConfig = {
  *     - type [string matching dataTypes attributes]
  *     - formatter [string] function ( [string], [mixed] )
  *     - schema [object]
+ *       - name [string]
  *       - layer [string matching a geoLayer.name for joining]
  *       - id [string]
- *       - menu [string]
- *       - labels [string | array]
- *         - [string]
- *       - descriptions [string | array]
- *         - [string]
- *       - values [string | array]
- *         - [string]
+ *       - menu [array]
+ *         - [object]
+ *           - column [string]
+ *           - label [string]
+ *           - description [string]
+ *           - bins [int > 0]
  *     - parse [string] | [mixed] function( [string] )
  *     - (other attributes are inherited from dataSources and dataTypes and can be overrided)
  *   - ...
