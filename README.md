@@ -7,16 +7,24 @@ Another advanced mapping tool by Dataninja, enhancement of the original Confisca
 ``` bash
 git clone https://github.com/Dataninja/advanced-mapping-tool.git
 cd advanced-mapping-tool/
-npm install
-bower install
-grunt
 cp dataninja-advanced-mapping-tool.conf.sample.js dataninja-advanced-mapping-tool.conf.js
+cp index.sample.html index.html
 ```
 
 # Setup
 Edit the configuration file dataninja-advanced-mapping-tool.conf.js accordingly to your needs.
 
-For development and debugging browse to debug.html.
+View the map browsing to index.html.
 
-For normal use browse to index.html.
+You can download the application to work offline zipping it: `zip -r map.zip . -x \*demo\* -x \*.git\*`.
+
+# Development
+``` bash
+git clone https://github.com/Dataninja/advanced-mapping-tool.git
+cd advanced-mapping-tool/
+npm install
+bower install
+grunt
+cp dataninja-advanced-mapping-tool.conf.sample.js dataninja-advanced-mapping-tool.conf.js
+```
 

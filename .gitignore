@@ -4,5 +4,7 @@ tmp/
 demo/welfarebo/
 demo/donnechecontano/
 /*.conf.js
+/*.custom.css
 index.html
 debug.html
+*.zip
