@@ -8,6 +8,7 @@ Another advanced mapping tool by Dataninja, enhancement of the original Confisca
 git clone https://github.com/Dataninja/advanced-mapping-tool.git
 cd advanced-mapping-tool/
 cp dataninja-advanced-mapping-tool.conf.sample.js dataninja-advanced-mapping-tool.conf.js
+cp dataninja-advanced-mapping-tool.custom.sample.css dataninja-advanced-mapping-tool.custom.css
 cp index.sample.html index.html
 ```
 
@@ -26,5 +27,8 @@ npm install
 bower install
 grunt
 cp dataninja-advanced-mapping-tool.conf.sample.js dataninja-advanced-mapping-tool.conf.js
+cp dataninja-advanced-mapping-tool.custom.sample.css dataninja-advanced-mapping-tool.custom.css
+cp index.sample.html index.html
+cp debug.sample.html debug.html
 ```
 
