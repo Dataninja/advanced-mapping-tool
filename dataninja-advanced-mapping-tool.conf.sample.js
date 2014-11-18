@@ -62,7 +62,7 @@ var mapConfig = {
                 northEast: {
                     lat: 45,
                     lng: 15
-                },
+                }
             },
 
             // Max bounds allowed to user
@@ -78,7 +78,7 @@ var mapConfig = {
                 northEast: {
                     lat: 45,
                     lng: 12
-                },
+                }
             }
         },
 
@@ -289,7 +289,7 @@ var mapConfig = {
             default: '<p></p>',
 
             // Shown on little screen, ie. on mobile
-            mobile: '',
+            mobile: ''
         },
 
         // Data downloads allowed and linked in the infowindow
@@ -923,7 +923,7 @@ var mapConfig = {
  *           - bins [int > 0]
  *       - groups [object]
  *         - (groups as keys) [array of columns' names]
- *     - parse [string] | [mixed] function( [string] )
+ *     - parse [string] | [mixed] function( [string], [mixed] )
  *     - (other attributes are inherited from dataSources and dataTypes and can be overrided)
  *   - ...
  * - pointsSet [object]
