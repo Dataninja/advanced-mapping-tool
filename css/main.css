@@ -294,6 +294,10 @@ html, body, #map {
     width: 20px;
 }
 
+.info a#close-cross {
+    float: right;
+}
+
 .table {
   margin-bottom: 0px;
 }

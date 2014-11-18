@@ -554,11 +554,12 @@ if (mapConfig) {
 
                     var thead = '<thead>' + 
                         '<tr>' + 
-                        '<th>' + 
+                        '<th colspan="2">' + 
                         (dnlBtn.length ? '<span id="sdnlBtn">'+dnlBtn.join("&nbsp;")+'</span>' + '&nbsp;&nbsp;' : '') + 
                         (buttons.length ? '<span id="sshrBtn">'+buttons.join("&nbsp;")+'</span>' : '') + 
+                        '<a id="close-cross" href="#" title="Chiudi"><img src="icons/close.png" /></a>' + 
                         '</th>' + 
-                        '<th style="text-align:right;"><a id="close-cross" href="#" title="Chiudi"><img src="icons/close.png" /></a></th></tr>' + 
+                        '</tr>' + 
                         '<tr>' + 
                         '<th colspan="2" class="rossobc">' + props[geo[region].label] + '</th>' +
                         '</tr>' + 
