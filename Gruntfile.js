@@ -13,7 +13,7 @@ module.exports = function(grunt) {
                     'leaflet/dist/images/*'
 
                 ],
-                dest: 'img/',
+                dest: 'icons/',
                 flatten: true,
                 filter: 'isFile'
             },
@@ -75,7 +75,7 @@ module.exports = function(grunt) {
                 options: {
                     replacements: [{
                         pattern: /url\(([^#\)]*\/)([^\/\)#]*)\)/g,
-                        replacement: 'url(img/$2)'
+                        replacement: 'url(icons/$2)'
                     }]
                 }
             }
