@@ -72,3 +72,10 @@ table {
     border-radius: 0 0 6px 6px
 }
 
+.zebra tbody tr.second-level > td.table-key {
+    text-indent: 1em;
+}
+
+.zebra tbody tr.group > td {
+    text-decoration: underline;
+}

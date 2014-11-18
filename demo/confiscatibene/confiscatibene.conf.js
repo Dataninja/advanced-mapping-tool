@@ -8,6 +8,15 @@ var mapConfig = {
     // Debug mode activation with logs in console
     debug: false,
 
+    // Language code in ISO 639-1:2002 format (see http://en.wikipedia.org/wiki/List_of_ISO_639-1_codes)
+    language: 'it',
+
+    // Google Analytics code for tracking, see http://www.google.it/intl/it/analytics/
+    analytics: {
+        active: false,
+        ua: ''
+    },
+
     // URL shortener service configuration (via yourls)
     urlShortener: {
 
@@ -20,13 +29,13 @@ var mapConfig = {
         /* Relative or absolute path (ie. [prepath]/yourls-api.php)
          * See http://yourls.org/#API
          */
-        path: '/api/dtnj/yourls-api.php',
+        path: '',
 
         // Signature, see https://github.com/YOURLS/YOURLS/wiki/PasswordlessAPI
-        signature: 'efe758b8d3',
+        signature: '',
 
         // If prefix is not empty, short url will be [prefix]+md5([long url])
-        prefix: 'confiscatibene-', // ie. confiscatibene-
+        prefix: '',
             
         // URL generator based on region and a filter
         url: function() {
@@ -92,11 +101,24 @@ var mapConfig = {
          */
         attribution: [
             'Powered by <a href="http://www.dataninja.it/" target="_blank">Dataninja</a>',
-            'tileset from <a href="http://www.geoiq.com/" target="_blank">GeoIQ</a>',
+            'tileset from <a href="http://mapnik.org/" target="_blank">OSM Mapnik</a>',
             'icons from <a href="http://www.flaticon.com/" target="_blank">Freepik</a> and <a href="http://www.simplesharebuttons.com/" target="_blank">Simple Share Buttons</a>',
             'geocoding by <a href="http://wiki.openstreetmap.org/wiki/Nominatim" target="_blank">OSM Nominatim</a>',
-            'code on <a href="https://github.com/Dataninja/confiscatibene-choropleth" target="_blank">GitHub</a>.'
+            'code on <a href="https://github.com/Dataninja/advanced-mapping-tool" target="_blank">GitHub</a>.'
         ]
+    },
+
+    // External div for long text description
+    description: {
+
+        // Enable or not
+        active: false,
+
+        // Position respect to map
+        position: 'right',
+
+        // HTML content of the description
+        content: '<p></p>'
     },
 
     // Label control on mouse over regions in vectorial geolayers
@@ -121,11 +143,14 @@ var mapConfig = {
         // Title at the top of the control
         title: 'Legenda',
 
-        // Description at the bottom
+        // Description at the bottom, overridable by dataset configuration
         description: 'Numero totale di beni confiscati',
 
         // Label appended to legend items
-        itemLabel: 'beni confiscati'
+        label: function(min,max,label) {
+            return label + ": " + min + " - " + max;
+        }
+
     },
 
     // Definition of geographic layers to load
@@ -140,6 +165,7 @@ var mapConfig = {
             // Inherits attributes from geoSource named here
             source: 'file',
             path: 'geo/',
+            filename: '',
             format: 'json',
             
             // Inherits attributes from geoType named here
@@ -161,12 +187,14 @@ var mapConfig = {
             }
         },
         {
+
             source: 'file',
             path: 'geo/',
+            filename: '',
             format: 'json',
 
             type: 'vector',
-            
+
             schema: {
                 name: 'province',
                 menu: 'Province',
@@ -175,11 +203,12 @@ var mapConfig = {
             }
         },
         {
-            active: true,
+
             source: 'file',
             path: 'geo/',
+            filename: '',
             format: 'json',
-
+            
             type: 'vector',
 
             schema: {
@@ -200,45 +229,70 @@ var mapConfig = {
             path: 'data/',
             filename: 'e2f0c989-929f-4e4d-87e2-097140f8880f.json',
             format: 'json',
+
+            // Transformation of the ajax results before their using
             transform: function(res) {
                 return res.result.records;
             },
+           
+            // Format specifier for d3.format(), see https://github.com/mbostock/d3/wiki/Formatting#d3_format
+            // For string template, see http://docs.python.org/release/3.1.3/library/string.html#formatspec
+            // If missing or return empty string, default formatting function is d3.format(',d')(v) || d3.format(',.2f')(v) || v
+            /*formatter: function(k,v) {
+                return '';
+            },*/ 
 
-            // Inherits attributes from geoType named here
-            type: 'choropleth', // from dataTypes attributes
+            // Inherits attributes from dataType named here
+            type: 'choropleth',
             bins: 7,
             palette: 'Reds',
             
             schema: {
-
+                
                 // Key name of dataset
                 name: 'regioni',
-                
+
                 // Menu label for layer entry
-                menu: 'Beni confiscati 1',
+                label: '',
 
                 // Key name of layer data refer to
                 layer: 'regioni',
 
                 // Key of id values used for join
                 id: 'IdRegioneISTAT',
-                
-                // Key of label values (not used)
-                label: '',
 
-                // Keys of data values shown on map on loading
-                values: [
-                    'Totale beni',
-                    'Totale immobili',
-                    'Totale aziende'
+                // Choroplethable columns with custom lable, description and bins number
+                menu: [
+                    {
+                        column: 'Totale beni'
+                        //label: '',
+                        //description: '',
+                        //bins: 3
+                    },
+                    {
+                        column: 'Totale immobili'
+                        //label: '',
+                        //description: '',
+                        //bins: 3
+                    },
+                    {
+                        column: 'Totale aziende'
+                        //label: '',
+                        //description: '',
+                        //bins: 3
+                    }
+                    //...
                 ]
+
+                // Columns aggregation
+                //groups: {}
+                
             },
 
-            /* Custom parse function name from string to number
-             * If missing, 'parseFloat' is the default
-             * You can also define a custom function (el) { return el; }
-             */
-            parse: 'parseInt'
+            // Custom parse function name from string to number
+            // If missing, formatting is performing by parseInt(v) || parseFloat(v) || v
+            // You can also define a custom function (k,v) { return v; }
+            //parse: 'parseFloat'
         },
         {
             source: 'file',
@@ -246,23 +300,50 @@ var mapConfig = {
             filename: 'c18fa1ca-971f-4cfa-92e9-869785260dec.json',
             format: 'json',
 
+            transform: function(res) {
+                return res;
+            },
+           
             type: 'choropleth',
             bins: 7,
             palette: 'Blues',
-
+            
             schema: {
                 name: 'province',
+                label: '',
                 layer: 'province',
                 id: 'IdProvinciaISTAT',
-                label: '',
-                values: [
-                    'Totale beni',
-                    'Totale immobili',
-                    'Totale aziende'
+                menu: [
+                    {
+                        column: 'Totale beni'
+                        //label: '',
+                        //description: '',
+                        //bins: 3
+                    },
+                    {
+                        column: 'Totale immobili'
+                        //label: '',
+                        //description: '',
+                        //bins: 3
+                    },
+                    {
+                        column: 'Totale aziende'
+                        //label: '',
+                        //description: '',
+                        //bins: 3
+                    }
+                    //...
                 ]
+
+                // Columns aggregation
+                //groups: {}
+                
             },
 
-            parse: 'parseInt'
+            // Custom parse function name from string to number
+            // If missing, formatting is performing by parseInt(v) || parseFloat(v) || v
+            // You can also define a custom function (k,v) { return v; }
+            //parse: 'parseFloat'
         },
         {
             source: 'file',
@@ -270,23 +351,50 @@ var mapConfig = {
             filename: '69b2565e-0332-422f-ad57-b11491e33b08.json',
             format: 'json',
 
+            transform: function(res) {
+                return res;
+            },
+           
             type: 'choropleth',
             bins: 7,
             palette: 'Greens',
-
+            
             schema: {
                 name: 'comuni',
+                label: '',
                 layer: 'comuni',
                 id: 'IdComuneISTAT',
-                label: '',
-                values: [
-                    'Totale beni',
-                    'Totale immobili',
-                    'Totale aziende'
+                menu: [
+                    {
+                        column: 'Totale beni'
+                        //label: '',
+                        //description: '',
+                        //bins: 3
+                    },
+                    {
+                        column: 'Totale immobili'
+                        //label: '',
+                        //description: '',
+                        //bins: 3
+                    },
+                    {
+                        column: 'Totale aziende'
+                        //label: '',
+                        //description: '',
+                        //bins: 3
+                    }
+                    //...
                 ]
+
+                // Columns aggregation
+                //groups: {}
+                
             },
 
-            parse: 'parseInt'
+            // Custom parse function name from string to number
+            // If missing, formatting is performing by parseInt(v) || parseFloat(v) || v
+            // You can also define a custom function (k,v) { return v; }
+            //parse: 'parseFloat'
         }
     ],
 
@@ -312,6 +420,9 @@ var mapConfig = {
 
         // Enable or not
         active: true,
+
+        // Position respect to map (default 'inside', bottom-right corner)
+        position: 'inside',
 
         // Default content when no region is selected
         content: {
@@ -344,30 +455,19 @@ var mapConfig = {
                     
                     // Inherits attributes from dataSource named here
                     source: 'dkan',
-                    resourceId: 'e5b4d63a-e1e8-40a3-acec-1d351f03ee56',
+                    resourceId: '',
 
                     // Name of the download, used to build filename
-                    name: 'immobili',
+                    name: 'dwn1',
                     
                     // Filebase of the filename
-                    filebase: 'confiscatibene',
+                    filebase: 'dwn1',
 
                     // Title for download icon
-                    title: 'Scarica l\'elenco degli immobili',
+                    title: '',
 
                     // Download icon
                     image: 'img/house109-dnl.png'
-                },
-                {
-                    active: true,
-
-                    source: 'dkan',
-                    resourceId: '8b7e12f1-6484-47f0-9cf6-88b446297dbc',
-
-                    name: 'aziende',
-                    filebase: 'confiscatibene',
-                    title: 'Scarica l\'elenco delle aziende',
-                    image: 'img/factory6-dnl.png'
                 }
             ]
         },
@@ -391,7 +491,7 @@ var mapConfig = {
                 via: 'confiscatibene',
 
                 // Text appended to tweet content, hashtags here (+ region name)
-                text: 'Immobili e aziende #confiscatibene' // ie. Tweet
+                text: 'Immobili e aziende #confiscatibene'
             },
 
             // Facebook share icon
@@ -448,10 +548,10 @@ var mapConfig = {
                 },
                 filter: function(k,v) {
                     return (v != '0' && k.charAt(0) == k.charAt(0).toUpperCase() && k.slice(0,2) != "Id");
-                },
-                transform: function(k,v) {
-                    return parseInt(v) || v;
-                }
+                }/*,
+                formatter: function(k,v) {
+                    return '';
+                }*/
             }
         }
     },
@@ -479,7 +579,10 @@ var mapConfig = {
             title: '',
 
             // Image
-            image: 'img/logo.png',
+            image: 'img/logocb.png',
+
+            // Border
+            border: false,
 
             // Link
             link: 'http://www.confiscatibene.it/'
@@ -502,7 +605,7 @@ var mapConfig = {
         embed: {
 
             // Enable or not
-            active: true,
+            active: false,
 
             // Title on mouseover
             title: 'Embed this map',
@@ -544,7 +647,7 @@ var mapConfig = {
         screenshot: {
 
             // Enable or not
-            active: true,
+            active: false,
 
             // Title on mouseover
             title: 'Take a screenshot',
@@ -597,11 +700,11 @@ var mapConfig = {
             facebook: {
 
                 // Enable or not
-                active: true,
+                active: false,
 
                 // Specific options from Facebook Dev
                 // See https://developers.facebook.com/docs/plugins/like-button
-                appId: '470290923072583', // appID dei Dataninja
+                appId: '', // appID dei Dataninja
                 layout: 'box_count',
                 action: 'like',
                 'show-faces': false,
@@ -626,7 +729,7 @@ var mapConfig = {
         geocoder: {
 
             // Enable or not
-            active: false,
+            active: true,
 
             // Geo layer name map shows after geocoding
             layer: 'comuni',
@@ -638,7 +741,7 @@ var mapConfig = {
             title: 'Cerca il tuo comune',
 
             // Email contact for Nominatim
-            email: 'jenkin@dataninja.it',
+            email: 'info@confiscatibene.it',
 
             // Zoom of map after geocoding
             zoom: 10,
@@ -649,7 +752,7 @@ var mapConfig = {
             autocomplete: {
 
                 // Enable or not
-                active: false,
+                active: true,
 
                 // Domain without trailing slash (only for remote file)
                 domain: '',
@@ -661,7 +764,7 @@ var mapConfig = {
                 filename: 'lista_comuni.json',
 
                 // File prefix (used as extension in file name template for multiple files)
-                prefix: 'lista_comuni-', // ie. geo/lista_comuni-
+                prefix: 'list_comuni-', // ie. geo/lista_comuni-
             
                 // File format (used as extension in file name template for multiple files)
                 format: 'json',
@@ -731,7 +834,7 @@ var mapConfig = {
             /* Relative or absolute path (ie. [prepath]/action/datastore/search.json)
              * See http://docs.getdkan.com/docs/dkan-documentation/dkan-api/datastore-api#Datastore_API_URL_
              */
-            path: '/api/confiscatibene/action/datastore/search.json',
+            path: '',
 
             /* Request parameters for Dkan API
              * See http://docs.getdkan.com/docs/dkan-documentation/dkan-api/datastore-api#Request_Parameters
@@ -894,69 +997,18 @@ var mapConfig = {
             }
         }
         // ...
-    },
-
-    // Known types of visualization into the infowindow with global setting inherited to infowindow with 'view' parameter
-    viewTypes: {
-
-        /* The infowindow contains a table with header and footer,
-         * here a structure of the body can be defined
-         * returning the tbody element, see http://www.w3schools.com/tags/tag_tbody.asp
-         */
-        table: function(data, options) {
-            if (!data) return '';
-
-            /* Default options can be overrided (include and exclude filters are evaluated in this order):
-             * - include array has data keys to include
-             * - exclude array has data keys to exclude
-             * - bold function defines a rule to boldify a row
-             * - filter function defines a custom filter after include and exclude filters
-             * - transform function defines a transformation (ie. casting) on data values
-             */
-            var defaultOptions = {
-                    include: [],
-                    exclude: [],
-                    bold: function(key, value) { return false; },
-                    filter: function(key, value) { return true; },
-                    transform: function(key, value) { return value; }
-                },
-                options = options || {},
-                tbody = '',
-                k;
-
-            for (k in defaultOptions) {
-                if (defaultOptions.hasOwnProperty(k) && !options.hasOwnProperty(k)) {
-                    options[k] = defaultOptions[k];
-                }
-            }
-
-            for (k in data) {
-                if (data.hasOwnProperty(k)) {
-                    if (!options.include.length || options.include.indexOf(k) > -1) {
-                        if (!options.exclude.length || !(options.exclude.indexOf(k) > -1)) {
-                            if (options.filter(k,data[k])) {
-                                var val = options.transform(k,data[k]),
-                                    isBold = options.bold(k,data[k]);
-                                tbody += '<tr>' + 
-                                    '<td>' + (isBold ? '<b>'+k+'</b>' : k) + '</td>' +
-                                    '<td>' + (isBold ? '<b>'+val+'</b>' : val) + '</td>' +
-                                    '</tr>';
-                            }
-                        }
-                    }
-                }
-            }
-
-            return tbody;
-        }
     }
 };
 
 /*
  * Map configuration complete structure:
  *
- * - debug: [bool]
- * - dataSources: [object]
+ * - debug [bool]
+ * - language [string]
+ * - analytics [object]
+ *   - active [bool]
+ *   - ua [string]
+ * - dataSources [object]
  *   - file [object]
  *     - domain [string]
  *     - path [string]
@@ -1005,13 +1057,19 @@ var mapConfig = {
  *     - active [bool]
  *     - source [string matching dataSources attributes]
  *     - type [string matching dataTypes attributes]
+ *     - formatter [string] function ( [string], [mixed] )
  *     - schema [object]
+ *       - name [string]
  *       - layer [string matching a geoLayer.name for joining]
  *       - id [string]
- *       - menu [string]
- *       - label [string]
- *       - values [string | array]
- *         - [string]
+ *       - menu [array]
+ *         - [object]
+ *           - column [string]
+ *           - label [string]
+ *           - description [string]
+ *           - bins [int > 0]
+ *       - groups [object]
+ *         - (groups as keys) [array of columns' names]
  *     - parse [string] | [mixed] function( [string] )
  *     - (other attributes are inherited from dataSources and dataTypes and can be overrided)
  *   - ...
@@ -1050,12 +1108,20 @@ var mapConfig = {
  *         - lat [float]
  *         - lng [float]
  *   - zoom [object]
+ *     - init [int]
  *     - min [int]
  *     - max [int]
  *     - scrollWheel [bool]
+ *   - center [object]
+ *     - lat [float]
+ *     - lng [float]
  *   - attribution [array]
  *     - [string]
  *     - ...
+ * - description [object]
+ *   - active [bool]
+ *   - position [string]
+ *   - content [string]
  * - urlShortener [object]
  *   - active [bool]
  *   - domain [string]
@@ -1065,6 +1131,7 @@ var mapConfig = {
  *   - url [string] function ( )
  * - infowindow [object]
  *   - active [bool]
+ *   - position [string]
  *   - content [object]
  *     - default [string]
  *     - mobile [string]
@@ -1112,7 +1179,7 @@ var mapConfig = {
  *   - active [bool]
  *   - title [string]
  *   - description [string]
- *   - itemLabel [string]
+ *   - label [string] function ( [float], [float] )
  * - controls [object]
  *   - active [bool]
  *   - fullscreen [object]
@@ -1122,6 +1189,7 @@ var mapConfig = {
  *     - active [bool]
  *     - title [string]
  *     - image [string]
+ *     - border [bool]
  *     - link [string]
  *   - reset [object]
  *     - active [bool]

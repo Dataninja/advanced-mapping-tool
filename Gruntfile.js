@@ -28,6 +28,10 @@ module.exports = function(grunt) {
                 src: '<%= pkg.files %>',
                 // the location of the resulting JS file
                 dest: '<%= pkg.name %>.lib.js'
+            },
+            main: {
+                src: ['js/<%= pkg.name %>.views.js', 'js/<%= pkg.name %>.main.js'],
+                dest: '<%= pkg.name %>.js'
             }
         },
         uglify: {

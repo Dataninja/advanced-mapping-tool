@@ -205,17 +205,23 @@ html, body, #map {
 }
 
 .menu-ui a {
-    border-bottom-left-radius: 3px;
-    border-bottom-right-radius: 3px;
+    border-radius: 0px;
     border-top-width: 0px;
 }
 
-.menu-ui a:first-child {
+.menu-ui a.first-item {
     border-bottom-left-radius: 0px;
     border-bottom-right-radius: 0px;
     border-top-left-radius: 3px;
     border-top-right-radius: 3px;
     border-top-width: 1px;
+}
+
+.menu-ui a.last-item {
+    border-bottom-left-radius: 3px;
+    border-bottom-right-radius: 3px;
+    border-top-left-radius: 0px;
+    border-top-right-radius: 0px;
 }
 
 .menu-ui select {
@@ -311,6 +317,7 @@ html, body, #map {
 	text-align: left;
 	line-height: 18px;
 	color: #555;
+    max-width: 25%;
 }
 
 .legend i {
@@ -319,6 +326,10 @@ html, body, #map {
 	float: left;
 	margin-right: 8px;
 	opacity: 0.7;
+}
+
+.legend h3 {
+    margin: 12px 0px;
 }
 
 /* Geocoder */
