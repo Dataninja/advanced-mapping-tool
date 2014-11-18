@@ -433,38 +433,38 @@
                             buttons.push('<a class="ssb" href="http://twitter.com/share?url=' + btnEncUrl + 
                                 '&via=' + $.infowindow.shareButtons.twitter.via + 
                                 '&text=' + encodeURIComponent(btnPlace + ' - ' + $.infowindow.shareButtons.twitter.text + ' ') + 
-                                '" target="_blank" title="'+btnTitle+' su Twitter"><img src="img/twitter.png" id="ssb-twitter"></a>'
+                                '" target="_blank" title="'+btnTitle+' su Twitter"><img src="icons/twitter.png" id="ssb-twitter"></a>'
                             );
                         }
 
                         if (_.has($.infowindow.shareButtons,'facebook') && $.infowindow.shareButtons.facebook.active) {
                             buttons.push('<a class="ssb" href="http://www.facebook.com/sharer.php?u=' + btnEncUrl + 
-                                '" target="_blank" title="'+btnTitle+' su Facebook"><img src="img/facebook.png" id="ssb-facebook"></a>'
+                                '" target="_blank" title="'+btnTitle+' su Facebook"><img src="icons/facebook.png" id="ssb-facebook"></a>'
                             );
                         }
 
                         if (_.has($.infowindow.shareButtons,'gplus') && $.infowindow.shareButtons.gplus.active) {
                             buttons.push('<a class="ssb" href="https://plus.google.com/share?url=' + btnEncUrl + 
-                                '" target="_blank" title="'+btnTitle+' su Google Plus"><img src="img/gplus.png" id="ssb-gplus"></a>'
+                                '" target="_blank" title="'+btnTitle+' su Google Plus"><img src="icons/gplus.png" id="ssb-gplus"></a>'
                             );
                         }
 
                         if (_.has($.infowindow.shareButtons,'linkedin') && $.infowindow.shareButtons.linkedin.active) {
                             buttons.push('<a class="ssb" href="http://www.linkedin.com/shareArticle?mini=true&url=' + btnEncUrl + 
-                                '" target="_blank" title="'+btnTitle+' su LinkedIn"><img src="img/linkedin.png" id="ssb-linkedin"></a>'
+                                '" target="_blank" title="'+btnTitle+' su LinkedIn"><img src="icons/linkedin.png" id="ssb-linkedin"></a>'
                             );
                         }
 
                         if (_.has($.infowindow.shareButtons,'email') && $.infowindow.shareButtons.email.active) {
                             buttons.push('<a class="ssb" href="mailto:?Subject=' + encodeURIComponent($.infowindow.shareButtons.email.subject + ' | ' + btnPlace) + 
                                 '&Body=' + encodeURIComponent(btnPlace + ' - ' + $.infowindow.shareButtons.email.body + ': ') + btnEncUrl + 
-                                '" target="_blank" title="'+btnTitle+' per email"><img src="img/email.png" id="ssb-email"></a>'
+                                '" target="_blank" title="'+btnTitle+' per email"><img src="icons/email.png" id="ssb-email"></a>'
                             );
                         }
 
                         if (_.has($.infowindow.shareButtons,'permalink') && $.infowindow.shareButtons.permalink.active) {
                             buttons.push('<a class="ssb" href="' + btnUrl + 
-                                '" target="_blank" title="Permalink"><img src="img/link.png" id="ssb-link"></a>'
+                                '" target="_blank" title="Permalink"><img src="icons/link.png" id="ssb-link"></a>'
                             );
                         }
                     }
@@ -496,7 +496,7 @@
                         (dnlBtn.length ? '<span id="sdnlBtn">'+dnlBtn.join("&nbsp;")+'</span>' + '&nbsp;&nbsp;' : '') + 
                         (buttons.length ? '<span id="sshrBtn">'+buttons.join("&nbsp;")+'</span>' : '') + 
                         '</th>' + 
-                        '<th style="text-align:right;"><a id="close-cross" href="#" title="Chiudi"><img src="img/close.png" /></a></th></tr>' + 
+                        '<th style="text-align:right;"><a id="close-cross" href="#" title="Chiudi"><img src="icons/close.png" /></a></th></tr>' + 
                         '<tr>' + 
                         '<th colspan="2" class="rossobc">' + props[geo[region].label] + '</th>' +
                         '</tr>' + 
@@ -542,38 +542,38 @@
                                 buttons.push('<a class="ssb" href="http://twitter.com/share?url=' + btnEncUrl + 
                                     '&via=' + $.infowindow.shareButtons.twitter.via + 
                                     '&text=' + encodeURIComponent(btnPlace + ' - ' + $.infowindow.shareButtons.twitter.text + ' ') + 
-                                    '" target="_blank" title="'+btnTitle+' su Twitter"><img src="img/twitter.png" id="ssb-twitter"></a>'
+                                    '" target="_blank" title="'+btnTitle+' su Twitter"><img src="icons/twitter.png" id="ssb-twitter"></a>'
                                 );
                             }
 
                             if (_.has($.infowindow.shareButtons,'facebook') && $.infowindow.shareButtons.facebook.active) {
                                 buttons.push('<a class="ssb" href="http://www.facebook.com/sharer.php?u=' + btnEncUrl + 
-                                    '" target="_blank" title="'+btnTitle+' su Facebook"><img src="img/facebook.png" id="ssb-facebook"></a>'
+                                    '" target="_blank" title="'+btnTitle+' su Facebook"><img src="icons/facebook.png" id="ssb-facebook"></a>'
                                 );
                             }
 
                             if (_.has($.infowindow.shareButtons,'gplus') && $.infowindow.shareButtons.gplus.active) {
                                 buttons.push('<a class="ssb" href="https://plus.google.com/share?url=' + btnEncUrl + 
-                                    '" target="_blank" title="'+btnTitle+' su Google Plus"><img src="img/gplus.png" id="ssb-gplus"></a>'
+                                    '" target="_blank" title="'+btnTitle+' su Google Plus"><img src="icons/gplus.png" id="ssb-gplus"></a>'
                                 );
                             }
 
                             if (_.has($.infowindow.shareButtons,'linkedin') && $.infowindow.shareButtons.linkedin.active) {
                                 buttons.push('<a class="ssb" href="http://www.linkedin.com/shareArticle?mini=true&url=' + btnEncUrl + 
-                                    '" target="_blank" title="'+btnTitle+' su LinkedIn"><img src="img/linkedin.png" id="ssb-linkedin"></a>'
+                                    '" target="_blank" title="'+btnTitle+' su LinkedIn"><img src="icons/linkedin.png" id="ssb-linkedin"></a>'
                                 );
                             }
     
                             if (_.has($.infowindow.shareButtons,'email') && $.infowindow.shareButtons.email.active) {
                                 buttons.push('<a class="ssb" href="mailto:?Subject=' + encodeURIComponent($.infowindow.shareButtons.email.subject + ' | ' + btnPlace) + 
                                     '&Body=' + encodeURIComponent(btnPlace + ' - ' + $.infowindow.shareButtons.email.body + ': ') + btnEncUrl + 
-                                    '" target="_blank" title="'+btnTitle+' per email"><img src="img/email.png" id="ssb-email"></a>'
+                                    '" target="_blank" title="'+btnTitle+' per email"><img src="icons/email.png" id="ssb-email"></a>'
                                 );
                             }
 
                             if (_.has($.infowindow.shareButtons,'permalink') && $.infowindow.shareButtons.permalink.active) {
                                 buttons.push('<a class="ssb" href="' + btnUrl + 
-                                    '" target="_blank" title="Permalink"><img src="img/link.png" id="ssb-link"></a>'
+                                    '" target="_blank" title="Permalink"><img src="icons/link.png" id="ssb-link"></a>'
                                 );
                             }
                             

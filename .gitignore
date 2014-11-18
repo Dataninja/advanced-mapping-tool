@@ -3,6 +3,6 @@ node_modules/
 tmp/
 demo/welfarebo/
 demo/donnechecontano/
-*.conf.js
+/*.conf.js
 index.html
 debug.html
