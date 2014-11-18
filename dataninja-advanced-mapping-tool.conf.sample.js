@@ -321,7 +321,7 @@ var mapConfig = {
                     title: '',
 
                     // Download icon
-                    image: 'icons/house109-dnl.png'
+                    image: 'icons/download.png'
                 }
                 // ...
             ]
