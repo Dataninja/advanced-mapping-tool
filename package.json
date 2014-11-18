@@ -1,6 +1,6 @@
 {
   "name": "dataninja-advanced-mapping-tool",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Another advanced mapping tool by Dataninja",
   "keywords": "map leaflet choropleth dataninja",
   "homepage": "https://github.com/Dataninja/advanced-mapping-tool",
@@ -21,6 +21,7 @@
   "files": [
     "bower_components/headjs/dist/1.0.0/head.js",
     "bower_components/queue-async/queue.js",
+    "bower_components/underscore/underscore.js",
     "bower_components/d3/d3.js",
     "bower_components/geostats/lib/geostats.js",
     "bower_components/colorbrewer2/colorbrewer.js",
@@ -51,7 +52,8 @@
     "grunt-contrib-uglify": "^0.5.1",
     "grunt-contrib-jshint": "^0.10.0",
     "grunt-contrib-cssmin": "^0.10.0",
-    "grunt-contrib-htmlmin": "^0.3.0"
+    "grunt-contrib-htmlmin": "^0.3.0",
+    "grunt-string-replace": "^1.0.0"
   },
   "engines": {
     "node": ">=0.10.0"

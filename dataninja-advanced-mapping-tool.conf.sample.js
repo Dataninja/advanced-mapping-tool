@@ -8,6 +8,15 @@ var mapConfig = {
     // Debug mode activation with logs in console
     debug: false,
 
+    // Language code in ISO 639-1:2002 format (see http://en.wikipedia.org/wiki/List_of_ISO_639-1_codes)
+    language: 'it',
+
+    // Google Analytics code for tracking, see http://www.google.it/intl/it/analytics/
+    analytics: {
+        active: false,
+        ua: ''
+    },
+
     // URL shortener service configuration (via yourls)
     urlShortener: {
 
@@ -134,11 +143,14 @@ var mapConfig = {
         // Title at the top of the control
         title: '',
 
-        // Description at the bottom
+        // Description at the bottom, overridable by dataset configuration
         description: '',
 
         // Label appended to legend items
-        itemLabel: ''
+        label: function(min,max,label) {
+            return label + ": " + min + " - " + max;
+        }
+
     },
 
     // Definition of geographic layers to load
@@ -185,12 +197,22 @@ var mapConfig = {
             path: 'data/',
             filename: '',
             format: '',
+
+            // Transformation of the ajax results before their using
             transform: function(res) {
                 return res;
             },
+           
+            // Format specifier for d3.format(), see https://github.com/mbostock/d3/wiki/Formatting#d3_format
+            // For string template, see http://docs.python.org/release/3.1.3/library/string.html#formatspec
+            // If missing or return empty string, default formatting function is d3.format(',d')(v) || d3.format(',.2f')(v) || v
+            formatter: function(k,v) {
+                return '';
+            }, 
 
-            // Inherits attributes from geoType named here
-            type: 'choropleth', // from dataTypes attributes
+
+            // Inherits attributes from dataType named here
+            type: 'choropleth',
             bins: 7,
             palette: 'Reds',
             
@@ -200,29 +222,37 @@ var mapConfig = {
                 name: 'dataset1',
 
                 // Menu label for layer entry
-                menu: 'dataset1',
+                label: 'dataset1',
 
                 // Key name of layer data refer to
                 layer: 'layer1',
 
                 // Key of id values used for join
                 id: '',
-                
-                // Key of label values (not used)
-                label: '',
 
                 // Legend description
-                legend: '',
+                description: '',
 
-                // Keys of data values shown on map on loading
-                values: ['var1']
+                // Choroplethable columns with custom lable, description and bins number
+                menu: [
+                    {
+                        column: '',
+                        label: '',
+                        description: '',
+                        bins: 3
+                    }
+                    //...
+                ],
+
+                // Columns aggregation
+                groups: {}
+                
             },
 
-            /* Custom parse function name from string to number
-             * If missing, 'parseFloat' is the default
-             * You can also define a custom function (el) { return el; }
-             */
-            parse: 'parseFloat'
+            // Custom parse function name from string to number
+            // If missing, formatting is performing by parseInt(v) || parseFloat(v) || v
+            // You can also define a custom function (k,v) { return v; }
+            //parse: 'parseFloat'
         }
     ],
 
@@ -284,12 +314,16 @@ var mapConfig = {
                     // Filebase of the filename
                     filebase: 'dwn1',
 
+                    // Shown only when these datasets are selected (all if missing or empty)
+                    datasets: [],
+
                     // Title for download icon
                     title: '',
 
                     // Download icon
                     image: 'img/house109-dnl.png'
                 }
+                // ...
             ]
         },
 
@@ -369,9 +403,6 @@ var mapConfig = {
                 },
                 filter: function(k,v) {
                     return true;
-                },
-                transform: function(k,v) {
-                    return parseInt(v) || v;
                 }
             }
         }
@@ -448,7 +479,7 @@ var mapConfig = {
 
             // Wordpress widget code if widget is available
             // See https://github.com/Dataninja/wp-cbmap-shortcode
-            shortcode: true,
+            shortcode: false,
 
             // SVG code and download of SVG image from shapes
             svg: {
@@ -818,69 +849,18 @@ var mapConfig = {
             }
         }
         // ...
-    },
-
-    // Known types of visualization into the infowindow with global setting inherited to infowindow with 'view' parameter
-    viewTypes: {
-
-        /* The infowindow contains a table with header and footer,
-         * here a structure of the body can be defined
-         * returning the tbody element, see http://www.w3schools.com/tags/tag_tbody.asp
-         */
-        table: function(data, options) {
-            if (!data) return '';
-
-            /* Default options can be overrided (include and exclude filters are evaluated in this order):
-             * - include array has data keys to include
-             * - exclude array has data keys to exclude
-             * - bold function defines a rule to boldify a row
-             * - filter function defines a custom filter after include and exclude filters
-             * - transform function defines a transformation (ie. casting) on data values
-             */
-            var defaultOptions = {
-                    include: [],
-                    exclude: [],
-                    bold: function(key, value) { return false; },
-                    filter: function(key, value) { return true; },
-                    transform: function(key, value) { return value; }
-                },
-                options = options || {},
-                tbody = '',
-                k;
-
-            for (k in defaultOptions) {
-                if (defaultOptions.hasOwnProperty(k) && !options.hasOwnProperty(k)) {
-                    options[k] = defaultOptions[k];
-                }
-            }
-
-            for (k in data) {
-                if (data.hasOwnProperty(k)) {
-                    if (!options.include.length || options.include.indexOf(k) > -1) {
-                        if (!options.exclude.length || !(options.exclude.indexOf(k) > -1)) {
-                            if (options.filter(k,data[k])) {
-                                var val = options.transform(k,data[k]),
-                                    isBold = options.bold(k,data[k]);
-                                tbody += '<tr>' + 
-                                    '<td>' + (isBold ? '<b>'+k+'</b>' : k) + '</td>' +
-                                    '<td>' + (isBold ? '<b>'+val+'</b>' : val) + '</td>' +
-                                    '</tr>';
-                            }
-                        }
-                    }
-                }
-            }
-
-            return tbody;
-        }
     }
 };
 
 /*
  * Map configuration complete structure:
  *
- * - debug: [bool]
- * - dataSources: [object]
+ * - debug [bool]
+ * - language [string]
+ * - analytics [object]
+ *   - active [bool]
+ *   - ua [string]
+ * - dataSources [object]
  *   - file [object]
  *     - domain [string]
  *     - path [string]
@@ -929,14 +909,20 @@ var mapConfig = {
  *     - active [bool]
  *     - source [string matching dataSources attributes]
  *     - type [string matching dataTypes attributes]
+ *     - formatter [string] function ( [string], [mixed] )
  *     - schema [object]
+ *       - name [string]
  *       - layer [string matching a geoLayer.name for joining]
  *       - id [string]
- *       - menu [string]
- *       - label [string]
- *       - legend [string]
- *       - values [string | array]
- *         - [string]
+ *       - description [string]
+ *       - menu [array]
+ *         - [object]
+ *           - column [string]
+ *           - label [string]
+ *           - description [string]
+ *           - bins [int > 0]
+ *       - groups [object]
+ *         - (groups as keys) [array of columns' names]
  *     - parse [string] | [mixed] function( [string] )
  *     - (other attributes are inherited from dataSources and dataTypes and can be overrided)
  *   - ...
@@ -1011,6 +997,8 @@ var mapConfig = {
  *         - source [string matching dataSources attributes]
  *         - name [string]
  *         - filebase [string]
+ *         - datasets [array]
+ *           - [string matching dataSets names]
  *         - title [string]
  *         - image [string]
  *         - transform [array] function ( [object] )
@@ -1046,7 +1034,7 @@ var mapConfig = {
  *   - active [bool]
  *   - title [string]
  *   - description [string]
- *   - itemLabel [string]
+ *   - label [string] function ( [float], [float] )
  * - controls [object]
  *   - active [bool]
  *   - fullscreen [object]

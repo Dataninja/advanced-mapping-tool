@@ -28,6 +28,10 @@ module.exports = function(grunt) {
                 src: '<%= pkg.files %>',
                 // the location of the resulting JS file
                 dest: '<%= pkg.name %>.lib.js'
+            },
+            main: {
+                src: ['js/<%= pkg.name %>.views.js', 'js/<%= pkg.name %>.main.js'],
+                dest: '<%= pkg.name %>.js'
             }
         },
         uglify: {
@@ -45,7 +49,7 @@ module.exports = function(grunt) {
         cssmin: {
             options: {
                 keepSpecialComments: false,
-                target: 'img'
+                target: '.'
             },
             combine: {
                 files: {
@@ -63,6 +67,19 @@ module.exports = function(grunt) {
                 }
             }
         },
+        'string-replace': {
+            dist: {
+                files: {
+                    '<%= pkg.name %>.min.css': '<%= pkg.name %>.min.css'
+                },
+                options: {
+                    replacements: [{
+                        pattern: /url\(([^#\)]*\/)([^\/\)#]*)\)/g,
+                        replacement: 'url(img/$2)'
+                    }]
+                }
+            }
+        },
         jshint: {
             // define the files to lint
             files: ['Gruntfile.js', 'js/**/*.js', '<%= pkg.name %>.js'],
@@ -73,8 +90,9 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-contrib-concat');
     grunt.loadNpmTasks('grunt-contrib-uglify');
     grunt.loadNpmTasks('grunt-contrib-cssmin');
+    grunt.loadNpmTasks('grunt-string-replace');
     grunt.loadNpmTasks('grunt-contrib-jshint');
 
     grunt.registerTask('jshint', ['jshint']);
-    grunt.registerTask('default', [/*'jshint',*/ 'copy', 'concat', 'uglify', 'cssmin']);
+    grunt.registerTask('default', [/*'jshint',*/ 'copy', 'concat', 'uglify', 'cssmin', 'string-replace']);
 }
