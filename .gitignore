@@ -3,6 +3,6 @@ node_modules/
 tmp/
 demo/welfarebo/
 demo/donnechecontano/
-dataninja-advanced-mapping-tool.conf.js
+*.conf.js
 index.html
 debug.html
