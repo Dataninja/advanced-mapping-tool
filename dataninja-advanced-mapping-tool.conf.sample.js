@@ -269,8 +269,8 @@ var mapConfig = {
         clusters: true,
 
         // Icons used for markers
-        icon: 'img/marker-icon.png',
-        shadow: 'img/marker-shadow.png'
+        icon: 'icons/marker-icon.png',
+        shadow: 'icons/marker-shadow.png'
     },
 
     // Info window appears on click on a region
@@ -321,7 +321,7 @@ var mapConfig = {
                     title: '',
 
                     // Download icon
-                    image: 'img/house109-dnl.png'
+                    image: 'icons/house109-dnl.png'
                 }
                 // ...
             ]
@@ -431,7 +431,7 @@ var mapConfig = {
             title: '',
 
             // Image
-            image: 'img/logo.png',
+            image: 'icons/logo.png',
 
             // Border
             border: true,
@@ -450,7 +450,7 @@ var mapConfig = {
             title: 'Reset',
 
             // Image
-            image: 'img/reset.png'
+            image: 'icons/reset.png'
         },
 
         // Embed options
@@ -463,7 +463,7 @@ var mapConfig = {
             title: 'Embed this map',
 
             // Image
-            image: 'img/embed.png',
+            image: 'icons/embed.png',
 
             // The permalink (long form)
             permalink: true,
@@ -491,7 +491,7 @@ var mapConfig = {
                 filename: 'map.svg',
 
                 // Icon of the control
-                image: 'img/svg.png'
+                image: 'icons/svg.png'
             }
         },
 
@@ -505,7 +505,7 @@ var mapConfig = {
             title: 'Take a screenshot',
 
             // Icon of the control
-            image: 'img/screenshot.png',
+            image: 'icons/screenshot.png',
 
             // File name for downloaded image
             filename: 'map.png',
@@ -521,7 +521,7 @@ var mapConfig = {
             title: 'Open in new window', // ie. Open in new window
 
             // Image
-            image: 'img/detach.png', // ie. img/detach.png
+            image: 'icons/detach.png', // ie. icons/detach.png
         },
 
         // Social buttons: like, tweet, +1
