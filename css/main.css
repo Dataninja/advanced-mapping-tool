@@ -322,6 +322,7 @@ html, body, #map {
 	line-height: 18px;
 	color: #555;
     max-width: 50%;
+    min-width: 20%;
 }
 
 .legend i {
