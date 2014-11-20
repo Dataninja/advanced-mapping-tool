@@ -214,16 +214,17 @@
                     return d3.format(dataSet.formatter)(v); 
                 };
             } else if (_.isFunction(dataSet.formatter)) {
-                (function(formatterFn) {
+                (function(i) {
+                    var dataSet = $.dataSets[i];
                     defaultData[dataSet.schema.name].formatter = function(k,v) { 
-                        var formatter = formatterFn(k,v);
+                        var formatter = dataSet.formatter(k,v);
                         if (formatter) {
                             return d3.format(formatter)(v);
                         } else {
                             return (_.isNumber(v) ? (d3.format(",d")(v) || d3.format(",.2f")(v)) : v);
                         }
                     };
-                })(dataSet.formatter);
+                })(i);
             } else {
                 defaultData[dataSet.schema.name].formatter = function(k,v) { 
                     return (_.isNumber(v) ? (d3.format(",d")(v) || d3.format(",.2f")(v)) : v); 

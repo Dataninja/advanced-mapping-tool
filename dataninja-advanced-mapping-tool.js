@@ -21,10 +21,10 @@ if (mapConfig) {
                     exclude: [],
                     bold: function(k,v) { return false; },
                     filter: function(k,v) { return true; },
-                    formatter: formatter || function(k,v) { return (_.isNumber(v) ? (d3.format(",d")(v) || d3.format(",.2f")(v)) : v); },
                     groups: groups || {}
                 },
                 options = options || {},
+                formatter = formatter || function(k,v) { return (_.isNumber(v) ? (d3.format(",d")(v) || d3.format(",.2f")(v)) : v); },
                 group = '',
                 tbody = '',
                 k;
@@ -37,7 +37,7 @@ if (mapConfig) {
                         if (!options.exclude.length || !(_.contains(options.exclude,k))) {
                             if (options.filter(k,data[k])) {
                                 
-                                var val = options.formatter(k,data[k]),
+                                var val = formatter(k,data[k]),
                                     isBold = options.bold(k,data[k]),
                                     isSecondLevel = _.has(options.groups,k);
                                 
@@ -276,16 +276,17 @@ if (mapConfig) {
                     return d3.format(dataSet.formatter)(v); 
                 };
             } else if (_.isFunction(dataSet.formatter)) {
-                (function(formatterFn) {
+                (function(i) {
+                    var dataSet = $.dataSets[i];
                     defaultData[dataSet.schema.name].formatter = function(k,v) { 
-                        var formatter = formatterFn(k,v);
+                        var formatter = dataSet.formatter(k,v);
                         if (formatter) {
                             return d3.format(formatter)(v);
                         } else {
                             return (_.isNumber(v) ? (d3.format(",d")(v) || d3.format(",.2f")(v)) : v);
                         }
                     };
-                })(dataSet.formatter);
+                })(i);
             } else {
                 defaultData[dataSet.schema.name].formatter = function(k,v) { 
                     return (_.isNumber(v) ? (d3.format(",d")(v) || d3.format(",.2f")(v)) : v); 

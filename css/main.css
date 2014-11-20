@@ -321,8 +321,8 @@ html, body, #map {
 	text-align: left;
 	line-height: 18px;
 	color: #555;
-    max-width: 50%;
-    min-width: 80px;
+    /*max-width: 50%;
+    min-width: 80px;*/
 }
 
 .legend i {
