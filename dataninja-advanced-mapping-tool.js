@@ -1396,7 +1396,7 @@ if (mapConfig) {
                 geoLayer = $.geoLayers.filter(function(l) { return (l.type === "vector" && l.schema.name === region); })[0],
                 dataSet = data[region].filter(function(el) { return el.active; })[0],
                 currentStyle = geoLayer.style.default;
-            currentStyle.fillColor = getColor(feature.properties.data[dataSet.name][dataSet.column], dataSet.bins, dataSet.palette); // Dynamic parsing
+            currentStyle.fillColor = getColor(feature.properties.data[dataSet.name][dataSet.column], dataSet.bins, dataSet.palette);
 	    	return currentStyle;
     	}
         /*** ***/
@@ -1529,7 +1529,7 @@ if (mapConfig) {
                 bins = gs.getJenks(dataSet.binsNum);
             }
 
-            dataSet.bins = bins.map(function(el) { return parseInt(el) || parseFloat(el) || el; });
+            dataSet.bins = bins.map(function(el) { return parseFloat(el) || el; });
             dataSet.ranges = gs.ranges;
             legend.update(region);
         }
