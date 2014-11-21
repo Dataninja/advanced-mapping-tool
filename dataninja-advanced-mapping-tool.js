@@ -1317,22 +1317,23 @@ if (mapConfig) {
             };
             legend.update = function(region) {
                 if (region) {
-                    var dataSet = data[region].filter(function(el) { return el.active; })[0], 
+                    var dataSet = data[region].filter(function(el) { return el.active; })[0],
+                        delimiter = $.legend.delimiter || '-',
                         grades = dataSet.ranges.map(function(el) { 
                             return el.split(" - ").map(function(el) { 
                                 var num = parseFloat(el);
                                 return dataSet.formatter(dataSet.column, num); 
-                            }).join(" - ");
+                            }).join(' '+delimiter+' ');
                         }),
                         description = dataSet.description || $.legend.description || '';
 
                     this._div.innerHTML = (parameters.md != 'widget' ? '<h3 title="'+description+'">'+$.legend.title+'</h3>' : '');
                     for (var i=0; i<grades.length; i++) {
                         var color = (colorbrewer[dataSet.palette][grades.length] ? colorbrewer[dataSet.palette][grades.length][i] : colorbrewer[dataSet.palette][3][i]);
-                        this._div.innerHTML += '<i title="'+(_.has($.legend,'label') ? $.legend.label(grades[i].split(" - ")[0],grades[i].split(" - ")[1],dataSet.label) : grades[i])+'" '+
+                        this._div.innerHTML += '<i title="'+(_.has($.legend,'label') ? $.legend.label.call($.legend,grades[i].split(' '+delimiter+' ')[0],grades[i].split(' '+delimiter+' ')[1],dataSet.label) : grades[i])+'" '+
                             'style="background:' + 
                             color + '"></i> ' + 
-                            (parameters.md != 'widget' ? grades[i] : '') + '<br>';
+                            (parameters.md != 'widget' ? $.legend.label.call($.legend,grades[i].split(' '+delimiter+' ')[0],grades[i].split(' '+delimiter+' ')[1]) : '') + '<br>';
                     }
                     if (parameters.md != 'widget') this._div.innerHTML += '<p>'+description+'</p>';
                 } else {

@@ -146,9 +146,14 @@ var mapConfig = {
         // Description at the bottom, overridable by dataset configuration
         description: '',
 
+        // Symbol between range numbers
+        // It will be '-' if missing
+        delimiter: '-',
+
         // Label appended to legend items
         label: function(min,max,label) {
-            return label + ": " + min + " - " + max;
+            var prefix = (label ? label+": " : "");
+            return prefix + min + (min != max ? " "+this.delimiter+" "+max : "");
         }
 
     },
@@ -1034,6 +1039,7 @@ var mapConfig = {
  *   - active [bool]
  *   - title [string]
  *   - description [string]
+ *   - delimiter [string]
  *   - label [string] function ( [float], [float] )
  * - controls [object]
  *   - active [bool]
