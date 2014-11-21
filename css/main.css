@@ -191,8 +191,11 @@ html, body, #map {
     overflow: hidden;
 }
 
-.menu-ui a,
-.menu-ui select {
+.leaflet-control.menu-ui {
+    vertical-align: top;
+}
+
+.menu-ui a {
 	background: #fff;
 	font-size: 13px;
 	border: 1px solid rgba(0,0,0,0.4);
@@ -201,10 +204,6 @@ html, body, #map {
 	margin: 0;
 	padding: 2px 10px;
 	text-decoration: none;
-	text-align: center;
-}
-
-.menu-ui a {
     border-radius: 0px;
     border-top-width: 0px;
 }
@@ -217,6 +216,10 @@ html, body, #map {
     border-top-width: 1px;
 }
 
+.menu-ui.collapsable a.active {
+    border-top-width: 1px;
+}
+
 .menu-ui a.last-item {
     border-bottom-left-radius: 3px;
     border-bottom-right-radius: 3px;
@@ -224,29 +227,21 @@ html, body, #map {
     border-top-right-radius: 0px;
 }
 
-.menu-ui select {
-    border-radius: 3px;
-    margin-top: 5px;
-    width: 100%;
-}
-
 .menu-ui a.disabled {
-    color: #b0b0b0;
+    font-weight: bold;
     cursor: default;
 }
 
-.menu-ui a: first-child {
+.menu-ui a:first-child {
 	border-radius: 3px 3px 0 0;
 }
 
-.menu-ui a: hover {
+.menu-ui a:hover {
 	background: #f8f8f8;
-	color: #404040;
 }
 
-.menu-ui a.disabled: hover {
+.menu-ui a.disabled:hover {
 	background: #fff;
-    color: #b0b0b0;
 }
 
 .menu-ui a.active {
@@ -254,8 +249,25 @@ html, body, #map {
 	color: #FFF;
 }
 
-.menu-ui a.active: hover {
+.menu-ui a.active:hover {
 	background: #3074a4;
+}
+
+.menu-ui a.second-level {
+    padding-left: 1em;
+}
+
+.menu-ui.collapsable a {
+    display: none;
+}
+
+.menu-ui.collapsable a.active,
+.menu-ui.collapsable:hover a {
+    display: block;
+}
+
+.menu-ui.collapsable a.active:after {
+    content: url("icons/down_white.png"); 
 }
 
 /* Infowindow */
@@ -360,10 +372,10 @@ a.detach {
     margin-top: 5px !important;
 }
 
-img.reset: hover, 
-img.detach: hover, 
-img.embed: hover,
-img.screenshot: hover {
+img.reset:hover, 
+img.detach:hover, 
+img.embed:hover,
+img.screenshot:hover {
     background-color: whitesmoke;
 }
 

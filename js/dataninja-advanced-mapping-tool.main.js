@@ -1052,7 +1052,9 @@
             }
 
             if (dataSet.columns && dataSet.columns.length > 1) {
-                d3.select(this._nav).selectAll("a")
+                d3.select(this._nav)
+                    .classed('collapsable',(dataSet.columns.length > 3))
+                    .selectAll("a")
                     .data(items)
                     .enter()
                     .append("a")
@@ -1065,7 +1067,9 @@
                         } else if (index === items.length-1) {
                             classText = 'last-item';
                         }
-                        return classText+' '+d.level+' '+(d.enabled ? 'enabled' : 'disabled');
+                        return classText + ' ' +
+                            d.level + ' ' + 
+                            (d.enabled ? 'enabled' : 'disabled'); 
                     })
                     .on("click", function(d) {
                         if (d.enabled) {
@@ -1075,8 +1079,9 @@
                             that.onChange(region,index,column);
                         }
                     })
-                    .text(function(d) { return (d.level === 'second-level' ? '- ' : '') + d.label; });
+                    .text(function(d) { return d.label; });
                 d3.select(this._nav).style("display",null);
+                d3.select(this._nav).style("width",1.5*d3.max(items.map(function(el) { return el.label.length; }))+"ex");
             } else {
                 d3.select(this._nav).style('display','none');
             }
@@ -1133,13 +1138,15 @@
             var that = this,
                 dataSets = data[region];
             if (dataSets.length > 1) {
-                d3.select(this._nav).selectAll("a")
+                d3.select(this._nav)
+                    .classed('collapsable',(dataSets.length > 3))
+                    .selectAll("a")
                     .data(dataSets)
                     .enter()
                     .append("a")
                     .attr("href", "#")
                     .attr("id", function(d) { return d.name; })
-                     .attr("title", function(d) { return d.description; })
+                    .attr("title", function(d) { return d.description; })
                     .attr("class", function(d,index) {
                         if (index === 0) {
                             return 'first-item active';
@@ -1156,6 +1163,7 @@
                     })
                     .text(function(d) { return d.menuLabel; });
                 d3.select(this._nav).style("display",null);
+                d3.select(this._nav).style("width",1.5*d3.max(dataSets.map(function(el) { return el.menuLabel.length; }))+"ex");
             } else {
                 d3.select(this._nav).style('display','none');
             }
@@ -1208,7 +1216,9 @@
             
             if (menuGeoLayers.length > 1) {
                 var that = this;
-                d3.select(this._nav).selectAll("a")
+                d3.select(this._nav)
+                    .classed('collapsable',(menuGeoLayers.length > 3))
+                    .selectAll("a")
                     .data(menuGeoLayers.map(function(el) { return el.schema; }))
                     .enter()
                     .append("a")
@@ -1235,6 +1245,7 @@
                     })
                     .text(function(d) { return d.menu; });
                 d3.select(this._nav).style("display",null);
+                d3.select(this._nav).style("width",1.5*d3.max(menuGeoLayers.map(function(el) { return el.schema.menu.length; }))+"ex");
             }
         };
        
