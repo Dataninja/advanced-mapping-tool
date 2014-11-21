@@ -294,6 +294,10 @@ html, body, #map {
     width: 20px;
 }
 
+.info a#close-cross {
+    float: right;
+}
+
 .table {
   margin-bottom: 0px;
 }
@@ -317,7 +321,8 @@ html, body, #map {
 	text-align: left;
 	line-height: 18px;
 	color: #555;
-    max-width: 25%;
+    /*max-width: 50%;
+    min-width: 80px;*/
 }
 
 .legend i {
