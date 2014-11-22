@@ -244,13 +244,10 @@ html, body, #map {
 	background: #fff;
 }
 
-.menu-ui a.active {
+.menu-ui a.active,
+.menu-ui a.active:hover {
 	background: #3887BE;
 	color: #FFF;
-}
-
-.menu-ui a.active:hover {
-	background: #3074a4;
 }
 
 .menu-ui a.second-level {
