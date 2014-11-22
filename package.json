@@ -1,6 +1,6 @@
 {
   "name": "dataninja-advanced-mapping-tool",
-  "version": "0.4.1",
+  "version": "0.4.2",
   "description": "Another advanced mapping tool by Dataninja",
   "keywords": "map leaflet choropleth dataninja",
   "homepage": "https://github.com/Dataninja/advanced-mapping-tool",
