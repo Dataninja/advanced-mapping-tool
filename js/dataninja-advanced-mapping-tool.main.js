@@ -286,7 +286,7 @@
                 }
                 if (defaultJoinData.length) {
                     geo[parameters.ls[i]] = defaultGeo[parameters.ls[i]];
-                    data[parameters.ls[i]] = defaultJoinData;
+                    data[parameters.ls[i]] = _.each(defaultJoinData, function(el,index) { el.index = index; });
                 }
             }
         }
@@ -342,8 +342,6 @@
         for (i=0; i<tileLayers.length; i++) {
             L.tileLayer(tileLayers[i].url.call(tileLayers[i]), tileLayers[i].options).addTo(map);
         }
-        
-        map.spin(true);
         
         // Attribution notices
         var attrib = L.control.attribution();
@@ -1023,6 +1021,11 @@
             var index = index || 0,
                 column = column || 0,
                 dataSet = data[region][index];
+            
+            if ($.debug) console.log("varMenuOnChange", arguments, region, index, column, dataSet);
+            
+            info.update();
+            legend.update();
             dataSet.column = dataSet.columns[column];
             dataSet.label = dataSet.labels[column];
             dataSet.description = dataSet.descriptions[column];
@@ -1159,20 +1162,17 @@
         dataMenu.onChange = function(region,index) {
             var index = index || 0,
                 dataSet = data[region][index];
+            
+            if ($.debug) console.log("dataMenuOnChange", arguments, region, index, dataSet);
+            
             dataSet.active = true;
             for (var i=0; i<data[region].length; i++) {
                 if (i != index) data[region][i].active = false;
             }
             delete parameters.i;
             if (embedControl && embedControl.isAdded) embedControl.removeFrom(map);
-            info.update();
-            legend.update();
             varMenu.update(region, index);
             varMenu.onChange(region, index);
-            dataSet.column = dataSet.columns[0];
-            dataSet.label = dataSet.labels[0];
-            dataSet.description = dataSet.descriptions[0];
-            dataSet.binsNum = dataSet.binsNums[0];
         };
 
         dataMenu.update = function(region) {
@@ -1197,7 +1197,7 @@
                             return '';
                         }
                     })
-                    .on("click", function(d,index) {
+                    .on("click", function(d) {
                         var listener = d3.select(this).on("click");
                         d3.select(that._nav)
                             .select("a.active")
@@ -1227,7 +1227,7 @@
                                     .selectAll("a")
                                     .style("display",null);
                             });
-                        that.onChange(d.layer, index);
+                        that.onChange(d.layer, d.index);
                     })
                     .text(function(d) { return d.menuLabel; });
                 
@@ -1282,14 +1282,13 @@
         };
           
         geoMenu.onChange = function(region) {
+            if ($.debug) console.log("geoMenuOnChange", arguments, region);
             data[region][0].active = true;
             for (var i=0; i<data[region].length; i++) {
                 if (i != 0) data[region][i].active = false;
             }
             delete parameters.i;
             if (embedControl && embedControl.isAdded) embedControl.removeFrom(map);
-            info.update();
-            legend.update();
             dataMenu.update(region);
             dataMenu.onChange(region);
         };
@@ -1318,7 +1317,7 @@
                     .classed("disabled", function(d) {
                         return !_.has(geo,d.name);
                     })
-                    .on("click", function(d,i) {
+                    .on("click", function(d) {
                         var listener = d3.select(this).on("click");
                         if (_.has(geo,d.name)) {
                             d3.select(that._nav)
@@ -1694,7 +1693,7 @@
             if ($.debug) console.log("geoLayer",geoLayer);
             if ($.debug) console.log("dataSets",dataSets);
 
-            if (!geo[region].resource) { // || !data[region].resource) { // Second condition in next loop
+            if (!geo[region].resource) { 
                 
                 map.spin(true);
                 
@@ -1719,13 +1718,13 @@
                         data[region][i-2].resource = dataSets[i-2].transform(arguments[i]);
                     }
 
-                    map.spin(false);
-                    
                     joinData(region);
                     binData(region);
                     
 	    	        geojson.addData(geo[region].resource);
 
+                    map.spin(false);
+                    
                     if (!svgViewBox) svgViewBox = d3.select(".leaflet-overlay-pane svg").attr("viewBox").split(" ");
                     if (parameters.t) { map.fitBounds(geojson.getBounds()); }
                     if (parameters.i) {
@@ -1746,15 +1745,6 @@
                 info.update();
             }
         }
-        /*** ***/
-
-
-
-        /*** Inizializzazione ***/
-        setTimeout(function () {
-            map.spin(false);
-            loadData(parameters.dl);
-        }, 3000);
         /*** ***/
 
 
