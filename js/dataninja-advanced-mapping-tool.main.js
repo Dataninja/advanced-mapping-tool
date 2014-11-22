@@ -1031,7 +1031,7 @@
         };
 
         varMenu.update = function(region,index) {
-            d3.select(this._nav).selectAll("a, select").remove();
+            d3.select(this._nav).style("width",null).selectAll("a").remove();
 
             var that = this,
                 index = index || 0,
@@ -1052,8 +1052,8 @@
             }
 
             if (dataSet.columns && dataSet.columns.length > 1) {
+                
                 d3.select(this._nav)
-                    .classed('collapsable',(dataSet.columns.length > 3))
                     .selectAll("a")
                     .data(items)
                     .enter()
@@ -1072,16 +1072,58 @@
                             (d.enabled ? 'enabled' : 'disabled'); 
                     })
                     .on("click", function(d) {
+                        var listener = d3.select(this).on("click");
                         if (d.enabled) {
                             var column = _.indexOf(dataSet.columns,d.label);
-                            d3.select(that._nav).select("a.active").classed("active",false);
-                            d3.select(this).classed('active',true);
+                            d3.select(that._nav)
+                                .select("a.active")
+                                .classed("active",false)
+                                .on("click",listener)
+                                .on("mouseout",null);
+                            d3.select(that._nav).selectAll("a").style("display",null);
+                            d3.select(this)
+                                .classed('active',true)
+                                .style("display","block")
+                                .on("click", function() {
+                                    if (d3.select(that._nav).classed("open")) {
+                                        d3.select(that._nav)
+                                            .classed("open",false)
+                                            .selectAll("a")
+                                            .style("display",null);
+                                    } else {
+                                        d3.select(that._nav)
+                                            .classed("open",true)
+                                            .selectAll("a")
+                                            .style("display","block");
+                                    }
+                                })
+                                .on("mouseout", function() {
+                                    d3.select(that._nav)
+                                        .classed("open",false)
+                                        .selectAll("a")
+                                        .style("display",null);
+                                });
                             that.onChange(region,index,column);
                         }
                     })
                     .text(function(d) { return d.label; });
-                d3.select(this._nav).style("display",null);
-                d3.select(this._nav).style("width",1.5*d3.max(items.map(function(el) { return el.label.length; }))+"ex");
+
+                var maxLabelLength = d3.max(items.map(function(el) { return el.label.length; }));
+                d3.select(this._nav)
+                    .style("display",null)
+                    .style("width", function() {
+                        if (dataSet.columns.length > 3) {
+                            return d3.select(this)
+                                .selectAll("a")
+                                .filter(function(d) { 
+                                    return d.label.length === maxLabelLength; 
+                                })[0][0].offsetWidth+15+"px";
+                        } else {
+                            return null;
+                        }
+                    })
+                    .classed('collapsable',(dataSet.columns.length > 3));
+
             } else {
                 d3.select(this._nav).style('display','none');
             }
@@ -1134,12 +1176,11 @@
         };
 
         dataMenu.update = function(region) {
-            d3.select(this._nav).selectAll("a, select").remove();
+            d3.select(this._nav).style("width",null).selectAll("a").remove();
             var that = this,
                 dataSets = data[region];
             if (dataSets.length > 1) {
                 d3.select(this._nav)
-                    .classed('collapsable',(dataSets.length > 3))
                     .selectAll("a")
                     .data(dataSets)
                     .enter()
@@ -1157,13 +1198,55 @@
                         }
                     })
                     .on("click", function(d,index) {
-                        d3.select(that._nav).select("a.active").classed("active",false);
-                        d3.select(this).classed('active',true);
+                        var listener = d3.select(this).on("click");
+                        d3.select(that._nav)
+                            .select("a.active")
+                            .classed("active",false)
+                            .on("click",listener)
+                            .on("mouseout",null);
+                        d3.select(that._nav).selectAll("a").style("display",null);
+                        d3.select(this)
+                            .classed('active',true)
+                            .style("display","block")
+                            .on("click", function() {
+                                if (d3.select(that._nav).classed("open")) {
+                                    d3.select(that._nav)
+                                        .classed("open",false)
+                                        .selectAll("a")
+                                        .style("display",null);
+                                } else {
+                                    d3.select(that._nav)
+                                        .classed("open",true)
+                                        .selectAll("a")
+                                        .style("display","block");
+                                }
+                            })
+                            .on("mouseout", function() {
+                                d3.select(that._nav)
+                                    .classed("open",false)
+                                    .selectAll("a")
+                                    .style("display",null);
+                            });
                         that.onChange(d.layer, index);
                     })
                     .text(function(d) { return d.menuLabel; });
-                d3.select(this._nav).style("display",null);
-                d3.select(this._nav).style("width",1.5*d3.max(dataSets.map(function(el) { return el.menuLabel.length; }))+"ex");
+                
+                var maxLabelLength = d3.max(dataSets.map(function(el) { return el.menuLabel.length; }));
+                d3.select(this._nav)
+                    .style("display",null)
+                    .style("width", function() {
+                        if (dataSets.length > 3) {
+                            return d3.select(this)
+                                .selectAll("a")
+                                .filter(function(d) { 
+                                    return d.menuLabel.length === maxLabelLength; 
+                                })[0][0].offsetWidth+15+"px";
+                        } else {
+                            return null;
+                        }
+                    })
+                    .classed('collapsable',(dataSets.length > 3));
+            
             } else {
                 d3.select(this._nav).style('display','none');
             }
@@ -1212,12 +1295,11 @@
         };
 
         geoMenu.update = function() {
-            d3.select(this._nav).selectAll("a, select").remove();
+            d3.select(this._nav).style("width",null).selectAll("a").remove();
             
             if (menuGeoLayers.length > 1) {
                 var that = this;
                 d3.select(this._nav)
-                    .classed('collapsable',(menuGeoLayers.length > 3))
                     .selectAll("a")
                     .data(menuGeoLayers.map(function(el) { return el.schema; }))
                     .enter()
@@ -1237,15 +1319,57 @@
                         return !_.has(geo,d.name);
                     })
                     .on("click", function(d,i) {
+                        var listener = d3.select(this).on("click");
                         if (_.has(geo,d.name)) {
-                            d3.select(that._nav).select("a.active").classed("active",false);
-                            d3.select(this).classed('active',true);
+                            d3.select(that._nav)
+                                .select("a.active")
+                                .classed("active",false)
+                                .on("click",listener)
+                                .on("mouseout",null);
+                            d3.select(that._nav).selectAll("a").style("display",null);
+                            d3.select(this)
+                                .classed('active',true)
+                                .style("display","block")
+                                .on("click", function() {
+                                    if (d3.select(that._nav).classed("open")) {
+                                        d3.select(that._nav)
+                                            .classed("open",false)
+                                            .selectAll("a")
+                                            .style("display",null);
+                                    } else {
+                                        d3.select(that._nav)
+                                            .classed("open",true)
+                                            .selectAll("a")
+                                            .style("display","block");
+                                    }
+                                })
+                                .on("mouseout", function() {
+                                    d3.select(that._nav)
+                                        .classed("open",false)
+                                        .selectAll("a")
+                                        .style("display",null);
+                                });
                             that.onChange(d.name);
                         }
                     })
                     .text(function(d) { return d.menu; });
-                d3.select(this._nav).style("display",null);
-                d3.select(this._nav).style("width",1.5*d3.max(menuGeoLayers.map(function(el) { return el.schema.menu.length; }))+"ex");
+                
+                var maxLabelLength = d3.max(menuGeoLayers.map(function(el) { return el.schema.menu.length; }));
+                d3.select(this._nav)
+                    .style("display",null)
+                    .style("width", function() {
+                        if (menuGeoLayers.length > 3) {
+                            return d3.select(this)
+                                .selectAll("a")
+                                .filter(function(d) { 
+                                    return d.menu.length === maxLabelLength; 
+                                })[0][0].offsetWidth+15+"px";
+                        } else {
+                            return null;
+                        }
+                    })
+                    .classed('collapsable',(menuGeoLayers.length > 3));
+
             }
         };
        
