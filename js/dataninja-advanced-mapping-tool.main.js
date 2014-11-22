@@ -440,7 +440,7 @@
                             buttons.push('<a class="ssb" href="http://twitter.com/share?url=' + btnEncUrl + 
                                 '&via=' + $.infowindow.shareButtons.twitter.via + 
                                 '&text=' + 
-                                encodeURIComponent((_.isFunction($.infowindow.shareButtons.twitter.text) ? $.infowindow.shareButtons.twitter.text(props.data[dataSet.name]) : btnPlace + ' - ' + $.infowindow.shareButtons.twitter.text) + ' ') + 
+                                encodeURIComponent((_.isFunction($.infowindow.shareButtons.twitter.text) ? $.infowindow.shareButtons.twitter.text(props.data[dataSet.name]) : btnPlace + ' - ' + $.infowindow.shareButtons.twitter.text)) + 
                                 '" target="_blank" title="'+btnTitle+' su Twitter"><img src="icons/twitter.png" id="ssb-twitter"></a>'
                             );
                         }
@@ -464,8 +464,8 @@
                         }
 
                         if (_.has($.infowindow.shareButtons,'email') && $.infowindow.shareButtons.email.active) {
-                            buttons.push('<a class="ssb" href="mailto:?Subject=' + encodeURIComponent($.infowindow.shareButtons.email.subject + ' | ' + btnPlace) + 
-                                '&Body=' + encodeURIComponent(btnPlace + ' - ' + $.infowindow.shareButtons.email.body + ': ') + btnEncUrl + 
+                            buttons.push('<a class="ssb" href="mailto:?Subject=' + encodeURIComponent((_.isFunction($.infowindow.shareButtons.email.subject) ? $.infowindow.shareButtons.email.subject(props.data[dataSet.name]) : $.infowindow.shareButtons.email.subject + ' | ' + btnPlace)) + 
+                                '&Body=' + encodeURIComponent((_.isFunction($.infowindow.shareButtons.email.body) ? $.infowindow.shareButtons.email.body(props.data[dataSet.name],btnEncUrl) : btnPlace + ' - ' + $.infowindow.shareButtons.email.body + ': ' + btnUrl)) + 
                                 '" target="_blank" title="'+btnTitle+' per email"><img src="icons/email.png" id="ssb-email"></a>'
                             );
                         }

@@ -387,10 +387,14 @@ var mapConfig = {
                 // Enable or not
                 active: true,
 
-                // Text prepended to subject (+ region name)
+                // Text for subject
+                // If string, it will be "[subject] | region name"
+                // If function, it has region data as input and must return a string
                 subject: '',
 
-                // Text prepended to body (+ region name and URL)
+                // Text for body
+                // If string, it will be "region name, [body]: url"
+                // If function, it has region data and url as input and must return a string
                 body: ''
             },
             permalink: {
@@ -1031,8 +1035,8 @@ var mapConfig = {
  *       - active [bool]
  *     - email [object]
  *       - active [bool]
- *       - subject [string]
- *       - body [string]
+ *       - subject [string | [string] function ( [object] )]
+ *       - body [string | [string] function ( [pbject], [string] )]
  *     - permalink [object]
  *       - active [bool]
  *   - view [object]
