@@ -286,7 +286,7 @@
                 }
                 if (defaultJoinData.length) {
                     geo[parameters.ls[i]] = defaultGeo[parameters.ls[i]];
-                    data[parameters.ls[i]] = defaultJoinData;
+                    data[parameters.ls[i]] = _.each(defaultJoinData, function(el,index) { el.index = index; });
                 }
             }
         }
@@ -342,8 +342,6 @@
         for (i=0; i<tileLayers.length; i++) {
             L.tileLayer(tileLayers[i].url.call(tileLayers[i]), tileLayers[i].options).addTo(map);
         }
-        
-        map.spin(true);
         
         // Attribution notices
         var attrib = L.control.attribution();
@@ -425,17 +423,22 @@
                         filterValue = props[geo[region].id],
                         buttons = [], btnTitle, btnUrl, btnPlace,
                         dnlBtn = [];
-    
+                    
                     if (_.has($.infowindow,'shareButtons') && $.infowindow.shareButtons.active) {
                         btnTitle = $.infowindow.shareButtons.title + (region == 'regioni' ? ' in ' : ' a ') + props[geo[region].label];
                         btnUrl = 'http://' + location.hostname + Arg.url(parameters).replace(/&*md=[^&]*/,'').replace(/&{2,}/g,"&");
                         btnEncUrl = 'http://' + location.hostname + encodeURIComponent(Arg.url(parameters).replace(/&*md=[^&]*/,'').replace(/&{2,}/g,"&"));
                         btnPlace = props[geo[region].label];
+
+                        if ($.infowindow.shareButtons.url) {
+                            btnUrl = btnEncUrl = $.infowindow.shareButtons.url;
+                        }
                     
                         if (_.has($.infowindow.shareButtons,'twitter') && $.infowindow.shareButtons.twitter.active) {
                             buttons.push('<a class="ssb" href="http://twitter.com/share?url=' + btnEncUrl + 
                                 '&via=' + $.infowindow.shareButtons.twitter.via + 
-                                '&text=' + encodeURIComponent(btnPlace + ' - ' + $.infowindow.shareButtons.twitter.text + ' ') + 
+                                '&text=' + 
+                                encodeURIComponent((_.isFunction($.infowindow.shareButtons.twitter.text) ? $.infowindow.shareButtons.twitter.text(props.data[dataSet.name]) : btnPlace + ' - ' + $.infowindow.shareButtons.twitter.text)) + 
                                 '" target="_blank" title="'+btnTitle+' su Twitter"><img src="icons/twitter.png" id="ssb-twitter"></a>'
                             );
                         }
@@ -459,8 +462,8 @@
                         }
 
                         if (_.has($.infowindow.shareButtons,'email') && $.infowindow.shareButtons.email.active) {
-                            buttons.push('<a class="ssb" href="mailto:?Subject=' + encodeURIComponent($.infowindow.shareButtons.email.subject + ' | ' + btnPlace) + 
-                                '&Body=' + encodeURIComponent(btnPlace + ' - ' + $.infowindow.shareButtons.email.body + ': ') + btnEncUrl + 
+                            buttons.push('<a class="ssb" href="mailto:?Subject=' + encodeURIComponent((_.isFunction($.infowindow.shareButtons.email.subject) ? $.infowindow.shareButtons.email.subject(props.data[dataSet.name]) : $.infowindow.shareButtons.email.subject + ' | ' + btnPlace)) + 
+                                '&Body=' + encodeURIComponent((_.isFunction($.infowindow.shareButtons.email.body) ? $.infowindow.shareButtons.email.body(props.data[dataSet.name],btnEncUrl) : btnPlace + ' - ' + $.infowindow.shareButtons.email.body + ': ' + btnUrl)) + 
                                 '" target="_blank" title="'+btnTitle+' per email"><img src="icons/email.png" id="ssb-email"></a>'
                             );
                         }
@@ -519,7 +522,7 @@
                         tfoot = '<tfoot></tfoot>';
                     }
                     
-                    if ($.debug) console.log("Table footer",tfoot);
+                if ($.debug) console.log("Table footer",tfoot);
 
                     var tbody;
                     if (_.has($.infowindow,'view') && $.infowindow.view.active && _.has($.viewTypes,$.infowindow.view.type)) {
@@ -955,71 +958,55 @@
 
 
 
-        /*** Creazione del menù dei geolayers ***/
-        var geoMenu,
-            menuGeoLayers = $.geoLayers.filter(function(l) { return l.type != 'tile'; });
-
-        if (menuGeoLayers.length > 1) {
-            geoMenu = L.control({position: 'topleft'});
-            geoMenu.onAdd = function(map) {
-                var nav = L.DomUtil.create('nav', 'menu-ui '+parameters.md);
-                nav.setAttribute('id','geomenu-ui');
-                if (parameters.md === 'widget') nav.setAttribute('style','display:none;');
-                return nav;
+        /*** Legenda ***/
+        var legend;
+        if (_.has($,'legend') && $.legend.active) {
+		    legend = L.control({position: 'bottomleft'});
+    	    legend.onAdd = function (map) {
+                this._div = L.DomUtil.create('div', 'info legend '+parameters.md);
+		        return this._div;
             };
-            
-            geoMenu.addTo(map);
-            
-            d3.select("nav#geomenu-ui").selectAll("a")
-                .data(menuGeoLayers.map(function(el) { return el.schema; }))
-                .enter()
-                .append("a")
-                .attr("href", "#")
-                .attr("id", function(d) { return d.name; })
-                .attr("class", function(d,index) {
-                    if (index === 0) {
-                        return 'first-item';
-                    } else if (index === menuGeoLayers.length-1) {
-                        return 'last-item';
-                    } else {
-                        return '';
+            legend.update = function(region) {
+                if (region) {
+                    var dataSet = data[region].filter(function(el) { return el.active; })[0],
+                        delimiter = $.legend.delimiter || '-',
+                        grades = dataSet.ranges.map(function(el) { 
+                            return el.split(" - ").map(function(el) { 
+                                var num = parseFloat(el);
+                                return dataSet.formatter(dataSet.column, num); 
+                            }).join(' '+delimiter+' ');
+                        }),
+                        description = dataSet.description || $.legend.description || '';
+
+                    this._div.innerHTML = (parameters.md != 'widget' ? '<h3 title="'+description+'">'+$.legend.title+'</h3>' : '');
+                    for (var i=0; i<grades.length; i++) {
+                        var color = (colorbrewer[dataSet.palette][grades.length] ? colorbrewer[dataSet.palette][grades.length][i] : colorbrewer[dataSet.palette][3][i]);
+                        this._div.innerHTML += '<i title="'+(_.has($.legend,'label') ? $.legend.label.call($.legend,grades[i].split(' '+delimiter+' ')[0],grades[i].split(' '+delimiter+' ')[1],dataSet.label) : grades[i])+'" '+
+                            'style="background:' + 
+                            color + '"></i> ' + 
+                            (parameters.md != 'widget' ? $.legend.label.call($.legend,grades[i].split(' '+delimiter+' ')[0],grades[i].split(' '+delimiter+' ')[1]) : '') + '<br>';
                     }
-                })
-                .classed("disabled", function(d) {
-                    return !_.has(geo,d.name);
-                })
-                .on("click", function(d,i) {
-                    if (_.has(geo,d.name)) {
-                        var region = d.name;
-                        data[region][0].active = true;
-                        for (var i=0; i<data[region].length; i++) {
-                            if (i != 0) data[region][i].active = false;
-                        }
-                        delete parameters.i;
-                        if (embedControl && embedControl.isAdded) embedControl.removeFrom(map);
-                        info.update();
-                        legend.update();
-                        dataMenu.update(d.name);
-                        dataMenu.onChange(d.name);
-                        loadData(d.name);
-                    }
-                })
-                .text(function(d) { return d.menu; });
+                    if (parameters.md != 'widget') this._div.innerHTML += '<p>'+description+'</p>';
+                } else {
+                    this._div.innerHTML = (parameters.md != 'widget' ? '<h3>'+$.legend.title+'</h3>' : '');
+                }
+    		};
+            legend.addTo(map);
+            legend.update();
         }
-       
-        if ($.debug) console.log("menuGeoLayers",menuGeoLayers);
-        if ($.debug) console.log("geoMenu",geoMenu);
+        
+        if ($.debug) console.log("legend",legend);
         /*** ***/
 
 
 
-        /*** Creazione del menù dei datasets ***/
-        var dataMenu = L.control({position: 'topleft'});
+        /*** Creazione del menù delle colonne del dataset ***/
+        var varMenu = L.control({position: 'topleft'});
 
-        dataMenu.onAdd = function(map) {
+        varMenu.onAdd = function(map) {
             var nav = L.DomUtil.create('nav', 'menu-ui '+parameters.md);
-            nav.setAttribute('id','datamenu-ui');
-            if (parameters.md === 'widget') nav.setAttribute('style','display:none;');
+            nav.setAttribute('id','varmenu-ui');
+            nav.setAttribute('style','display:none;');
             this._nav = nav;
             d3.select(nav)
                 .on("mouseenter", function() {
@@ -1035,107 +1022,370 @@
             return nav;
         };
 
-        dataMenu.onChange = function(region, index) {
-            d3.select(this._nav).select('select').remove();
+        varMenu.onChange = function(region, index, column) {
             var index = index || 0,
+                column = column || 0,
+                dataSet = data[region][index];
+            
+            if ($.debug) console.log("varMenuOnChange", arguments, region, index, column, dataSet);
+            
+            info.update();
+            legend.update();
+            dataSet.column = dataSet.columns[column];
+            dataSet.label = dataSet.labels[column];
+            dataSet.description = dataSet.descriptions[column];
+            dataSet.binsNum = dataSet.binsNums[column];
+            loadData(region, dataSet.name);
+        };
+
+        varMenu.update = function(region,index) {
+            d3.select(this._nav).style("width",null).selectAll("a").remove();
+
+            var that = this,
+                index = index || 0,
                 dataSet = data[region][index],
-                options = [],
+                items = [],
                 group = '';
 
             for (var i=0; i<dataSet.labels.length; i++) {
                 if (_.has(dataSet.groups,dataSet.labels[i])) {
                     if (dataSet.groups[dataSet.labels[i]] != group) {
                         group = dataSet.groups[dataSet.labels[i]];
-                        options.push({ label: group, enabled: false, level: 'first-level' });
+                        items.push({ label: group, enabled: false, level: 'first-level' });
                     }
-                    options.push({ label: dataSet.labels[i], descr: dataSet.descriptions[i], enabled: true, level: 'second-level' });
-
+                    items.push({ label: dataSet.labels[i], descr: dataSet.descriptions[i], enabled: true, level: 'second-level' });
                 } else {
-                    options.push({ label: dataSet.labels[i], descr: dataSet.descriptions[i], enabled: true, level: 'first-level' });
+                    items.push({ label: dataSet.labels[i], descr: dataSet.descriptions[i], enabled: true, level: 'first-level' });
                 }
             }
 
             if (dataSet.columns && dataSet.columns.length > 1) {
+                
                 d3.select(this._nav)
-                    .append('select')
-                    .attr('disabled','disabled')
-                    .on('change', function() {
-                        var selectedIndex = d3.select(this).property('selectedIndex'),
-                            column = d3.select(this).selectAll("option")[0][selectedIndex].value,
-                            index = _.indexOf(dataSet.columns,column);
-                        console.log(d3.select(this).selectAll("option")[0][selectedIndex]);
-                        dataSet.column = column;
-                        dataSet.label = dataSet.labels[index];
-                        dataSet.description = dataSet.descriptions[index];
-                        dataSet.binsNum = dataSet.binsNums[index];
-                        loadData(region,dataSet.name);
-                    })
-                    .selectAll('option')
-                    .data(options)
+                    .selectAll("a")
+                    .data(items)
                     .enter()
-                    .append('option')
-                    .attr('title', function(d) { return d.descr; })
-                    .attr('disabled', function(d) { return (d.enabled ? null : 'disabled'); })
-                    .attr('class', function(d) { return d.level + ' ' + (d.enabled ? 'enabled' : 'disabled'); })
-                    .attr('value', function(d) { return d.label; })
-                    .text(function(d) { return (d.level === 'second-level' ? '- ' : '') + d.label; });
-            }
-        };
+                    .append("a")
+                    .attr("href", "#")
+                    .attr("title", function(d) { return d.descr; })
+                    .attr("class", function(d,index) {
+                        var classText = '';
+                        if (index === 0) {
+                            classText = 'first-item active';
+                        } else if (index === items.length-1) {
+                            classText = 'last-item';
+                        }
+                        return classText + ' ' +
+                            d.level + ' ' + 
+                            (d.enabled ? 'enabled' : 'disabled'); 
+                    })
+                    .on("click", function(d) {
+                        var listener = d3.select(this).on("click");
+                        if (d.enabled) {
+                            var column = _.indexOf(dataSet.columns,d.label);
+                            d3.select(that._nav)
+                                .select("a.active")
+                                .classed("active",false)
+                                .on("click",listener)
+                                .on("mouseout",null);
+                            d3.select(that._nav).selectAll("a").style("display",null);
+                            d3.select(this)
+                                .classed('active',true)
+                                .style("display","block")
+                                .on("click", function() {
+                                    if (d3.select(that._nav).classed("open")) {
+                                        d3.select(that._nav)
+                                            .classed("open",false)
+                                            .selectAll("a")
+                                            .style("display",null);
+                                    } else {
+                                        d3.select(that._nav)
+                                            .classed("open",true)
+                                            .selectAll("a")
+                                            .style("display","block");
+                                    }
+                                })
+                                .on("mouseout", function() {
+                                    d3.select(that._nav)
+                                        .classed("open",false)
+                                        .selectAll("a")
+                                        .style("display",null);
+                                });
+                            that.onChange(region,index,column);
+                        }
+                    })
+                    .text(function(d) { return d.label; });
 
-        dataMenu.update = function(region) {
-            d3.select(this._nav).style('display',null).selectAll("a, select").remove();
-            if (region) {
-                var dataSets = data[region];
-                if (dataSets.length > 1) {
-                    d3.select(this._nav).selectAll("a")
-                        .data(dataSets)
-                        .enter()
-                        .append("a")
-                        .attr("href", "#")
-                        .attr("id", function(d) { return d.name; })
-                        .attr("title", function(d) { return d.description; })
-                        .attr("class", function(d,index) {
-                            if (index === 0) {
-                                return 'first-item';
-                            } else if (index === dataSets.length-1) {
-                                return 'last-item';
-                            } else {
-                                return '';
-                            }
-                        })
-                        .on("click", function(d,index) {
-                            var region = d.layer,
-                                dataSet = data[region][index];
-                            dataSet.active = true;
-                            for (var i=0; i<data[region].length; i++) {
-                                if (i != index) data[region][i].active = false;
-                            }
-                            delete parameters.i;
-                            if (embedControl && embedControl.isAdded) embedControl.removeFrom(map);
-                            info.update();
-                            legend.update();
-                            dataMenu.onChange(region, index);
-                            dataSet.column = dataSet.columns[0];
-                            dataSet.label = dataSet.labels[0];
-                            dataSet.description = dataSet.descriptions[0];
-                            dataSet.binsNum = dataSet.binsNums[0];
-                            loadData(region, d.name);
-                        })
-                        .text(function(d) { return d.menuLabel; });
+                var maxLabelLength = d3.max(items.map(function(el) { return el.label.length; }));
+                d3.select(this._nav)
+                    .style("display",null)
+                    .style("width", function() {
+                        if (dataSet.columns.length > 3) {
+                            return d3.select(this)
+                                .selectAll("a")
+                                .filter(function(d) { 
+                                    return d.label.length === maxLabelLength; 
+                                })[0][0].offsetWidth+15+"px";
+                        } else {
+                            return null;
+                        }
+                    })
+                    .classed('collapsable',(dataSet.columns.length > 3));
 
-                } else {
-                    d3.select(this._nav).style('display','none');
-                }
+            } else {
+                d3.select(this._nav).style('display','none');
             }
         };
             
-        dataMenu.addTo(map);
-        dataMenu.update(menuGeoLayers[0].schema.name);
-        dataMenu.onChange(menuGeoLayers[0].schema.name);
-       
+        if ($.debug) console.log("varMenu",varMenu);
+        /*** ***/
+
+
+
+        /*** Creazione del menù dei datasets ***/
+        var dataMenu = L.control({position: 'topleft'});
+
+        dataMenu.onAdd = function(map) {
+            var nav = L.DomUtil.create('nav', 'menu-ui '+parameters.md);
+            nav.setAttribute('id','datamenu-ui');
+            nav.setAttribute('style','display:none;');
+            this._nav = nav;
+            d3.select(nav)
+                .on("mouseenter", function() {
+                    map.scrollWheelZoom.disable();
+                    map.doubleClickZoom.disable();
+                    map.dragging.disable();
+                })
+                .on("mouseleave", function() {
+                    map.scrollWheelZoom.enable();
+                    map.doubleClickZoom.enable();
+                    map.dragging.enable();
+                });
+            return nav;
+        };
+
+        dataMenu.onChange = function(region,index) {
+            var index = index || 0,
+                dataSet = data[region][index];
+            
+            if ($.debug) console.log("dataMenuOnChange", arguments, region, index, dataSet);
+            
+            dataSet.active = true;
+            for (var i=0; i<data[region].length; i++) {
+                if (i != index) data[region][i].active = false;
+            }
+            delete parameters.i;
+            if (embedControl && embedControl.isAdded) embedControl.removeFrom(map);
+            varMenu.update(region, index);
+            varMenu.onChange(region, index);
+        };
+
+        dataMenu.update = function(region) {
+            d3.select(this._nav).style("width",null).selectAll("a").remove();
+            var that = this,
+                dataSets = data[region];
+            if (dataSets.length > 1) {
+                d3.select(this._nav)
+                    .selectAll("a")
+                    .data(dataSets)
+                    .enter()
+                    .append("a")
+                    .attr("href", "#")
+                    .attr("id", function(d) { return d.name; })
+                    .attr("title", function(d) { return d.description; })
+                    .attr("class", function(d,index) {
+                        if (index === 0) {
+                            return 'first-item active';
+                        } else if (index === dataSets.length-1) {
+                            return 'last-item';
+                        } else {
+                            return '';
+                        }
+                    })
+                    .on("click", function(d) {
+                        var listener = d3.select(this).on("click");
+                        d3.select(that._nav)
+                            .select("a.active")
+                            .classed("active",false)
+                            .on("click",listener)
+                            .on("mouseout",null);
+                        d3.select(that._nav).selectAll("a").style("display",null);
+                        d3.select(this)
+                            .classed('active',true)
+                            .style("display","block")
+                            .on("click", function() {
+                                if (d3.select(that._nav).classed("open")) {
+                                    d3.select(that._nav)
+                                        .classed("open",false)
+                                        .selectAll("a")
+                                        .style("display",null);
+                                } else {
+                                    d3.select(that._nav)
+                                        .classed("open",true)
+                                        .selectAll("a")
+                                        .style("display","block");
+                                }
+                            })
+                            .on("mouseout", function() {
+                                d3.select(that._nav)
+                                    .classed("open",false)
+                                    .selectAll("a")
+                                    .style("display",null);
+                            });
+                        that.onChange(d.layer, d.index);
+                    })
+                    .text(function(d) { return d.menuLabel; });
+                
+                var maxLabelLength = d3.max(dataSets.map(function(el) { return el.menuLabel.length; }));
+                d3.select(this._nav)
+                    .style("display",null)
+                    .style("width", function() {
+                        if (dataSets.length > 3) {
+                            return d3.select(this)
+                                .selectAll("a")
+                                .filter(function(d) { 
+                                    return d.menuLabel.length === maxLabelLength; 
+                                })[0][0].offsetWidth+15+"px";
+                        } else {
+                            return null;
+                        }
+                    })
+                    .classed('collapsable',(dataSets.length > 3));
+            
+            } else {
+                d3.select(this._nav).style('display','none');
+            }
+        };
+
         if ($.debug) console.log("dataMenu",dataMenu);
         /*** ***/
 
+
+
+        /*** Creazione del menù dei geolayers ***/
+        var geoMenu = L.control({position: 'topleft'}),
+            menuGeoLayers = $.geoLayers.filter(function(l) { return l.type != 'tile'; });
+
+        geoMenu.onAdd = function(map) {
+            var nav = L.DomUtil.create('nav', 'menu-ui '+parameters.md);
+            nav.setAttribute('id','geomenu-ui');
+            nav.setAttribute('style','display:none;');
+            this._nav = nav;
+            d3.select(nav)
+                .on("mouseenter", function() {
+                    map.scrollWheelZoom.disable();
+                    map.doubleClickZoom.disable();
+                    map.dragging.disable();
+                })
+                .on("mouseleave", function() {
+                    map.scrollWheelZoom.enable();
+                    map.doubleClickZoom.enable();
+                    map.dragging.enable();
+                });
+            this.update();
+            return nav;
+        };
+          
+        geoMenu.onChange = function(region) {
+            if ($.debug) console.log("geoMenuOnChange", arguments, region);
+            data[region][0].active = true;
+            for (var i=0; i<data[region].length; i++) {
+                if (i != 0) data[region][i].active = false;
+            }
+            delete parameters.i;
+            if (embedControl && embedControl.isAdded) embedControl.removeFrom(map);
+            dataMenu.update(region);
+            dataMenu.onChange(region);
+        };
+
+        geoMenu.update = function() {
+            d3.select(this._nav).style("width",null).selectAll("a").remove();
+            
+            if (menuGeoLayers.length > 1) {
+                var that = this;
+                d3.select(this._nav)
+                    .selectAll("a")
+                    .data(menuGeoLayers.map(function(el) { return el.schema; }))
+                    .enter()
+                    .append("a")
+                    .attr("href", "#")
+                    .attr("id", function(d) { return d.name; })
+                    .attr("class", function(d,index) {
+                        if (index === 0) {
+                            return 'first-item active';
+                        } else if (index === menuGeoLayers.length-1) {
+                            return 'last-item';
+                        } else {
+                            return '';
+                        }
+                    })
+                    .classed("disabled", function(d) {
+                        return !_.has(geo,d.name);
+                    })
+                    .on("click", function(d) {
+                        var listener = d3.select(this).on("click");
+                        if (_.has(geo,d.name)) {
+                            d3.select(that._nav)
+                                .select("a.active")
+                                .classed("active",false)
+                                .on("click",listener)
+                                .on("mouseout",null);
+                            d3.select(that._nav).selectAll("a").style("display",null);
+                            d3.select(this)
+                                .classed('active',true)
+                                .style("display","block")
+                                .on("click", function() {
+                                    if (d3.select(that._nav).classed("open")) {
+                                        d3.select(that._nav)
+                                            .classed("open",false)
+                                            .selectAll("a")
+                                            .style("display",null);
+                                    } else {
+                                        d3.select(that._nav)
+                                            .classed("open",true)
+                                            .selectAll("a")
+                                            .style("display","block");
+                                    }
+                                })
+                                .on("mouseout", function() {
+                                    d3.select(that._nav)
+                                        .classed("open",false)
+                                        .selectAll("a")
+                                        .style("display",null);
+                                });
+                            that.onChange(d.name);
+                        }
+                    })
+                    .text(function(d) { return d.menu; });
+                
+                var maxLabelLength = d3.max(menuGeoLayers.map(function(el) { return el.schema.menu.length; }));
+                d3.select(this._nav)
+                    .style("display",null)
+                    .style("width", function() {
+                        if (menuGeoLayers.length > 3) {
+                            return d3.select(this)
+                                .selectAll("a")
+                                .filter(function(d) { 
+                                    return d.menu.length === maxLabelLength; 
+                                })[0][0].offsetWidth+15+"px";
+                        } else {
+                            return null;
+                        }
+                    })
+                    .classed('collapsable',(menuGeoLayers.length > 3));
+
+            }
+        };
+       
+        if ($.debug) console.log("menuGeoLayers",menuGeoLayers);
+        if ($.debug) console.log("geoMenu",geoMenu);
+        /*** ***/
+
+
+        geoMenu.addTo(map);
+        dataMenu.addTo(map);
+        varMenu.addTo(map);
+        geoMenu.onChange(menuGeoLayers[0].schema.name);
 
 
         /*** Funzione di ricerca del luogo ***/
@@ -1197,7 +1447,7 @@
         /*** Dev utility ***/
         var devUtil;
         if ($.debug) {
-            devUtil = L.control({position: 'bottomleft'});
+            devUtil = L.control({position: 'topright'});
             devUtil.onAdd = function(map) {
                 var div = L.DomUtil.create('div','devutil');
 
@@ -1241,47 +1491,6 @@
                 })
                 .on('zoomend', function(e) { d3.select('#devutil-zoom').text('Zoom level: '+map.getZoom()); });
         }
-        /*** ***/
-
-
-
-        /*** Legenda ***/
-        var legend;
-        if (_.has($,'legend') && $.legend.active) {
-		    legend = L.control({position: 'bottomleft'});
-    	    legend.onAdd = function (map) {
-                this._div = L.DomUtil.create('div', 'info legend '+parameters.md);
-		        return this._div;
-            };
-            legend.update = function(region) {
-                if (region) {
-                    var dataSet = data[region].filter(function(el) { return el.active; })[0], 
-                        grades = dataSet.ranges.map(function(el) { 
-                            return el.split(" - ").map(function(el) { 
-                                var num = parseFloat(el);
-                                return dataSet.formatter(dataSet.column, num); 
-                            }).join(" - ");
-                        }),
-                        description = dataSet.description || $.legend.description || '';
-
-                    this._div.innerHTML = (parameters.md != 'widget' ? '<h3 title="'+description+'">'+$.legend.title+'</h3>' : '');
-                    for (var i=0; i<grades.length; i++) {
-                        var color = (colorbrewer[dataSet.palette][grades.length] ? colorbrewer[dataSet.palette][grades.length][i] : colorbrewer[dataSet.palette][3][i]);
-                        this._div.innerHTML += '<i title="'+(_.has($.legend,'label') ? $.legend.label(grades[i].split(" - ")[0],grades[i].split(" - ")[1],dataSet.label) : grades[i])+'" '+
-                            'style="background:' + 
-                            color + '"></i> ' + 
-                            (parameters.md != 'widget' ? grades[i] : '') + '<br>';
-                    }
-                    if (parameters.md != 'widget') this._div.innerHTML += '<p>'+description+'</p>';
-                } else {
-                    this._div.innerHTML = (parameters.md != 'widget' ? '<h3>'+$.legend.title+'</h3>' : '');
-                }
-    		};
-            legend.addTo(map);
-            legend.update();
-        }
-        
-        if ($.debug) console.log("legend",legend);
         /*** ***/
 
 
@@ -1483,19 +1692,13 @@
                 dataSets = $.dataSets.filter(function(l) { return l.schema.layer === region; }),
                 geoPath, dataPath, q;
             
-            d3.selectAll("nav#geomenu-ui a").classed("active", false);
-            d3.select("nav#geomenu-ui a#"+region).classed("active", true);
-            d3.selectAll("nav#datamenu-ui a").classed("active", false);
-            d3.select("nav#datamenu-ui a#"+(dataset || dataSets[0].schema.name)).classed("active", true);
-            d3.select("nav#datamenu-ui select").attr("disabled",null);
-            
             parameters.dl = region;
-            geojson.clearLayers();
+            if (geojson) geojson.clearLayers();
 
             if ($.debug) console.log("geoLayer",geoLayer);
             if ($.debug) console.log("dataSets",dataSets);
 
-            if (!geo[region].resource) { // || !data[region].resource) { // Second condition in next loop
+            if (!geo[region].resource) { 
                 
                 map.spin(true);
                 
@@ -1520,13 +1723,13 @@
                         data[region][i-2].resource = dataSets[i-2].transform(arguments[i]);
                     }
 
-                    map.spin(false);
-                    
                     joinData(region);
                     binData(region);
                     
 	    	        geojson.addData(geo[region].resource);
 
+                    map.spin(false);
+                    
                     if (!svgViewBox) svgViewBox = d3.select(".leaflet-overlay-pane svg").attr("viewBox").split(" ");
                     if (parameters.t) { map.fitBounds(geojson.getBounds()); }
                     if (parameters.i) {
@@ -1547,15 +1750,6 @@
                 info.update();
             }
         }
-        /*** ***/
-
-
-
-        /*** Inizializzazione ***/
-        setTimeout(function () {
-            map.spin(false);
-            loadData(parameters.dl);
-        }, 3000);
         /*** ***/
 
 

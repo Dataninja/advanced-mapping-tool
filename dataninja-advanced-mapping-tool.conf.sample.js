@@ -146,9 +146,14 @@ var mapConfig = {
         // Description at the bottom, overridable by dataset configuration
         description: '',
 
+        // Symbol between range numbers
+        // It will be '-' if missing
+        delimiter: '-',
+
         // Label appended to legend items
         label: function(min,max,label) {
-            return label + ": " + min + " - " + max;
+            var prefix = (label ? label+": " : "");
+            return prefix + min + (min != max ? " "+this.delimiter+" "+max : "");
         }
 
     },
@@ -336,6 +341,10 @@ var mapConfig = {
             // Text prepended to title of each share icon (+ 'su [Twitter | Facebook | Google Plus | Linkedin | ...]')
             title: 'Condividi',
 
+            // If missing or empty, it will be used the url map with proper get parameters to show selected region
+            // Otherwise, this custom url will be used
+            url: '',
+
             // Twitter share icon
             twitter: {
 
@@ -345,7 +354,9 @@ var mapConfig = {
                 // Mention after sharing
                 via: '',
 
-                // Text appended to tweet content, hashtags here (+ region name)
+                // Text for tweeted content
+                // If string it will be "region name - [text]"
+                // If function it can use region data: function(d) { return [string]; }
                 text: 'Tweet'
             },
 
@@ -376,10 +387,14 @@ var mapConfig = {
                 // Enable or not
                 active: true,
 
-                // Text prepended to subject (+ region name)
+                // Text for subject
+                // If string, it will be "[subject] | region name"
+                // If function, it has region data as input and must return a string
                 subject: '',
 
-                // Text prepended to body (+ region name and URL)
+                // Text for body
+                // If string, it will be "region name, [body]: url"
+                // If function, it has region data and url as input and must return a string
                 body: ''
             },
             permalink: {
@@ -1007,10 +1022,11 @@ var mapConfig = {
  *   - shareButtons [object]
  *     - active [bool]
  *     - title [string]
+ *     - url [string]
  *     - twitter [object]
  *       - active [bool]
  *       - via [string]
- *       - text [string]
+ *       - text [string | [string] function ( [object] )]
  *     - facebook [object]
  *       - active [bool]
  *     - gplus [object]
@@ -1019,8 +1035,8 @@ var mapConfig = {
  *       - active [bool]
  *     - email [object]
  *       - active [bool]
- *       - subject [string]
- *       - body [string]
+ *       - subject [string | [string] function ( [object] )]
+ *       - body [string | [string] function ( [pbject], [string] )]
  *     - permalink [object]
  *       - active [bool]
  *   - view [object]
@@ -1034,6 +1050,7 @@ var mapConfig = {
  *   - active [bool]
  *   - title [string]
  *   - description [string]
+ *   - delimiter [string]
  *   - label [string] function ( [float], [float] )
  * - controls [object]
  *   - active [bool]
