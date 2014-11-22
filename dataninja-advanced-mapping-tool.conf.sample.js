@@ -341,6 +341,10 @@ var mapConfig = {
             // Text prepended to title of each share icon (+ 'su [Twitter | Facebook | Google Plus | Linkedin | ...]')
             title: 'Condividi',
 
+            // If missing or empty, it will be used the url map with proper get parameters to show selected region
+            // Otherwise, this custom url will be used
+            url: '',
+
             // Twitter share icon
             twitter: {
 
@@ -1014,6 +1018,7 @@ var mapConfig = {
  *   - shareButtons [object]
  *     - active [bool]
  *     - title [string]
+ *     - url [string]
  *     - twitter [object]
  *       - active [bool]
  *       - via [string]

@@ -431,6 +431,10 @@
                         btnUrl = 'http://' + location.hostname + Arg.url(parameters).replace(/&*md=[^&]*/,'').replace(/&{2,}/g,"&");
                         btnEncUrl = 'http://' + location.hostname + encodeURIComponent(Arg.url(parameters).replace(/&*md=[^&]*/,'').replace(/&{2,}/g,"&"));
                         btnPlace = props[geo[region].label];
+
+                        if ($.infowindow.shareButtons.url) {
+                            btnUrl = btnEncUrl = $.infowindow.shareButtons.url;
+                        }
                     
                         if (_.has($.infowindow.shareButtons,'twitter') && $.infowindow.shareButtons.twitter.active) {
                             buttons.push('<a class="ssb" href="http://twitter.com/share?url=' + btnEncUrl + 
