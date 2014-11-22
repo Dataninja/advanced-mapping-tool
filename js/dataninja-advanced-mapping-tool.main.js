@@ -425,6 +425,9 @@
                         dnlBtn = [];
                     
                     if (_.has($.infowindow,'shareButtons') && $.infowindow.shareButtons.active) {
+
+                        var imagePath = (_.isString($.infowindow.shareButtons.path) ? $.infowindow.shareButtons.path : 'icons/');
+                        
                         btnTitle = $.infowindow.shareButtons.title + (region == 'regioni' ? ' in ' : ' a ') + props[geo[region].label];
                         btnUrl = 'http://' + location.hostname + Arg.url(parameters).replace(/&*md=[^&]*/,'').replace(/&{2,}/g,"&");
                         btnEncUrl = 'http://' + location.hostname + encodeURIComponent(Arg.url(parameters).replace(/&*md=[^&]*/,'').replace(/&{2,}/g,"&"));
@@ -439,38 +442,38 @@
                                 '&via=' + $.infowindow.shareButtons.twitter.via + 
                                 '&text=' + 
                                 encodeURIComponent((_.isFunction($.infowindow.shareButtons.twitter.text) ? $.infowindow.shareButtons.twitter.text(props.data[dataSet.name]) : btnPlace + ' - ' + $.infowindow.shareButtons.twitter.text)) + 
-                                '" target="_blank" title="'+btnTitle+' su Twitter"><img src="icons/twitter.png" id="ssb-twitter"></a>'
+                                '" target="_blank" title="'+btnTitle+' su Twitter"><img src="'+imagePath+($.infowindow.shareButtons.twitter.image || 'twitter.png')+'" id="ssb-twitter"></a>'
                             );
                         }
 
                         if (_.has($.infowindow.shareButtons,'facebook') && $.infowindow.shareButtons.facebook.active) {
                             buttons.push('<a class="ssb" href="http://www.facebook.com/sharer.php?u=' + btnEncUrl + 
-                                '" target="_blank" title="'+btnTitle+' su Facebook"><img src="icons/facebook.png" id="ssb-facebook"></a>'
+                                '" target="_blank" title="'+btnTitle+' su Facebook"><img src="'+imagePath+($.infowindow.shareButtons.facebook.image || 'facebook.png')+'" id="ssb-facebook"></a>'
                             );
                         }
 
                         if (_.has($.infowindow.shareButtons,'gplus') && $.infowindow.shareButtons.gplus.active) {
                             buttons.push('<a class="ssb" href="https://plus.google.com/share?url=' + btnEncUrl + 
-                                '" target="_blank" title="'+btnTitle+' su Google Plus"><img src="icons/gplus.png" id="ssb-gplus"></a>'
+                                '" target="_blank" title="'+btnTitle+' su Google Plus"><img src="'+imagePath+($.infowindow.shareButtons.gplus.image || 'gplus.png')+'" id="ssb-gplus"></a>'
                             );
                         }
 
                         if (_.has($.infowindow.shareButtons,'linkedin') && $.infowindow.shareButtons.linkedin.active) {
                             buttons.push('<a class="ssb" href="http://www.linkedin.com/shareArticle?mini=true&url=' + btnEncUrl + 
-                                '" target="_blank" title="'+btnTitle+' su LinkedIn"><img src="icons/linkedin.png" id="ssb-linkedin"></a>'
+                                '" target="_blank" title="'+btnTitle+' su LinkedIn"><img src="'+imagePath+($.infowindow.shareButtons.linkedin.image || 'linkedin.png')+'" id="ssb-linkedin"></a>'
                             );
                         }
 
                         if (_.has($.infowindow.shareButtons,'email') && $.infowindow.shareButtons.email.active) {
                             buttons.push('<a class="ssb" href="mailto:?Subject=' + encodeURIComponent((_.isFunction($.infowindow.shareButtons.email.subject) ? $.infowindow.shareButtons.email.subject(props.data[dataSet.name]) : $.infowindow.shareButtons.email.subject + ' | ' + btnPlace)) + 
                                 '&Body=' + encodeURIComponent((_.isFunction($.infowindow.shareButtons.email.body) ? $.infowindow.shareButtons.email.body(props.data[dataSet.name],btnEncUrl) : btnPlace + ' - ' + $.infowindow.shareButtons.email.body + ': ' + btnUrl)) + 
-                                '" target="_blank" title="'+btnTitle+' per email"><img src="icons/email.png" id="ssb-email"></a>'
+                                '" target="_blank" title="'+btnTitle+' per email"><img src="'+imagePath+($.infowindow.shareButtons.email.image || 'email.png')+'" id="ssb-email"></a>'
                             );
                         }
 
                         if (_.has($.infowindow.shareButtons,'permalink') && $.infowindow.shareButtons.permalink.active) {
                             buttons.push('<a class="ssb" href="' + btnUrl + 
-                                '" target="_blank" title="Permalink"><img src="icons/link.png" id="ssb-link"></a>'
+                                '" target="_blank" title="Permalink"><img src="'+imagePath+($.infowindow.shareButtons.permalink.image || 'link.png')+'" id="ssb-link"></a>'
                             );
                         }
                     }
@@ -522,7 +525,7 @@
                         tfoot = '<tfoot></tfoot>';
                     }
                     
-                if ($.debug) console.log("Table footer",tfoot);
+                    if ($.debug) console.log("Table footer",tfoot);
 
                     var tbody;
                     if (_.has($.infowindow,'view') && $.infowindow.view.active && _.has($.viewTypes,$.infowindow.view.type)) {
@@ -549,38 +552,38 @@
                                 buttons.push('<a class="ssb" href="http://twitter.com/share?url=' + btnEncUrl + 
                                     '&via=' + $.infowindow.shareButtons.twitter.via + 
                                     '&text=' + encodeURIComponent(btnPlace + ' - ' + $.infowindow.shareButtons.twitter.text + ' ') + 
-                                    '" target="_blank" title="'+btnTitle+' su Twitter"><img src="icons/twitter.png" id="ssb-twitter"></a>'
+                                    '" target="_blank" title="'+btnTitle+' su Twitter"><img src="'+imagePath+($.infowindow.shareButtons.twitter.image || 'twitter.png')+'" id="ssb-twitter"></a>'
                                 );
                             }
 
                             if (_.has($.infowindow.shareButtons,'facebook') && $.infowindow.shareButtons.facebook.active) {
                                 buttons.push('<a class="ssb" href="http://www.facebook.com/sharer.php?u=' + btnEncUrl + 
-                                    '" target="_blank" title="'+btnTitle+' su Facebook"><img src="icons/facebook.png" id="ssb-facebook"></a>'
+                                    '" target="_blank" title="'+btnTitle+' su Facebook"><img src="'+imagePath+($.infowindow.shareButtons.facebook.image || 'facebook.png')+'" id="ssb-facebook"></a>'
                                 );
                             }
 
                             if (_.has($.infowindow.shareButtons,'gplus') && $.infowindow.shareButtons.gplus.active) {
                                 buttons.push('<a class="ssb" href="https://plus.google.com/share?url=' + btnEncUrl + 
-                                    '" target="_blank" title="'+btnTitle+' su Google Plus"><img src="icons/gplus.png" id="ssb-gplus"></a>'
+                                    '" target="_blank" title="'+btnTitle+' su Google Plus"><img src="'+imagePath+($.infowindow.shareButtons.gplus.image || 'gplus.png')+'" id="ssb-gplus"></a>'
                                 );
                             }
 
                             if (_.has($.infowindow.shareButtons,'linkedin') && $.infowindow.shareButtons.linkedin.active) {
                                 buttons.push('<a class="ssb" href="http://www.linkedin.com/shareArticle?mini=true&url=' + btnEncUrl + 
-                                    '" target="_blank" title="'+btnTitle+' su LinkedIn"><img src="icons/linkedin.png" id="ssb-linkedin"></a>'
+                                    '" target="_blank" title="'+btnTitle+' su LinkedIn"><img src="'+imagePath+($.infowindow.shareButtons.linkedin.image || 'linkedin.png')+'" id="ssb-linkedin"></a>'
                                 );
                             }
     
                             if (_.has($.infowindow.shareButtons,'email') && $.infowindow.shareButtons.email.active) {
                                 buttons.push('<a class="ssb" href="mailto:?Subject=' + encodeURIComponent($.infowindow.shareButtons.email.subject + ' | ' + btnPlace) + 
                                     '&Body=' + encodeURIComponent(btnPlace + ' - ' + $.infowindow.shareButtons.email.body + ': ') + btnEncUrl + 
-                                    '" target="_blank" title="'+btnTitle+' per email"><img src="icons/email.png" id="ssb-email"></a>'
+                                    '" target="_blank" title="'+btnTitle+' per email"><img src="'+imagePath+($.infowindow.shareButtons.email.image || 'email.png')+'" id="ssb-email"></a>'
                                 );
                             }
 
                             if (_.has($.infowindow.shareButtons,'permalink') && $.infowindow.shareButtons.permalink.active) {
                                 buttons.push('<a class="ssb" href="' + btnUrl + 
-                                    '" target="_blank" title="Permalink"><img src="icons/link.png" id="ssb-link"></a>'
+                                    '" target="_blank" title="Permalink"><img src="'+imagePath+($.infowindow.shareButtons.permalink.image || 'link.png')+'" id="ssb-link"></a>'
                                 );
                             }
                             
@@ -1447,7 +1450,7 @@
         /*** Dev utility ***/
         var devUtil;
         if ($.debug) {
-            devUtil = L.control({position: 'topright'});
+            devUtil = L.control({position: 'bottomright'});
             devUtil.onAdd = function(map) {
                 var div = L.DomUtil.create('div','devutil');
 

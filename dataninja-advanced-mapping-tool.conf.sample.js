@@ -345,11 +345,20 @@ var mapConfig = {
             // Otherwise, this custom url will be used
             url: '',
 
+            // Common path for all icons
+            // If missing, it will be 'icons/'
+            // If empty, you can use absolute path for every icon or different relative paths
+            path: 'icons/',
+
             // Twitter share icon
             twitter: {
 
                 // Enable or not
                 active: true,
+
+                // Name of the image file, relative to global path
+                // If missing or empty, it will be twitter.png
+                image: '',
 
                 // Mention after sharing
                 via: '',
@@ -365,6 +374,10 @@ var mapConfig = {
 
                 // Enable or not
                 active: true
+
+                // Name of the image file, relative to global path
+                // If missing or empty, it will be facebook.png
+                image: '',
             },
 
             // Google Plus share icon
@@ -372,6 +385,10 @@ var mapConfig = {
 
                 // Enable or not
                 active: true
+
+                // Name of the image file, relative to global path
+                // If missing or empty, it will be gplus.png
+                image: '',
             },
 
             // LinkedIn share icon
@@ -379,6 +396,10 @@ var mapConfig = {
 
                 // Enable or not
                 active: true
+
+                // Name of the image file, relative to global path
+                // If missing or empty, it will be linkedin.png
+                image: '',
             },
 
             // Send an email
@@ -386,6 +407,10 @@ var mapConfig = {
 
                 // Enable or not
                 active: true,
+
+                // Name of the image file, relative to global path
+                // If missing or empty, it will be email.png
+                image: '',
 
                 // Text for subject
                 // If string, it will be "[subject] | region name"
@@ -401,6 +426,10 @@ var mapConfig = {
 
                 // Enable or not
                 active: true
+
+                // Name of the image file, relative to global path
+                // If missing or empty, it will be link.png
+                image: '',
             }
         },
 
@@ -1023,22 +1052,29 @@ var mapConfig = {
  *     - active [bool]
  *     - title [string]
  *     - url [string]
+ *     - path [string]
  *     - twitter [object]
  *       - active [bool]
+ *       - image [string]
  *       - via [string]
  *       - text [string | [string] function ( [object] )]
  *     - facebook [object]
  *       - active [bool]
+ *       - image [string]
  *     - gplus [object]
  *       - active [bool]
+ *       - image [string]
  *     - linkedin [object]
  *       - active [bool]
+ *       - image [string]
  *     - email [object]
  *       - active [bool]
+ *       - image [string]
  *       - subject [string | [string] function ( [object] )]
  *       - body [string | [string] function ( [pbject], [string] )]
  *     - permalink [object]
  *       - active [bool]
+ *       - image [string]
  *   - view [object]
  *     - active [bool]
  *     - type [string matching viewTypes attributes]
