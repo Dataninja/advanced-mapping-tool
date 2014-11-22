@@ -487,7 +487,7 @@ if (mapConfig) {
                         filterValue = props[geo[region].id],
                         buttons = [], btnTitle, btnUrl, btnPlace,
                         dnlBtn = [];
-    
+                    
                     if (_.has($.infowindow,'shareButtons') && $.infowindow.shareButtons.active) {
                         btnTitle = $.infowindow.shareButtons.title + (region == 'regioni' ? ' in ' : ' a ') + props[geo[region].label];
                         btnUrl = 'http://' + location.hostname + Arg.url(parameters).replace(/&*md=[^&]*/,'').replace(/&{2,}/g,"&");
@@ -497,7 +497,8 @@ if (mapConfig) {
                         if (_.has($.infowindow.shareButtons,'twitter') && $.infowindow.shareButtons.twitter.active) {
                             buttons.push('<a class="ssb" href="http://twitter.com/share?url=' + btnEncUrl + 
                                 '&via=' + $.infowindow.shareButtons.twitter.via + 
-                                '&text=' + encodeURIComponent(btnPlace + ' - ' + $.infowindow.shareButtons.twitter.text + ' ') + 
+                                '&text=' + 
+                                encodeURIComponent((_.isFunction($.infowindow.shareButtons.twitter.text) ? $.infowindow.shareButtons.twitter.text(props.data[dataSet.name]) : btnPlace + ' - ' + $.infowindow.shareButtons.twitter.text) + ' ') + 
                                 '" target="_blank" title="'+btnTitle+' su Twitter"><img src="icons/twitter.png" id="ssb-twitter"></a>'
                             );
                         }
@@ -581,7 +582,7 @@ if (mapConfig) {
                         tfoot = '<tfoot></tfoot>';
                     }
                     
-                    if ($.debug) console.log("Table footer",tfoot);
+                if ($.debug) console.log("Table footer",tfoot);
 
                     var tbody;
                     if (_.has($.infowindow,'view') && $.infowindow.view.active && _.has($.viewTypes,$.infowindow.view.type)) {

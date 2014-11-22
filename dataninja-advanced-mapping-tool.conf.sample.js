@@ -350,7 +350,9 @@ var mapConfig = {
                 // Mention after sharing
                 via: '',
 
-                // Text appended to tweet content, hashtags here (+ region name)
+                // Text for tweeted content
+                // If string it will be "region name - [text]"
+                // If function it can use region data: function(d) { return [string]; }
                 text: 'Tweet'
             },
 
@@ -1015,7 +1017,7 @@ var mapConfig = {
  *     - twitter [object]
  *       - active [bool]
  *       - via [string]
- *       - text [string]
+ *       - text [string | [string] function ( [object] )]
  *     - facebook [object]
  *       - active [bool]
  *     - gplus [object]
