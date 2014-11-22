@@ -1447,7 +1447,7 @@
         /*** Dev utility ***/
         var devUtil;
         if ($.debug) {
-            devUtil = L.control({position: 'bottomleft'});
+            devUtil = L.control({position: 'topright'});
             devUtil.onAdd = function(map) {
                 var div = L.DomUtil.create('div','devutil');
 
