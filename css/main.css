@@ -189,6 +189,7 @@ html, body, #map {
     background: transparent;
 	border-radius: 3px;
     overflow: hidden;
+    margin-bottom: 2px;
 }
 
 .leaflet-control.menu-ui {
