@@ -373,33 +373,33 @@ var mapConfig = {
             facebook: {
 
                 // Enable or not
-                active: true
+                active: true,
 
                 // Name of the image file, relative to global path
                 // If missing or empty, it will be facebook.png
-                image: '',
+                image: ''
             },
 
             // Google Plus share icon
             gplus: {
 
                 // Enable or not
-                active: true
+                active: true,
 
                 // Name of the image file, relative to global path
                 // If missing or empty, it will be gplus.png
-                image: '',
+                image: ''
             },
 
             // LinkedIn share icon
             linkedin: {
 
                 // Enable or not
-                active: true
+                active: true,
 
                 // Name of the image file, relative to global path
                 // If missing or empty, it will be linkedin.png
-                image: '',
+                image: ''
             },
 
             // Send an email
@@ -425,11 +425,11 @@ var mapConfig = {
             permalink: {
 
                 // Enable or not
-                active: true
+                active: true,
 
                 // Name of the image file, relative to global path
                 // If missing or empty, it will be link.png
-                image: '',
+                image: ''
             }
         },
 
