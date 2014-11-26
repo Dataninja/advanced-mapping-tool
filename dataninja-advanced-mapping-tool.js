@@ -387,7 +387,7 @@ if (mapConfig) {
             minZoom: $.map.zoom.min || null, 
             zoom: (parameters.md != 'widget' ? $.map.zoom.init : $.map.zoom.init-1) || null,
             center: ($.map.center || (mapBounds ? mapBounds.getCenter() : null)),
-            scrollWheelZoom: $.map.zoom.scrollWheel || true, 
+            scrollWheelZoom: (_.has($.map.zoom,'scrollWheel') ? $.map.zoom.scrollWheel : true),
             attributionControl: !$.map.attribution.length,
             maxBounds: maxMapBounds || null
         });
@@ -471,7 +471,7 @@ if (mapConfig) {
                         map.scrollWheelZoom.disable();
                     })
                     .on("mouseleave", function() {
-                        map.scrollWheelZoom.enable();
+                        if (_.has($.map.zoom,'scrollWheel') && $.map.zoom.scrollWheel) map.scrollWheelZoom.enable();
                     });
         	    this.update();
                 return this._div;
@@ -698,7 +698,7 @@ if (mapConfig) {
                             delete parameters.i;
                             if (embedControl && embedControl.isAdded) embedControl.removeFrom(map);
                             info.update();
-                            map.scrollWheelZoom.enable();
+                            if (_.has($.map.zoom,'scrollWheel') && $.map.zoom.scrollWheel) map.scrollWheelZoom.enable();
                             return false;
                         });
 
@@ -1093,7 +1093,7 @@ if (mapConfig) {
                     map.dragging.disable();
                 })
                 .on("mouseleave", function() {
-                    map.scrollWheelZoom.enable();
+                    if (_.has($.map.zoom,'scrollWheel') && $.map.zoom.scrollWheel) map.scrollWheelZoom.enable();
                     map.doubleClickZoom.enable();
                     map.dragging.enable();
                 });
@@ -1222,7 +1222,7 @@ if (mapConfig) {
                     map.dragging.disable();
                 })
                 .on("mouseleave", function() {
-                    map.scrollWheelZoom.enable();
+                    if (_.has($.map.zoom,'scrollWheel') && $.map.zoom.scrollWheel) map.scrollWheelZoom.enable();
                     map.doubleClickZoom.enable();
                     map.dragging.enable();
                 });
@@ -1351,7 +1351,7 @@ if (mapConfig) {
                     map.dragging.disable();
                 })
                 .on("mouseleave", function() {
-                    map.scrollWheelZoom.enable();
+                    if (_.has($.map.zoom,'scrollWheel') && $.map.zoom.scrollWheel) map.scrollWheelZoom.enable();
                     map.doubleClickZoom.enable();
                     map.dragging.enable();
                 })
@@ -1497,6 +1497,7 @@ if (mapConfig) {
                         bounds: mapBounds,
                         email: $.controls.geocoder.email,
                         callback: function (results) {
+                            if ($.debug) console.log("osmGeocoderResults",results);
                             if (results.length) {
                                 var bbox = results[0].boundingbox,
                                     first = new L.LatLng(bbox[0], bbox[2]),
@@ -1571,7 +1572,7 @@ if (mapConfig) {
                         map.dragging.disable();
                     })
                     .on("mouseleave", function() {
-                        map.scrollWheelZoom.enable();
+                        if (_.has($.map.zoom,'scrollWheel') && $.map.zoom.scrollWheel) map.scrollWheelZoom.enable();
                         map.doubleClickZoom.enable();
                         map.dragging.enable();
                     });
