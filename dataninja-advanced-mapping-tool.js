@@ -1418,7 +1418,7 @@ if (mapConfig) {
                     .on("click", function(d) {
                         var listener = d3.select(this).on("click");
                         if (d.enabled) {
-                            var column = _.indexOf(dataSet.columns,d.label);
+                            var column = _.indexOf(dataSet.labels,d.label);
                             d3.select(that._nav)
                                 .select("a.active")
                                 .classed("active",false)
