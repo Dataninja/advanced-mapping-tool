@@ -1509,7 +1509,9 @@ if (mapConfig) {
                                 delete parameters.i;
                                 if (embedControl && embedControl.isAdded) embedControl.removeFrom(map);
     		    	            info.update();
-                                loadData($.controls.geocoder.layer);
+                                var e = document.createEvent('UIEvents');
+                                e.initUIEvent('click', true, true, window, 1);
+                                d3.select("#geomenu-ui #"+$.controls.geocoder.layer).node().dispatchEvent(e);
                                 this._map.fitBounds(bounds, { maxZoom: $.controls.geocoder.zoom });
                             }
                         }
