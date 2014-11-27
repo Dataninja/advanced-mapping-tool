@@ -32,6 +32,7 @@
     "bower_components/Leaflet.label/dist/leaflet.label-src.js",
     "bower_components/leaflet-fullscreen/Control.FullScreen.js",
     "bower_components/leaflet.markercluster/dist/leaflet.markercluster-src.js",
+    "bower_components/leaflet-omnivore/leaflet-omnivore.js",
     "bower_components/completely/complete.ly.1.0.1.js",
     "bower_components/agnesjs/agnes.js",
     "bower_components/argjs/src/arg.js",
