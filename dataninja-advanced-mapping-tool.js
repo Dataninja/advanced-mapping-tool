@@ -69,6 +69,8 @@ if (mapConfig) {
         return;
     }
 
+    d3.geojson = d3.topojson = d3.json;
+
     head.ready(function() {
 
         // Global variables
@@ -387,7 +389,7 @@ if (mapConfig) {
             minZoom: $.map.zoom.min || null, 
             zoom: (parameters.md != 'widget' ? $.map.zoom.init : $.map.zoom.init-1) || null,
             center: ($.map.center || (mapBounds ? mapBounds.getCenter() : null)),
-            scrollWheelZoom: $.map.zoom.scrollWheel || true, 
+            scrollWheelZoom: (_.has($.map.zoom,'scrollWheel') ? $.map.zoom.scrollWheel : true),
             attributionControl: !$.map.attribution.length,
             maxBounds: maxMapBounds || null
         });
@@ -471,7 +473,7 @@ if (mapConfig) {
                         map.scrollWheelZoom.disable();
                     })
                     .on("mouseleave", function() {
-                        map.scrollWheelZoom.enable();
+                        if (_.has($.map.zoom,'scrollWheel') && $.map.zoom.scrollWheel) map.scrollWheelZoom.enable();
                     });
         	    this.update();
                 return this._div;
@@ -676,7 +678,7 @@ if (mapConfig) {
                                     d3.select('a#a-'+$.infowindow.downloads.files[i].name).on("click", function() {
                                         if ($.debug) console.log(this, i, $.infowindow.downloads.files[i].name, dnlPath, dnlFile);
                                         d3[$.infowindow.downloads.files[i].format](dnlPath, function(err,res) {
-                                            var dataset = $.infowindow.downloads.files[i].transform(res);
+                                            var dataset = $.infowindow.downloads.files[i].transform.call($.infowindow.downloads.files[i],res);
                                             if (dataset.length > 0) {
                                                 var csv = agnes.jsonToCsv(dataset, delim),
                                                     blob = new Blob([csv], {type: "text/csv;charset=utf-8"});
@@ -698,7 +700,7 @@ if (mapConfig) {
                             delete parameters.i;
                             if (embedControl && embedControl.isAdded) embedControl.removeFrom(map);
                             info.update();
-                            map.scrollWheelZoom.enable();
+                            if (_.has($.map.zoom,'scrollWheel') && $.map.zoom.scrollWheel) map.scrollWheelZoom.enable();
                             return false;
                         });
 
@@ -1093,7 +1095,7 @@ if (mapConfig) {
                     map.dragging.disable();
                 })
                 .on("mouseleave", function() {
-                    map.scrollWheelZoom.enable();
+                    if (_.has($.map.zoom,'scrollWheel') && $.map.zoom.scrollWheel) map.scrollWheelZoom.enable();
                     map.doubleClickZoom.enable();
                     map.dragging.enable();
                 });
@@ -1222,7 +1224,7 @@ if (mapConfig) {
                     map.dragging.disable();
                 })
                 .on("mouseleave", function() {
-                    map.scrollWheelZoom.enable();
+                    if (_.has($.map.zoom,'scrollWheel') && $.map.zoom.scrollWheel) map.scrollWheelZoom.enable();
                     map.doubleClickZoom.enable();
                     map.dragging.enable();
                 });
@@ -1351,7 +1353,7 @@ if (mapConfig) {
                     map.dragging.disable();
                 })
                 .on("mouseleave", function() {
-                    map.scrollWheelZoom.enable();
+                    if (_.has($.map.zoom,'scrollWheel') && $.map.zoom.scrollWheel) map.scrollWheelZoom.enable();
                     map.doubleClickZoom.enable();
                     map.dragging.enable();
                 })
@@ -1497,6 +1499,7 @@ if (mapConfig) {
                         bounds: mapBounds,
                         email: $.controls.geocoder.email,
                         callback: function (results) {
+                            if ($.debug) console.log("osmGeocoderResults",results);
                             if (results.length) {
                                 var bbox = results[0].boundingbox,
                                     first = new L.LatLng(bbox[0], bbox[2]),
@@ -1526,7 +1529,7 @@ if (mapConfig) {
                     
                     var acFile = $.controls.geocoder.autocomplete.url.call($.controls.geocoder.autocomplete, parameters.t || undefined);
                     d3[$.controls.geocoder.autocomplete.format](acFile, function(err,res) {
-                        defaultGeo[$.controls.geocoder.layer].list = $.controls.geocoder.autocomplete.transform(res);
+                        defaultGeo[$.controls.geocoder.layer].list = $.controls.geocoder.autocomplete.transform.call($.controls.geocoder.autocomplete,res);
                         osmGeocoder._completely.options = defaultGeo[$.controls.geocoder.layer]
                             .list.map(function(el) { 
                                 return el[geo[$.controls.geocoder.layer].label]; 
@@ -1571,7 +1574,7 @@ if (mapConfig) {
                         map.dragging.disable();
                     })
                     .on("mouseleave", function() {
-                        map.scrollWheelZoom.enable();
+                        if (_.has($.map.zoom,'scrollWheel') && $.map.zoom.scrollWheel) map.scrollWheelZoom.enable();
                         map.doubleClickZoom.enable();
                         map.dragging.enable();
                     });
@@ -1598,7 +1601,7 @@ if (mapConfig) {
             if ($.debug) console.log("markersPath",markersPath);
             d3[$.pointsSet.format](markersPath, function(err, markersjs) {
                 if ($.debug) console.log("markers",arguments);
-                var points = (markersjs ? $.pointsSet.transform(markersjs) : null);
+                var points = (markersjs ? $.pointsSet.transform.call($.pointsSet,markersjs) : null);
                 if (points) {
                     var clusters = new L.MarkerClusterGroup({ showCoverageOnHover: false }),
                         markers = [];
@@ -1813,11 +1816,17 @@ if (mapConfig) {
 
                 q.await(function(err, geojs) { // Access results by arguments
                     if ($.debug) console.log("await",arguments);
-                    
-                    geo[region].resource = geoLayer.transform(geojs);
+                   
+                    geojs = geoLayer.transform.call(geoLayer, geojs);
+
+                    if (geoLayer.format === 'topojson') {
+                        geo[region].resource = topojson.feature(geojs, geojs.objects[geoLayer.filename.split(".")[0]]).features;
+                    } else if (geoLayer.format === 'geojson') {
+                        geo[region].resource = geojs.features;
+                    }
 
                     for (var i=2; i<arguments.length; i++) {
-                        data[region][i-2].resource = dataSets[i-2].transform(arguments[i]);
+                        data[region][i-2].resource = dataSets[i-2].transform.call(dataSets[i-2],arguments[i]);
                     }
 
                     joinData(region);

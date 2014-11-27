@@ -1,6 +1,6 @@
 {
   "name": "dataninja-advanced-mapping-tool",
-  "version": "0.4.4",
+  "version": "0.4.5",
   "description": "Another advanced mapping tool by Dataninja",
   "keywords": "map leaflet choropleth dataninja",
   "homepage": "https://github.com/Dataninja/advanced-mapping-tool",
@@ -23,6 +23,7 @@
     "bower_components/queue-async/queue.js",
     "bower_components/underscore/underscore.js",
     "bower_components/d3/d3.js",
+    "bower_components/topojson/topojson.js",
     "bower_components/geostats/lib/geostats.js",
     "bower_components/colorbrewer2/colorbrewer.js",
     "bower_components/leaflet/dist/leaflet-src.js",

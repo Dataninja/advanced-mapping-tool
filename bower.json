@@ -1,6 +1,6 @@
 {
   "name": "dataninja-advanced-mapping-tool",
-  "version": "0.4.4",
+  "version": "0.4.5",
   "homepage": "https://github.com/Dataninja/advanced-mapping-tool",
   "authors": [
     "Alessio Cimarelli <jenkin@dataninja.it>"
@@ -49,6 +49,7 @@
     "canvas-toBlob.js": "eligrey/canvas-toBlob.js",
     "yourls-api": "jenkin/yourls-api#~1.0.0",
     "leaflet-control-osm-geocoder": "k4r573n/leaflet-control-osm-geocoder",
-    "underscore": "~1.7.0"
+    "underscore": "~1.7.0",
+    "topojson": "mbostock/topojson#~1.6.18"
   }
 }

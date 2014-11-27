@@ -716,6 +716,7 @@ var mapConfig = {
             },
 
             // Callback function of ajax request for custom result transformation
+            // this is the dataSet object
             transform: function(res) {
                 return res;
             }
@@ -754,6 +755,7 @@ var mapConfig = {
             },
             
             /* Callback function of ajax request for custom result transformation
+             * this is the dataSet object
              * See http://docs.getdkan.com/docs/dkan-documentation/dkan-api/datastore-api#Return_Values
              */
             transform: function(res) {
@@ -812,10 +814,11 @@ var mapConfig = {
             },
             
             /* Callback function of ajax request for custom result transformation
+             * this is the dataSet object
              * See http://geojson.org/
              */
             transform: function(res) {
-                return res.features;
+                return res;
             }
         },
 
