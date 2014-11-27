@@ -919,7 +919,7 @@ var mapConfig = {
              * See http://geojson.org/
              */
             transform: function(res) {
-                return res.features;
+                return res;
             }
         },
 
