@@ -23632,6 +23632,15 @@ L.Control.OSMGeocoder = L.Control.extend({
 			}
 		}
 
+		if (this.options.type && this.options.type != null) {
+			if (typeof this.options.type == 'string') {
+				params.featuretype = this.options.type;
+			}
+			else{
+				console.log('type must be a string');
+			}
+		}
+
                 var protocol = location.protocol;
 		var url = protocol + "//nominatim.openstreetmap.org/search" + L.Util.getParamString(params),
 		script = document.createElement("script");

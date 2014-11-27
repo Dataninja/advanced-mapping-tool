@@ -1498,6 +1498,7 @@ if (mapConfig) {
                         text: $.controls.geocoder.title,
                         bounds: mapBounds,
                         email: $.controls.geocoder.email,
+                        type: 'city',
                         callback: function (results) {
                             if ($.debug) console.log("osmGeocoderResults",results);
                             if (results.length) {
