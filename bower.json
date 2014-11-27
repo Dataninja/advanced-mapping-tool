@@ -48,8 +48,8 @@
     "Blob.js": "eligrey/Blob.js",
     "canvas-toBlob.js": "eligrey/canvas-toBlob.js",
     "yourls-api": "jenkin/yourls-api#~1.0.0",
-    "leaflet-control-osm-geocoder": "k4r573n/leaflet-control-osm-geocoder",
     "underscore": "~1.7.0",
-    "topojson": "mbostock/topojson#~1.6.18"
+    "topojson": "mbostock/topojson#~1.6.18",
+    "leaflet-control-osm-geocoder": "jenkin/leaflet-control-osm-geocoder#develop"
   }
 }
