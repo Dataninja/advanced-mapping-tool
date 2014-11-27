@@ -1,0 +1,3 @@
+[submodule "shapes"]
+	path = shapes
+	url = https://github.com/Dataninja/geo-shapes
