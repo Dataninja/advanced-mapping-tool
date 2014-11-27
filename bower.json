@@ -50,6 +50,6 @@
     "yourls-api": "jenkin/yourls-api#~1.0.0",
     "leaflet-control-osm-geocoder": "k4r573n/leaflet-control-osm-geocoder",
     "underscore": "~1.7.0",
-    "leaflet-omnivore": "mapbox/leaflet-omnivore#~0.3.0"
+    "topojson": "mbostock/topojson#~1.6.18"
   }
 }
