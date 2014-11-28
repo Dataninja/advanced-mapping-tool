@@ -634,17 +634,17 @@
                     d3.select(this._div).select("a#close-cross")
                         .on("click", function() {
                             if ($.debug) console.log("clickCloseCross",arguments);;
-                            geojson.eachLayer(function(l) { l.selected = false; geojson.resetStyle(l); });
-                            delete parameters.i;
-                            if (embedControl && embedControl.isAdded) embedControl.removeFrom(map);
                             info.update();
-                            if (_.has($.map.zoom,'scrollWheel') && $.map.zoom.scrollWheel) map.scrollWheelZoom.enable();
                             return false;
                         });
 
                 } else { // if (props) 
                         
                     d3.select(this._div).classed("closed", true);
+                    if (geojson) geojson.eachLayer(function(l) { l.feature.selected = false; geojson.resetStyle(l); });
+                    delete parameters.i;
+                    if (embedControl && embedControl.isAdded) embedControl.removeFrom(map);
+                    if (_.has($.map.zoom,'scrollWheel') && $.map.zoom.scrollWheel) map.scrollWheelZoom.enable();
                     if (parameters.md === 'widget') {
                         map.dragging.enable();
                         this._div.innerHTML += $.infowindow.content.mobile;
@@ -1179,8 +1179,15 @@
             for (var i=0; i<data[region].length; i++) {
                 if (i != index) data[region][i].active = false;
             }
-            delete parameters.i;
-            if (embedControl && embedControl.isAdded) embedControl.removeFrom(map);
+            if (geojson) {
+                geojson.eachLayer(function(l) {
+                    if (l.feature.selected) {
+                        info.update(l.feature.properties);
+                    }
+                });
+            } else {
+                info.update();
+            }
             varMenu.update(region, index);
             varMenu.onChange(region, index);
         };
@@ -1305,7 +1312,7 @@
             
             if ($.debug) console.log("varMenuOnChange", arguments, region, index, column, dataSet);
             
-            info.update();
+            //info.update();
             legend.update();
             dataSet.column = dataSet.columns[column];
             dataSet.label = dataSet.labels[column];
@@ -1583,7 +1590,15 @@
             var region = feature.properties._layer,
                 geoLayer = $.geoLayers.filter(function(l) { return (l.type === "vector" && l.schema.name === region); })[0],
                 dataSet = data[region].filter(function(el) { return el.active; })[0],
-                currentStyle = geoLayer.style.default;
+                currentStyle = _.clone(geoLayer.style.default);
+            if (feature.selected) {
+                _.extend(currentStyle,geoLayer.style.selected);
+            }
+            geojson.eachLayer(function(l) { 
+                if (l.feature.selected && !L.Browser.ie && !L.Browser.opera) {
+                    l.bringToFront();
+                }
+            });
             currentStyle.fillColor = getColor(feature.properties.data[dataSet.name][dataSet.column], dataSet.bins, dataSet.palette);
 	    	return currentStyle;
     	}
@@ -1604,7 +1619,7 @@
                 highlightStyle = geoLayer.style.highlight,
                 num = props.data[dataSet.name][dataSet.column];
                     
-            if (!layer.selected) layer.setStyle(highlightStyle);
+            if (!layer.feature.selected) layer.setStyle(highlightStyle);
             if (_.has($,'label') && $.label.active) {
                 label.setContent(props[geo[region].label]+'<br>' + dataSet.label + ': '+ dataSet.formatter(dataSet.column, num));
                 label.setLatLng(layer.getBounds().getCenter());
@@ -1618,7 +1633,7 @@
                 region = layer.feature.properties._layer,
                 geoLayer = $.geoLayers.filter(function(l) { return (l.type === "vector" && l.schema.name === region); })[0],
                 defaultStyle = geoLayer.style.default;
-            if (!layer.selected) geojson.eachLayer(function(l) { if (!l.selected) geojson.resetStyle(l); });
+            if (!layer.feature.selected) geojson.eachLayer(function(l) { if (!l.feature.selected) geojson.resetStyle(l); });
             if (_.has($,'label') && $.label.active) label.close();
 	    }
 
@@ -1628,15 +1643,19 @@
                 region = layer.feature.properties._layer,
                 geoLayer = $.geoLayers.filter(function(l) { return (l.type === "vector" && l.schema.name === region); })[0],
                 selectedStyle = geoLayer.style.selected;
-            geojson.eachLayer(function(l) { l.selected = false; geojson.resetStyle(l); });
-            layer.selected = true;
-            layer.setStyle(selectedStyle);
-            parameters.i = layer.feature.properties[geo[parameters.dl].id];
-            if (embedControl && embedControl.isAdded) embedControl.removeFrom(map);
-            info.update(layer.feature.properties);
+
+            if (!layer.feature.selected) {
+                geojson.eachLayer(function(l) { l.feature.selected = false; geojson.resetStyle(l); });
+                layer.feature.selected = true;
+                layer.setStyle(selectedStyle);
+                parameters.i = layer.feature.properties[geo[parameters.dl].id];
+                if (embedControl && embedControl.isAdded) embedControl.removeFrom(map);
+                info.update(layer.feature.properties);
+            }
+        
             if (!L.Browser.ie && !L.Browser.opera) {
-	    		layer.bringToFront();
-	        }
+	        	layer.bringToFront();
+            }
         }
 
         function onEachFeature(feature, layer) {
@@ -1794,7 +1813,7 @@
                 delete parameters.i;
                 if (embedControl && embedControl.isAdded) embedControl.removeFrom(map);
                 legend.update(region);
-                info.update();
+                //info.update();
             }
         }
         /*** ***/
