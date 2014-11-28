@@ -634,17 +634,17 @@
                     d3.select(this._div).select("a#close-cross")
                         .on("click", function() {
                             if ($.debug) console.log("clickCloseCross",arguments);;
-                            geojson.eachLayer(function(l) { l.selected = false; geojson.resetStyle(l); });
-                            delete parameters.i;
-                            if (embedControl && embedControl.isAdded) embedControl.removeFrom(map);
                             info.update();
-                            if (_.has($.map.zoom,'scrollWheel') && $.map.zoom.scrollWheel) map.scrollWheelZoom.enable();
                             return false;
                         });
 
                 } else { // if (props) 
                         
                     d3.select(this._div).classed("closed", true);
+                    if (geojson) geojson.eachLayer(function(l) { l.feature.selected = false; geojson.resetStyle(l); });
+                    delete parameters.i;
+                    if (embedControl && embedControl.isAdded) embedControl.removeFrom(map);
+                    if (_.has($.map.zoom,'scrollWheel') && $.map.zoom.scrollWheel) map.scrollWheelZoom.enable();
                     if (parameters.md === 'widget') {
                         map.dragging.enable();
                         this._div.innerHTML += $.infowindow.content.mobile;
@@ -712,8 +712,13 @@
                 img.setAttribute('src', $.controls.reset.image);
                 img.setAttribute('title', $.controls.reset.title);
                 d3.select(img).on('click', function() {
-                    loadData(parameters.ml);
-                    map.fitBounds(mapBounds);
+                    info.update();
+                    if (!$.map.zoom.init && mapBounds) {
+                        map.fitBounds(mapBounds);
+                    } else {
+                        map.setView(($.map.center || (mapBounds ? mapBounds.getCenter() : null)), (parameters.md != 'widget' ? $.map.zoom.init : $.map.zoom.init-1));
+                    }
+                    geoMenu.onChange(parameters.ml);
                 });
                 return img;
             };
@@ -1056,159 +1061,29 @@
         geoMenu.update = function() {
             d3.select(this._nav).style("width",null).selectAll("a").remove();
             
-            if (menuGeoLayers.length > 1) {
-                var that = this;
-                d3.select(this._nav)
-                    .selectAll("a")
-                    .data(menuGeoLayers.map(function(el) { return el.schema; }))
-                    .enter()
-                    .append("a")
-                    .attr("href", "#")
-                    .attr("id", function(d) { return d.name; })
-                    .attr("class", function(d,index) {
-                        if (index === 0) {
-                            return 'first-item active';
-                        } else if (index === menuGeoLayers.length-1) {
-                            return 'last-item';
-                        } else {
-                            return '';
-                        }
-                    })
-                    .classed("disabled", function(d) {
-                        return !_.has(geo,d.name);
-                    })
-                    .on("click", function(d) {
-                        var listener = d3.select(this).on("click");
-                        if (_.has(geo,d.name)) {
-                            d3.select(that._nav)
-                                .select("a.active")
-                                .classed("active",false)
-                                .on("click",listener)
-                                .on("mouseout",null);
-                            d3.select(that._nav).selectAll("a").style("display",null);
-                            d3.select(this)
-                                .classed('active',true)
-                                .style("display","block")
-                                .on("click", function() {
-                                    if (d3.select(that._nav).classed("open")) {
-                                        d3.select(that._nav)
-                                            .classed("open",false)
-                                            .selectAll("a")
-                                            .style("display",null);
-                                    } else {
-                                        d3.select(that._nav)
-                                            .classed("open",true)
-                                            .selectAll("a")
-                                            .style("display","block");
-                                    }
-                                })
-                                .on("mouseout", function() {
-                                    d3.select(that._nav)
-                                        .classed("open",false)
-                                        .selectAll("a")
-                                        .style("display",null);
-                                });
-                            that.onChange(d.name);
-                        }
-                    })
-                    .text(function(d) { return d.menu; });
-                
-                var maxLabelLength = d3.max(menuGeoLayers.map(function(el) { return el.schema.menu.length; }));
-                d3.select(this._nav)
-                    .style("display",null)
-                    .style("width", function() {
-                        if (parameters.md != 'widget' && menuGeoLayers.length > 3) {
-                            return d3.select(this)
-                                .selectAll("a")
-                                .filter(function(d) { 
-                                    return d.menu.length === maxLabelLength; 
-                                })[0][0].offsetWidth+15+"px";
-                        } else {
-                            return null;
-                        }
-                    })
-                    .classed('collapsable',(menuGeoLayers.length > 3));
-
-            }
-        };
-       
-        if ($.debug) console.log("menuGeoLayers",menuGeoLayers);
-        if ($.debug) console.log("geoMenu",geoMenu);
-        /*** ***/
-
-
-
-        /*** Creazione del menù dei datasets ***/
-        var dataMenu;
-        
-        if (parameters.md === 'widget') {
-            dataMenu = {
-                _nav: d3.select('body').insert('nav','#map').node(),
-                addTo: function(map) { this.onAdd(map); return this; }
-            };
-        } else {
-            dataMenu = L.control({position: 'topleft'});
-        }
-
-        dataMenu.onAdd = function(map) {
-            this._nav = this._nav || L.DomUtil.create('nav');
+            var that = this;
             d3.select(this._nav)
-                .attr('id','datamenu-ui')
-                .attr('class','menu-ui '+parameters.md)
-                .attr('style','display:none;')
-                .on("mouseenter", function() {
-                    map.scrollWheelZoom.disable();
-                    map.doubleClickZoom.disable();
-                    map.dragging.disable();
+                .selectAll("a")
+                .data(menuGeoLayers.map(function(el) { return el.schema; }))
+                .enter()
+                .append("a")
+                .attr("href", "#")
+                .attr("id", function(d) { return d.name; })
+                .attr("class", function(d,index) {
+                    if (index === 0) {
+                        return 'first-item active';
+                    } else if (index === menuGeoLayers.length-1) {
+                        return 'last-item';
+                    } else {
+                        return '';
+                    }
                 })
-                .on("mouseleave", function() {
-                    if (_.has($.map.zoom,'scrollWheel') && $.map.zoom.scrollWheel) map.scrollWheelZoom.enable();
-                    map.doubleClickZoom.enable();
-                    map.dragging.enable();
-                });
-            return this._nav;
-        };
-
-        dataMenu.onChange = function(region,index) {
-            var index = index || 0,
-                dataSet = data[region][index];
-            
-            if ($.debug) console.log("dataMenuOnChange", arguments, region, index, dataSet);
-            
-            dataSet.active = true;
-            for (var i=0; i<data[region].length; i++) {
-                if (i != index) data[region][i].active = false;
-            }
-            delete parameters.i;
-            if (embedControl && embedControl.isAdded) embedControl.removeFrom(map);
-            varMenu.update(region, index);
-            varMenu.onChange(region, index);
-        };
-
-        dataMenu.update = function(region) {
-            d3.select(this._nav).style("width",null).selectAll("a").remove();
-            var that = this,
-                dataSets = data[region];
-            if (dataSets.length > 1) {
-                d3.select(this._nav)
-                    .selectAll("a")
-                    .data(dataSets)
-                    .enter()
-                    .append("a")
-                    .attr("href", "#")
-                    .attr("id", function(d) { return d.name; })
-                    .attr("title", function(d) { return d.description; })
-                    .attr("class", function(d,index) {
-                        if (index === 0) {
-                            return 'first-item active';
-                        } else if (index === dataSets.length-1) {
-                            return 'last-item';
-                        } else {
-                            return '';
-                        }
-                    })
-                    .on("click", function(d) {
-                        var listener = d3.select(this).on("click");
+                .classed("disabled", function(d) {
+                    return !_.has(geo,d.name);
+                })
+                .on("click", function(d) {
+                    var listener = d3.select(this).on("click");
+                    if (_.has(geo,d.name)) {
                         d3.select(that._nav)
                             .select("a.active")
                             .classed("active",false)
@@ -1237,13 +1112,156 @@
                                     .selectAll("a")
                                     .style("display",null);
                             });
-                        that.onChange(d.layer, d.index);
-                    })
-                    .text(function(d) { return d.menuLabel; });
+                        console.log(d.name);
+                        that.onChange(d.name);
+                    }
+                })
+                .text(function(d) { return d.menu; });
                 
+            if (menuGeoLayers.length > 1) {
+                var maxLabelLength = d3.max(menuGeoLayers.map(function(el) { return el.schema.menu.length; }));
+                d3.select(this._nav)
+                    .style("display",null)
+                    .classed('collapsable', false)
+                    .style("width", function() {
+                        if (parameters.md != 'widget' && menuGeoLayers.length > 3) {
+                            return d3.select(this)
+                                .selectAll("a")
+                                .filter(function(d) { 
+                                    return d.menu.length === maxLabelLength; 
+                                })[0][0].offsetWidth+15+"px";
+                        } else {
+                            return null;
+                        }
+                    })
+                    .classed('collapsable',(menuGeoLayers.length > 3));
+
+            } else {
+                d3.select(this._nav).style('display','none');
+            }
+        };
+       
+        if ($.debug) console.log("menuGeoLayers",menuGeoLayers);
+        if ($.debug) console.log("geoMenu",geoMenu);
+        /*** ***/
+
+
+
+        /*** Creazione del menù dei datasets ***/
+        var dataMenu;
+        
+        if (parameters.md === 'widget') {
+            dataMenu = {
+                _nav: d3.select('body').insert('nav','#map').node(),
+                addTo: function(map) { this.onAdd(map); return this; }
+            };
+        } else {
+            dataMenu = L.control({position: 'topleft'});
+        }
+
+        dataMenu.onAdd = function(map) {
+            this._nav = this._nav || L.DomUtil.create('nav');
+            d3.select(this._nav)
+                .attr('id','datamenu-ui')
+                .attr('class','menu-ui '+parameters.md)
+                .style('display','none')
+                .on("mouseenter", function() {
+                    map.scrollWheelZoom.disable();
+                    map.doubleClickZoom.disable();
+                    map.dragging.disable();
+                })
+                .on("mouseleave", function() {
+                    if (_.has($.map.zoom,'scrollWheel') && $.map.zoom.scrollWheel) map.scrollWheelZoom.enable();
+                    map.doubleClickZoom.enable();
+                    map.dragging.enable();
+                });
+            return this._nav;
+        };
+
+        dataMenu.onChange = function(region,index) {
+            var index = index || 0,
+                dataSet = data[region][index];
+            
+            if ($.debug) console.log("dataMenuOnChange", arguments, region, index, dataSet);
+            
+            dataSet.active = true;
+            for (var i=0; i<data[region].length; i++) {
+                if (i != index) data[region][i].active = false;
+            }
+            if (geojson) {
+                geojson.eachLayer(function(l) {
+                    if (l.feature.selected) {
+                        info.update(l.feature.properties);
+                    }
+                });
+            } else {
+                info.update();
+            }
+            varMenu.update(region, index);
+            varMenu.onChange(region, index);
+        };
+
+        dataMenu.update = function(region) {
+            d3.select(this._nav).style("width",null).selectAll("a").remove();
+            var that = this,
+                dataSets = data[region];
+                
+            d3.select(this._nav)
+                .selectAll("a")
+                .data(dataSets)
+                .enter()
+                .append("a")
+                .attr("href", "#")
+                .attr("id", function(d) { return d.name; })
+                .attr("title", function(d) { return d.description; })
+                .attr("class", function(d,index) {
+                    if (index === 0) {
+                        return 'first-item active';
+                    } else if (index === dataSets.length-1) {
+                        return 'last-item';
+                    } else {
+                        return '';
+                    }
+                })
+                .on("click", function(d) {
+                    var listener = d3.select(this).on("click");
+                    d3.select(that._nav)
+                        .select("a.active")
+                        .classed("active",false)
+                        .on("click",listener)
+                        .on("mouseout",null);
+                    d3.select(that._nav).selectAll("a").style("display",null);
+                    d3.select(this)
+                        .classed('active',true)
+                        .style("display","block")
+                        .on("click", function() {
+                            if (d3.select(that._nav).classed("open")) {
+                                d3.select(that._nav)
+                                    .classed("open",false)
+                                    .selectAll("a")
+                                    .style("display",null);
+                            } else {
+                                d3.select(that._nav)
+                                    .classed("open",true)
+                                    .selectAll("a")
+                                    .style("display","block");
+                            }
+                        })
+                        .on("mouseout", function() {
+                            d3.select(that._nav)
+                                .classed("open",false)
+                                .selectAll("a")
+                                .style("display",null);
+                        });
+                    that.onChange(d.layer, d.index);
+                })
+                .text(function(d) { return d.menuLabel; });
+                
+            if (dataSets.length > 1) {
                 var maxLabelLength = d3.max(dataSets.map(function(el) { return el.menuLabel.length; }));
                 d3.select(this._nav)
                     .style("display",null)
+                    .classed('collapsable', false)
                     .style("width", function() {
                         if (parameters.md != 'widget' && dataSets.length > 3) {
                             return d3.select(this)
@@ -1305,7 +1323,7 @@
             
             if ($.debug) console.log("varMenuOnChange", arguments, region, index, column, dataSet);
             
-            info.update();
+            //info.update();
             legend.update();
             dataSet.column = dataSet.columns[column];
             dataSet.label = dataSet.labels[column];
@@ -1335,7 +1353,7 @@
                 }
             }
 
-            if (dataSet.columns && dataSet.columns.length > 1) {
+            if (dataSet.columns) {
                 
                 d3.select(this._nav)
                     .selectAll("a")
@@ -1392,21 +1410,26 @@
                     })
                     .text(function(d) { return d.label; });
 
-                var maxLabelLength = d3.max(items.map(function(el) { return el.label.length; }));
-                d3.select(this._nav)
-                    .style("display",null)
-                    .style("width", function() {
-                        if (parameters.md != 'widget' && dataSet.columns.length > 3) {
-                            return d3.select(this)
-                                .selectAll("a")
-                                .filter(function(d) { 
-                                    return d.label.length === maxLabelLength; 
-                                })[0][0].offsetWidth+15+"px";
-                        } else {
-                            return null;
-                        }
-                    })
-                    .classed('collapsable',(dataSet.columns.length > 3));
+                if (dataSet.columns.length > 1) {
+                    var maxLabelLength = d3.max(items.map(function(el) { return el.label.length; }));
+                    d3.select(this._nav)
+                        .style("display",null)
+                        .classed('collapsable', false)
+                        .style("width", function() {
+                            if (parameters.md != 'widget' && dataSet.columns.length > 3) {
+                                return d3.select(this)
+                                    .selectAll("a")
+                                    .filter(function(d) { 
+                                        return d.label.length === maxLabelLength; 
+                                    })[0][0].offsetWidth+15+"px";
+                            } else {
+                                return null;
+                            }
+                        })
+                        .classed('collapsable',(dataSet.columns.length > 3));
+                } else {
+                    d3.select(this._nav).style('display','none');
+                }
 
             } else {
                 d3.select(this._nav).style('display','none');
@@ -1583,7 +1606,15 @@
             var region = feature.properties._layer,
                 geoLayer = $.geoLayers.filter(function(l) { return (l.type === "vector" && l.schema.name === region); })[0],
                 dataSet = data[region].filter(function(el) { return el.active; })[0],
-                currentStyle = geoLayer.style.default;
+                currentStyle = _.clone(geoLayer.style.default);
+            if (feature.selected) {
+                _.extend(currentStyle,geoLayer.style.selected);
+            }
+            geojson.eachLayer(function(l) { 
+                if (l.feature.selected && !L.Browser.ie && !L.Browser.opera) {
+                    l.bringToFront();
+                }
+            });
             currentStyle.fillColor = getColor(feature.properties.data[dataSet.name][dataSet.column], dataSet.bins, dataSet.palette);
 	    	return currentStyle;
     	}
@@ -1604,7 +1635,7 @@
                 highlightStyle = geoLayer.style.highlight,
                 num = props.data[dataSet.name][dataSet.column];
                     
-            if (!layer.selected) layer.setStyle(highlightStyle);
+            if (!layer.feature.selected) layer.setStyle(highlightStyle);
             if (_.has($,'label') && $.label.active) {
                 label.setContent(props[geo[region].label]+'<br>' + dataSet.label + ': '+ dataSet.formatter(dataSet.column, num));
                 label.setLatLng(layer.getBounds().getCenter());
@@ -1618,7 +1649,7 @@
                 region = layer.feature.properties._layer,
                 geoLayer = $.geoLayers.filter(function(l) { return (l.type === "vector" && l.schema.name === region); })[0],
                 defaultStyle = geoLayer.style.default;
-            if (!layer.selected) geojson.eachLayer(function(l) { if (!l.selected) geojson.resetStyle(l); });
+            if (!layer.feature.selected) geojson.eachLayer(function(l) { if (!l.feature.selected) geojson.resetStyle(l); });
             if (_.has($,'label') && $.label.active) label.close();
 	    }
 
@@ -1628,15 +1659,19 @@
                 region = layer.feature.properties._layer,
                 geoLayer = $.geoLayers.filter(function(l) { return (l.type === "vector" && l.schema.name === region); })[0],
                 selectedStyle = geoLayer.style.selected;
-            geojson.eachLayer(function(l) { l.selected = false; geojson.resetStyle(l); });
-            layer.selected = true;
-            layer.setStyle(selectedStyle);
-            parameters.i = layer.feature.properties[geo[parameters.dl].id];
-            if (embedControl && embedControl.isAdded) embedControl.removeFrom(map);
-            info.update(layer.feature.properties);
+
+            if (!layer.feature.selected) {
+                geojson.eachLayer(function(l) { l.feature.selected = false; geojson.resetStyle(l); });
+                layer.feature.selected = true;
+                layer.setStyle(selectedStyle);
+                parameters.i = layer.feature.properties[geo[parameters.dl].id];
+                if (embedControl && embedControl.isAdded) embedControl.removeFrom(map);
+                info.update(layer.feature.properties);
+            }
+        
             if (!L.Browser.ie && !L.Browser.opera) {
-	    		layer.bringToFront();
-	        }
+	        	layer.bringToFront();
+            }
         }
 
         function onEachFeature(feature, layer) {
@@ -1794,7 +1829,7 @@
                 delete parameters.i;
                 if (embedControl && embedControl.isAdded) embedControl.removeFrom(map);
                 legend.update(region);
-                info.update();
+                //info.update();
             }
         }
         /*** ***/
