@@ -718,7 +718,16 @@
                     } else {
                         map.setView(($.map.center || (mapBounds ? mapBounds.getCenter() : null)), (parameters.md != 'widget' ? $.map.zoom.init : $.map.zoom.init-1));
                     }
-                    geoMenu.onChange(parameters.ml);
+                    if (d3.select("#geomenu-ui #"+parameters.ml).classed("active")) {
+                        geoMenu.onChange(parameters.ml);
+                    } else {
+                        var e = document.createEvent('UIEvents');
+                        e.initUIEvent('click', true, true, window, 1);
+                        d3.select("#geomenu-ui #"+parameters.ml).node().dispatchEvent(e);
+                    }
+                    if (_.has($.controls,'geocoder') && $.controls.geocoder.active) {
+                        d3.select(".leaflet-control-geocoder input").node().value = '';
+                    }
                 });
                 return img;
             };
