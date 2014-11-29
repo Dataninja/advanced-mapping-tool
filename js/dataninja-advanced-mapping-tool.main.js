@@ -14,7 +14,8 @@
         // Global variables
         var $ = mapConfig, // Configuration object
             svgViewBox,
-            h, i, j, k;
+            h, i, j, k,
+            selectedLayer;
 
 
 
@@ -641,7 +642,10 @@
                 } else { // if (props) 
                         
                     d3.select(this._div).classed("closed", true);
-                    if (geojson) geojson.eachLayer(function(l) { l.feature.selected = false; geojson.resetStyle(l); });
+                    if (selectedLayer) {
+                        selectedLayer.feature.selected = false;
+                        geojson.resetStyle(selectedLayer);
+                    }
                     delete parameters.i;
                     if (embedControl && embedControl.isAdded) embedControl.removeFrom(map);
                     if (_.has($.map.zoom,'scrollWheel') && $.map.zoom.scrollWheel) map.scrollWheelZoom.enable();
@@ -1197,12 +1201,8 @@
             for (var i=0; i<data[region].length; i++) {
                 if (i != index) data[region][i].active = false;
             }
-            if (geojson) {
-                geojson.eachLayer(function(l) {
-                    if (l.feature.selected) {
-                        info.update(l.feature.properties);
-                    }
-                });
+            if (selectedLayer) {
+                info.update(selectedLayer.feature.properties);
             } else {
                 info.update();
             }
@@ -1619,11 +1619,9 @@
             if (feature.selected) {
                 _.extend(currentStyle,geoLayer.style.selected);
             }
-            geojson.eachLayer(function(l) { 
-                if (l.feature.selected && !L.Browser.ie && !L.Browser.opera) {
-                    l.bringToFront();
-                }
-            });
+            /*if (selectedLayer && !L.Browser.ie && !L.Browser.opera) {
+                selectedLayer.bringToFront();
+            }*/
             currentStyle.fillColor = (_.has(feature.properties.data,dataSet.name) ? getColor(feature.properties.data[dataSet.name][dataSet.column], dataSet.bins, dataSet.palette) : 'transparent');
 	    	return currentStyle;
     	}
@@ -1658,7 +1656,7 @@
                 region = layer.feature.properties._layer,
                 geoLayer = $.geoLayers.filter(function(l) { return (l.type === "vector" && l.schema.name === region); })[0],
                 defaultStyle = geoLayer.style.default;
-            if (!layer.feature.selected) geojson.eachLayer(function(l) { if (!l.feature.selected) geojson.resetStyle(l); });
+            if (!layer.feature.selected) geojson.resetStyle(layer);
             if (_.has($,'label') && $.label.active) label.close();
 	    }
 
@@ -1670,7 +1668,10 @@
                 selectedStyle = geoLayer.style.selected;
 
             if (!layer.feature.selected) {
-                geojson.eachLayer(function(l) { l.feature.selected = false; geojson.resetStyle(l); });
+                if (selectedLayer) {
+                    selectedLayer.feature.selected = false;
+                    geojson.resetStyle(selectedLayer);
+                }
                 layer.feature.selected = true;
                 layer.setStyle(selectedStyle);
                 parameters.i = layer.feature.properties[geo[parameters.dl].id];
@@ -1681,6 +1682,8 @@
             if (!L.Browser.ie && !L.Browser.opera) {
 	        	layer.bringToFront();
             }
+
+            selectedLayer = layer;
         }
 
         function onEachFeature(feature, layer) {
