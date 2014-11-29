@@ -1064,14 +1064,16 @@ if (mapConfig) {
                                 return dataSet.formatter(dataSet.column, num); 
                             }).join(' '+delimiter+' ');
                         }),
-                        description = dataSet.description || $.legend.description || '';
+                        description = dataSet.description || $.legend.description || '',
+                        pal = dataSet.palette.replace("~",""),
+                        binsNum = (colorbrewer[pal][grades.length] ? grades.length : 3),
+                        colors = (dataSet.palette[0] === "~" ? _.clone(colorbrewer[pal][binsNum]).reverse() : colorbrewer[pal][binsNum]);
 
                     this._div.innerHTML = (parameters.md != 'widget' ? '<h3 title="'+description+'">'+$.legend.title+'</h3>' : '');
                     for (var i=0; i<grades.length; i++) {
-                        var color = (colorbrewer[dataSet.palette][grades.length] ? colorbrewer[dataSet.palette][grades.length][i] : colorbrewer[dataSet.palette][3][i]);
                         this._div.innerHTML += '<i title="'+(_.has($.legend,'label') ? $.legend.label.call($.legend,grades[i].split(' '+delimiter+' ')[0],grades[i].split(' '+delimiter+' ')[1],dataSet.label) : grades[i])+'" '+
                             'style="background:' + 
-                            color + '"></i> ' + 
+                            colors[i] + '"></i> ' + 
                             (parameters.md != 'widget' ? $.legend.label.call($.legend,grades[i].split(' '+delimiter+' ')[0],grades[i].split(' '+delimiter+' ')[1]) : '') + '<br>';
                     }
                     if (parameters.md != 'widget') this._div.innerHTML += '<p>'+description+'</p>';
@@ -1664,10 +1666,12 @@ if (mapConfig) {
         /*** Gestione degli stili della choropleth ***/
         function getColor(d, bins, palette) {
             //if ($.debug) console.log("getColorFunction",arguments);
-            var binsNum = (colorbrewer[palette][bins.length-1] ? bins.length-1 : 3);
+            var pal = palette.replace("~",""),
+                binsNum = (colorbrewer[pal][bins.length-1] ? bins.length-1 : 3),
+                colors = (palette[0] === "~" ? _.clone(colorbrewer[pal][binsNum]).reverse() : colorbrewer[pal][binsNum]);
             for (var i=1; i<bins.length; i++) {
                 if (d <= bins[i]) {
-                    return colorbrewer[palette][binsNum][i-1];
+                    return colors[i-1];
                 }
             }
         }
