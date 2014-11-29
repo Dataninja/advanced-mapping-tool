@@ -1686,7 +1686,7 @@ if (mapConfig) {
                     l.bringToFront();
                 }
             });
-            currentStyle.fillColor = getColor(feature.properties.data[dataSet.name][dataSet.column], dataSet.bins, dataSet.palette);
+            currentStyle.fillColor = (_.has(feature.properties.data,dataSet.name) ? getColor(feature.properties.data[dataSet.name][dataSet.column], dataSet.bins, dataSet.palette) : 'transparent');
 	    	return currentStyle;
     	}
         /*** ***/
