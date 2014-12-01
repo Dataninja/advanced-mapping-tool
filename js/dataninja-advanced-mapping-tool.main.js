@@ -1031,6 +1031,10 @@
 
 
 
+        /*** Menus ***/
+        var maxMenuItems = (_.has($,'menu') ? $.menu.maxItems || 3 : 3);
+
+
         /*** Creazione del menù dei geolayers ***/
         var geoMenu, 
             menuGeoLayers = $.geoLayers.filter(function(l) { return l.type != 'tile'; });
@@ -1141,7 +1145,7 @@
                     .style("display",null)
                     .classed('collapsable', false)
                     .style("width", function() {
-                        if (parameters.md != 'widget' && menuGeoLayers.length > 3) {
+                        if (parameters.md != 'widget' && menuGeoLayers.length > maxMenuItems) {
                             return d3.select(this)
                                 .selectAll("a")
                                 .filter(function(d) { 
@@ -1151,7 +1155,7 @@
                             return null;
                         }
                     })
-                    .classed('collapsable',(menuGeoLayers.length > 3));
+                    .classed('collapsable',(menuGeoLayers.length > maxMenuItems));
 
             } else {
                 d3.select(this._nav).style('display','none');
@@ -1276,7 +1280,7 @@
                     .style("display",null)
                     .classed('collapsable', false)
                     .style("width", function() {
-                        if (parameters.md != 'widget' && dataSets.length > 3) {
+                        if (parameters.md != 'widget' && dataSets.length > maxMenuItems) {
                             return d3.select(this)
                                 .selectAll("a")
                                 .filter(function(d) { 
@@ -1286,7 +1290,7 @@
                             return null;
                         }
                     })
-                    .classed('collapsable',(dataSets.length > 3));
+                    .classed('collapsable',(dataSets.length > maxMenuItems));
             
             } else {
                 d3.select(this._nav).style('display','none');
@@ -1430,7 +1434,7 @@
                         .style("display",null)
                         .classed('collapsable', false)
                         .style("width", function() {
-                            if (parameters.md != 'widget' && dataSet.columns.length > 3) {
+                            if (parameters.md != 'widget' && dataSet.columns.length > maxMenuItems) {
                                 return d3.select(this)
                                     .selectAll("a")
                                     .filter(function(d) { 
@@ -1440,7 +1444,7 @@
                                 return null;
                             }
                         })
-                        .classed('collapsable',(dataSet.columns.length > 3));
+                        .classed('collapsable',(dataSet.columns.length > maxMenuItems));
                 } else {
                     d3.select(this._nav).style('display','none');
                 }

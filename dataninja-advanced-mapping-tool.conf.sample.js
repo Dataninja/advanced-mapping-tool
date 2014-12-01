@@ -158,6 +158,16 @@ var mapConfig = {
 
     },
 
+    // Menu controls
+    menu: {
+        
+        // Max number of items for an always open menu.
+        // If items (geo layers, datasets or columns) are more, menu will collapse.
+        // If missing or 0, it will be 3.
+        maxItems: 3
+
+    },
+
     // Definition of geographic layers to load
     geoLayers: [
         {
@@ -1106,6 +1116,8 @@ var mapConfig = {
  *   - description [string]
  *   - delimiter [string]
  *   - label [string] function ( [float], [float] )
+ * - menu [object]
+ *   - maxItems [int > 0]
  * - controls [object]
  *   - active [bool]
  *   - fullscreen [object]
