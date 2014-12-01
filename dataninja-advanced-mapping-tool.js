@@ -707,6 +707,7 @@ if (mapConfig) {
                     if (selectedLayer) {
                         selectedLayer.feature.selected = false;
                         geojson.resetStyle(selectedLayer);
+                        selectedLayer = undefined;
                     }
                     delete parameters.i;
                     if (embedControl && embedControl.isAdded) embedControl.removeFrom(map);
@@ -1129,8 +1130,7 @@ if (mapConfig) {
             for (var i=0; i<data[region].length; i++) {
                 if (i != 0) data[region][i].active = false;
             }
-            delete parameters.i;
-            if (embedControl && embedControl.isAdded) embedControl.removeFrom(map);
+            info.update();
             dataMenu.update(region);
             dataMenu.onChange(region);
         };
@@ -1685,9 +1685,6 @@ if (mapConfig) {
             if (feature.selected) {
                 _.extend(currentStyle,geoLayer.style.selected);
             }
-            /*if (selectedLayer && !L.Browser.ie && !L.Browser.opera) {
-                selectedLayer.bringToFront();
-            }*/
             currentStyle.fillColor = (_.has(feature.properties.data,dataSet.name) ? getColor(feature.properties.data[dataSet.name][dataSet.column], dataSet.bins, dataSet.palette) : 'transparent');
 	    	return currentStyle;
     	}
