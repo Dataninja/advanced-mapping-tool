@@ -236,6 +236,7 @@ if (mapConfig) {
                 columns: (_.has(dataSet.schema,'menu') && dataSet.schema.menu.length ? dataSet.schema.menu.map(function(el) { return el.column; }) : null),
                 labels: (_.has(dataSet.schema,'menu') && dataSet.schema.menu.length ? dataSet.schema.menu.map(function(el) { return el.label || el.column; }) : null),
                 descriptions: (_.has(dataSet.schema,'menu') && dataSet.schema.menu.length ? dataSet.schema.menu.map(function(el) { return el.description || dataSet.schema.description || (el.label ? el.label + '>' + el.column : el.column); }) : null),
+                precisions: (_.has(dataSet.schema,'menu') && dataSet.schema.menu.length ? dataSet.schema.menu.map(function(el) { return el.precision || dataSet.precision || 0; }) : null),
                 resourceId: dataSet.resourceId, // HMMM
                 palette: dataSet.palette || 'Reds',
                 transform: dataSet.transform || function(k,v) { return v; },
@@ -250,6 +251,7 @@ if (mapConfig) {
             defaultData[dataSet.schema.name].column = defaultData[dataSet.schema.name].columns[0];
             defaultData[dataSet.schema.name].label = defaultData[dataSet.schema.name].labels[0];
             defaultData[dataSet.schema.name].description = defaultData[dataSet.schema.name].descriptions[0];
+            defaultData[dataSet.schema.name].precision = defaultData[dataSet.schema.name].precisions[0];
             defaultData[dataSet.schema.name].binsNum = defaultData[dataSet.schema.name].binsNums[0];
 
             // Columns grouping
@@ -1401,6 +1403,7 @@ if (mapConfig) {
             dataSet.column = dataSet.columns[column];
             dataSet.label = dataSet.labels[column];
             dataSet.description = dataSet.descriptions[column];
+            dataSet.precision = dataSet.precisions[column];
             dataSet.binsNum = dataSet.binsNums[column];
             loadData(region, dataSet.name);
         };
@@ -1808,7 +1811,8 @@ if (mapConfig) {
             var dataSet = data[region].filter(function(el) { return el.active; })[0],
                 geoLayer = $.geoLayers.filter(function(l) { return (l.type === "vector" && l.schema.name === region); })[0];
 
-            var serie = dataSet.resource.map(function(el) { return el[dataSet.column]; });
+            var serie = dataSet.resource.map(function(el) { return el[dataSet.column]; }),
+                bins, ranges;
             var gs = new geostats(serie);
 
             if (serie.length > 3) {
@@ -1818,9 +1822,14 @@ if (mapConfig) {
             } else {
                 dataSet.binsNum = 3;
             }
-            
+
             if (_.isArray(geoLayer.classification)) {
-                bins = gs.setClassManually(geoLayer.classification);
+                dataSet.binsNum = geoLayer.classification.length-1;
+                bins = gs.setClassManually(_.flatten([d3.min(serie), geoLayer.classification.slice(1,-1), d3.max(serie)]));
+                bins = bins.map(function(el) { return parseFloat(el) || el; });
+                ranges = gs.ranges;
+                ranges[0] = geoLayer.classification[0] + " - " + ranges[0].split(" - ")[1];
+                ranges[ranges.length-1] = ranges[ranges.length-1].split(" - ")[0] + " - " + geoLayer.classification[geoLayer.classification.length-1];
             } else {
                 bins = gs['get'+geoLayer.classification](dataSet.binsNum);
                 var uniqBins = _.uniq(bins);
@@ -1828,10 +1837,23 @@ if (mapConfig) {
                     dataSet.binsNum = uniqBins.length-1;
                     bins = gs['get'+geoLayer.classification](dataSet.binsNum);
                 }
+                bins = bins.map(function(el) { return parseFloat(el) || el; });
+                ranges = gs.ranges;
             }
 
-            dataSet.bins = bins.map(function(el) { return parseFloat(el) || el; });
-            dataSet.ranges = gs.ranges;
+
+            if (dataSet.precision) {
+                for (var i=1; i<bins.length-1; i++) {
+                    bins[i] = Math.round(bins[i]/dataSet.precision)*dataSet.precision;
+                }
+                bins = gs.setClassManually(bins);
+                ranges = gs.ranges;
+                ranges[0] = Math.floor(bins[0]/dataSet.precision)*dataSet.precision + " - " + ranges[0].split(" - ")[1];
+                ranges[ranges.length-1] = ranges[ranges.length-1].split(" - ")[0] + " - " + (Math.floor(bins[bins.length-1]/dataSet.precision)+1)*dataSet.precision;
+            }
+
+            dataSet.bins = bins;
+            dataSet.ranges = ranges;
             legend.update(region);
         }
 
