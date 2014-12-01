@@ -149,7 +149,7 @@
             if ($.geoLayers[i].type === 'vector') {
                 defaultGeo[$.geoLayers[i].schema.name] = {
                     id: $.geoLayers[i].schema.id,
-                    label: $.geoLayers[i].schema.label, // || $.geoLayers[i].schema.id,
+                    label: $.geoLayers[i].schema.label,
                     resource: null,
                     list: []
                 };
@@ -1638,7 +1638,7 @@
 
 
         /*** Gestione degli eventi ***/
-        var geojson, label = new L.Label();
+        var geojson, tooltip = new L.Label();
 
 	    function highlightFeature(e) {
             //if ($.debug) console.log("highlightFeatureFunction",arguments);
@@ -1651,10 +1651,10 @@
                 num = props.data[dataSet.name][dataSet.column];
                     
             if (!layer.feature.selected) layer.setStyle(highlightStyle);
-            if (_.has($,'label') && $.label.active) {
-                label.setContent((geo[region].label ? props[geo[region].label]+'<br>' : '') + dataSet.label + ': '+ dataSet.formatter(dataSet.column, num));
-                label.setLatLng(layer.getBounds().getCenter());
-                map.showLabel(label);
+            if (_.has($,'tooltip') && $.tooltip.active) {
+                tooltip.setContent((geo[region].label ? props[geo[region].label]+'<br>' : '') + dataSet.label + ': '+ dataSet.formatter(dataSet.column, num));
+                tooltip.setLatLng(layer.getBounds().getCenter());
+                map.showLabel(tooltip);
             }
 	    }
                 
@@ -1665,7 +1665,7 @@
                 geoLayer = $.geoLayers.filter(function(l) { return (l.type === "vector" && l.schema.name === region); })[0],
                 defaultStyle = geoLayer.style.default;
             if (!layer.feature.selected) geojson.resetStyle(layer);
-            if (_.has($,'label') && $.label.active) label.close();
+            if (_.has($,'tooltip') && $.tooltip.active) tooltip.close();
 	    }
 
 	    function openInfoWindow(e, layer) {

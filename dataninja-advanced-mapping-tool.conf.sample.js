@@ -121,13 +121,13 @@ var mapConfig = {
         content: '<p></p>'
     },
 
-    // Label control on mouse over regions in vectorial geolayers
-    label: {
+    // Tooltip control on mouse over regions in vectorial geolayers
+    tooltip: {
 
         // Enable or not
         active: true,
 
-        /* Default label has this structure:
+        /* Default tooltip content has this structure:
          * [REGION NAME]
          * [text]: [value]
          */
@@ -1107,7 +1107,7 @@ var mapConfig = {
  *     - active [bool]
  *     - type [string matching viewTypes attributes]
  *     - (other attributes are inherited from geoSources and geoTypes and can be overrided)
- * - label [object]
+ * - tooltip [object]
  *   - active [bool]
  *   - text [string]
  * - legend [object]
