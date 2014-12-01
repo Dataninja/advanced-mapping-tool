@@ -149,7 +149,7 @@
             if ($.geoLayers[i].type === 'vector') {
                 defaultGeo[$.geoLayers[i].schema.name] = {
                     id: $.geoLayers[i].schema.id,
-                    label: $.geoLayers[i].schema.label || $.geoLayers[i].schema.id,
+                    label: $.geoLayers[i].schema.label, // || $.geoLayers[i].schema.id,
                     resource: null,
                     list: []
                 };
@@ -517,9 +517,9 @@
                         '<a id="close-cross" href="#" title="Chiudi"><img src="icons/close.png" /></a>' + 
                         '</th>' + 
                         '</tr>' + 
-                        '<tr>' + 
+                        (geo[region].label ? '<tr>' + 
                         '<th colspan="2" class="rossobc">' + props[geo[region].label] + '</th>' +
-                        '</tr>' + 
+                        '</tr>' : '') + 
                         '</thead>';
 
                     if ($.debug) console.log("Table header",thead);
@@ -1648,7 +1648,7 @@
                     
             if (!layer.feature.selected) layer.setStyle(highlightStyle);
             if (_.has($,'label') && $.label.active) {
-                label.setContent(props[geo[region].label]+'<br>' + dataSet.label + ': '+ dataSet.formatter(dataSet.column, num));
+                label.setContent((geo[region].label ? props[geo[region].label]+'<br>' : '') + dataSet.label + ': '+ dataSet.formatter(dataSet.column, num));
                 label.setLatLng(layer.getBounds().getCenter());
                 map.showLabel(label);
             }
