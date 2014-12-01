@@ -158,6 +158,16 @@ var mapConfig = {
 
     },
 
+    // Menu controls
+    menu: {
+        
+        // Max number of items for an always open menu.
+        // If items (geo layers, datasets or columns) are more, menu will collapse.
+        // If missing or 0, it will be 3.
+        maxItems: 3
+
+    },
+
     // Definition of geographic layers to load
     geoLayers: [
         {
@@ -244,7 +254,8 @@ var mapConfig = {
                         column: '',
                         label: '',
                         description: '',
-                        bins: 3
+                        bins: 7,
+                        precision: 0
                     }
                     //...
                 ],
@@ -778,6 +789,10 @@ var mapConfig = {
              */
             palette: 'Reds',
 
+            // Rounding factor for binning bounds, in 10^n with n is an integer
+            // 0 means no rounding
+            precision: 0,
+
             // Bins number for data -> color scale transformation
             bins: 3
         },
@@ -866,6 +881,12 @@ var mapConfig = {
 
             // Enable or not
             active: true,
+
+            // Binning algorithm, see https://github.com/simogeo/geostats (Classification)
+            // Supported names are the same of geostats functions without 'get' prefix
+            // It can be also an array of bounds for manually class definition
+            // Default value is 'Jenks'
+            classification: 'Jenks',
             
             /* Layer style, with three presets:
              * - default
@@ -925,6 +946,8 @@ var mapConfig = {
  *     - transform [array] function ( [object] )
  * - dataTypes [object]
  *   - choropleth [object]
+ *     - palette [string]
+ *     - precision 10^[int]
  *     - bins [int > 0]
  *   - points [object]
  * - geoSources [object]
@@ -945,6 +968,7 @@ var mapConfig = {
  *     - options [object matching http://leafletjs.com/reference.html#tilelayer-options structure]
  *   - vector [object]
  *     - active [bool]
+ *     - classification [string]
  *     - style [object]
  *       - default [object matching http://leafletjs.com/reference.html#geojson-options style structure]
  *       - highlight [object]
@@ -968,6 +992,7 @@ var mapConfig = {
  *           - label [string]
  *           - description [string]
  *           - bins [int > 0]
+ *           - precision 10^[int]
  *       - groups [object]
  *         - (groups as keys) [array of columns' names]
  *     - parse [string] | [mixed] function( [string], [mixed] )
@@ -1091,6 +1116,8 @@ var mapConfig = {
  *   - description [string]
  *   - delimiter [string]
  *   - label [string] function ( [float], [float] )
+ * - menu [object]
+ *   - maxItems [int > 0]
  * - controls [object]
  *   - active [bool]
  *   - fullscreen [object]

@@ -76,7 +76,8 @@ if (mapConfig) {
         // Global variables
         var $ = mapConfig, // Configuration object
             svgViewBox,
-            h, i, j, k;
+            h, i, j, k,
+            selectedLayer;
 
 
 
@@ -210,7 +211,7 @@ if (mapConfig) {
             if ($.geoLayers[i].type === 'vector') {
                 defaultGeo[$.geoLayers[i].schema.name] = {
                     id: $.geoLayers[i].schema.id,
-                    label: $.geoLayers[i].schema.label || $.geoLayers[i].schema.id,
+                    label: $.geoLayers[i].schema.label, // || $.geoLayers[i].schema.id,
                     resource: null,
                     list: []
                 };
@@ -235,6 +236,7 @@ if (mapConfig) {
                 columns: (_.has(dataSet.schema,'menu') && dataSet.schema.menu.length ? dataSet.schema.menu.map(function(el) { return el.column; }) : null),
                 labels: (_.has(dataSet.schema,'menu') && dataSet.schema.menu.length ? dataSet.schema.menu.map(function(el) { return el.label || el.column; }) : null),
                 descriptions: (_.has(dataSet.schema,'menu') && dataSet.schema.menu.length ? dataSet.schema.menu.map(function(el) { return el.description || dataSet.schema.description || (el.label ? el.label + '>' + el.column : el.column); }) : null),
+                precisions: (_.has(dataSet.schema,'menu') && dataSet.schema.menu.length ? dataSet.schema.menu.map(function(el) { return el.precision || dataSet.precision || 0; }) : null),
                 resourceId: dataSet.resourceId, // HMMM
                 palette: dataSet.palette || 'Reds',
                 transform: dataSet.transform || function(k,v) { return v; },
@@ -249,6 +251,7 @@ if (mapConfig) {
             defaultData[dataSet.schema.name].column = defaultData[dataSet.schema.name].columns[0];
             defaultData[dataSet.schema.name].label = defaultData[dataSet.schema.name].labels[0];
             defaultData[dataSet.schema.name].description = defaultData[dataSet.schema.name].descriptions[0];
+            defaultData[dataSet.schema.name].precision = defaultData[dataSet.schema.name].precisions[0];
             defaultData[dataSet.schema.name].binsNum = defaultData[dataSet.schema.name].binsNums[0];
 
             // Columns grouping
@@ -578,9 +581,9 @@ if (mapConfig) {
                         '<a id="close-cross" href="#" title="Chiudi"><img src="icons/close.png" /></a>' + 
                         '</th>' + 
                         '</tr>' + 
-                        '<tr>' + 
+                        (geo[region].label ? '<tr>' + 
                         '<th colspan="2" class="rossobc">' + props[geo[region].label] + '</th>' +
-                        '</tr>' + 
+                        '</tr>' : '') + 
                         '</thead>';
 
                     if ($.debug) console.log("Table header",thead);
@@ -703,7 +706,11 @@ if (mapConfig) {
                 } else { // if (props) 
                         
                     d3.select(this._div).classed("closed", true);
-                    if (geojson) geojson.eachLayer(function(l) { l.feature.selected = false; geojson.resetStyle(l); });
+                    if (selectedLayer) {
+                        selectedLayer.feature.selected = false;
+                        geojson.resetStyle(selectedLayer);
+                        selectedLayer = undefined;
+                    }
                     delete parameters.i;
                     if (embedControl && embedControl.isAdded) embedControl.removeFrom(map);
                     if (_.has($.map.zoom,'scrollWheel') && $.map.zoom.scrollWheel) map.scrollWheelZoom.enable();
@@ -1060,14 +1067,16 @@ if (mapConfig) {
                                 return dataSet.formatter(dataSet.column, num); 
                             }).join(' '+delimiter+' ');
                         }),
-                        description = dataSet.description || $.legend.description || '';
+                        description = dataSet.description || $.legend.description || '',
+                        pal = dataSet.palette.replace("~",""),
+                        binsNum = (colorbrewer[pal][grades.length] ? grades.length : 3),
+                        colors = (dataSet.palette[0] === "~" ? _.clone(colorbrewer[pal][binsNum]).reverse() : colorbrewer[pal][binsNum]);
 
                     this._div.innerHTML = (parameters.md != 'widget' ? '<h3 title="'+description+'">'+$.legend.title+'</h3>' : '');
                     for (var i=0; i<grades.length; i++) {
-                        var color = (colorbrewer[dataSet.palette][grades.length] ? colorbrewer[dataSet.palette][grades.length][i] : colorbrewer[dataSet.palette][3][i]);
                         this._div.innerHTML += '<i title="'+(_.has($.legend,'label') ? $.legend.label.call($.legend,grades[i].split(' '+delimiter+' ')[0],grades[i].split(' '+delimiter+' ')[1],dataSet.label) : grades[i])+'" '+
                             'style="background:' + 
-                            color + '"></i> ' + 
+                            colors[i] + '"></i> ' + 
                             (parameters.md != 'widget' ? $.legend.label.call($.legend,grades[i].split(' '+delimiter+' ')[0],grades[i].split(' '+delimiter+' ')[1]) : '') + '<br>';
                     }
                     if (parameters.md != 'widget') this._div.innerHTML += '<p>'+description+'</p>';
@@ -1082,6 +1091,10 @@ if (mapConfig) {
         if ($.debug) console.log("legend",legend);
         /*** ***/
 
+
+
+        /*** Menus ***/
+        var maxMenuItems = (_.has($,'menu') ? $.menu.maxItems || 3 : 3);
 
 
         /*** Creazione del menù dei geolayers ***/
@@ -1123,8 +1136,7 @@ if (mapConfig) {
             for (var i=0; i<data[region].length; i++) {
                 if (i != 0) data[region][i].active = false;
             }
-            delete parameters.i;
-            if (embedControl && embedControl.isAdded) embedControl.removeFrom(map);
+            info.update();
             dataMenu.update(region);
             dataMenu.onChange(region);
         };
@@ -1195,7 +1207,7 @@ if (mapConfig) {
                     .style("display",null)
                     .classed('collapsable', false)
                     .style("width", function() {
-                        if (parameters.md != 'widget' && menuGeoLayers.length > 3) {
+                        if (parameters.md != 'widget' && menuGeoLayers.length > maxMenuItems) {
                             return d3.select(this)
                                 .selectAll("a")
                                 .filter(function(d) { 
@@ -1205,7 +1217,7 @@ if (mapConfig) {
                             return null;
                         }
                     })
-                    .classed('collapsable',(menuGeoLayers.length > 3));
+                    .classed('collapsable',(menuGeoLayers.length > maxMenuItems));
 
             } else {
                 d3.select(this._nav).style('display','none');
@@ -1259,12 +1271,8 @@ if (mapConfig) {
             for (var i=0; i<data[region].length; i++) {
                 if (i != index) data[region][i].active = false;
             }
-            if (geojson) {
-                geojson.eachLayer(function(l) {
-                    if (l.feature.selected) {
-                        info.update(l.feature.properties);
-                    }
-                });
+            if (selectedLayer) {
+                info.update(selectedLayer.feature.properties);
             } else {
                 info.update();
             }
@@ -1334,7 +1342,7 @@ if (mapConfig) {
                     .style("display",null)
                     .classed('collapsable', false)
                     .style("width", function() {
-                        if (parameters.md != 'widget' && dataSets.length > 3) {
+                        if (parameters.md != 'widget' && dataSets.length > maxMenuItems) {
                             return d3.select(this)
                                 .selectAll("a")
                                 .filter(function(d) { 
@@ -1344,7 +1352,7 @@ if (mapConfig) {
                             return null;
                         }
                     })
-                    .classed('collapsable',(dataSets.length > 3));
+                    .classed('collapsable',(dataSets.length > maxMenuItems));
             
             } else {
                 d3.select(this._nav).style('display','none');
@@ -1399,6 +1407,7 @@ if (mapConfig) {
             dataSet.column = dataSet.columns[column];
             dataSet.label = dataSet.labels[column];
             dataSet.description = dataSet.descriptions[column];
+            dataSet.precision = dataSet.precisions[column];
             dataSet.binsNum = dataSet.binsNums[column];
             loadData(region, dataSet.name);
         };
@@ -1487,7 +1496,7 @@ if (mapConfig) {
                         .style("display",null)
                         .classed('collapsable', false)
                         .style("width", function() {
-                            if (parameters.md != 'widget' && dataSet.columns.length > 3) {
+                            if (parameters.md != 'widget' && dataSet.columns.length > maxMenuItems) {
                                 return d3.select(this)
                                     .selectAll("a")
                                     .filter(function(d) { 
@@ -1497,7 +1506,7 @@ if (mapConfig) {
                                 return null;
                             }
                         })
-                        .classed('collapsable',(dataSet.columns.length > 3));
+                        .classed('collapsable',(dataSet.columns.length > maxMenuItems));
                 } else {
                     d3.select(this._nav).style('display','none');
                 }
@@ -1664,10 +1673,12 @@ if (mapConfig) {
         /*** Gestione degli stili della choropleth ***/
         function getColor(d, bins, palette) {
             //if ($.debug) console.log("getColorFunction",arguments);
-            var binsNum = (colorbrewer[palette][bins.length-1] ? bins.length-1 : 3);
+            var pal = palette.replace("~",""),
+                binsNum = (colorbrewer[pal][bins.length-1] ? bins.length-1 : 3),
+                colors = (palette[0] === "~" ? _.clone(colorbrewer[pal][binsNum]).reverse() : colorbrewer[pal][binsNum]);
             for (var i=1; i<bins.length; i++) {
                 if (d <= bins[i]) {
-                    return colorbrewer[palette][binsNum][i-1];
+                    return colors[i-1];
                 }
             }
         }
@@ -1681,11 +1692,6 @@ if (mapConfig) {
             if (feature.selected) {
                 _.extend(currentStyle,geoLayer.style.selected);
             }
-            geojson.eachLayer(function(l) { 
-                if (l.feature.selected && !L.Browser.ie && !L.Browser.opera) {
-                    l.bringToFront();
-                }
-            });
             currentStyle.fillColor = (_.has(feature.properties.data,dataSet.name) ? getColor(feature.properties.data[dataSet.name][dataSet.column], dataSet.bins, dataSet.palette) : 'transparent');
 	    	return currentStyle;
     	}
@@ -1708,7 +1714,7 @@ if (mapConfig) {
                     
             if (!layer.feature.selected) layer.setStyle(highlightStyle);
             if (_.has($,'label') && $.label.active) {
-                label.setContent(props[geo[region].label]+'<br>' + dataSet.label + ': '+ dataSet.formatter(dataSet.column, num));
+                label.setContent((geo[region].label ? props[geo[region].label]+'<br>' : '') + dataSet.label + ': '+ dataSet.formatter(dataSet.column, num));
                 label.setLatLng(layer.getBounds().getCenter());
                 map.showLabel(label);
             }
@@ -1720,7 +1726,7 @@ if (mapConfig) {
                 region = layer.feature.properties._layer,
                 geoLayer = $.geoLayers.filter(function(l) { return (l.type === "vector" && l.schema.name === region); })[0],
                 defaultStyle = geoLayer.style.default;
-            if (!layer.feature.selected) geojson.eachLayer(function(l) { if (!l.feature.selected) geojson.resetStyle(l); });
+            if (!layer.feature.selected) geojson.resetStyle(layer);
             if (_.has($,'label') && $.label.active) label.close();
 	    }
 
@@ -1732,7 +1738,10 @@ if (mapConfig) {
                 selectedStyle = geoLayer.style.selected;
 
             if (!layer.feature.selected) {
-                geojson.eachLayer(function(l) { l.feature.selected = false; geojson.resetStyle(l); });
+                if (selectedLayer) {
+                    selectedLayer.feature.selected = false;
+                    geojson.resetStyle(selectedLayer);
+                }
                 layer.feature.selected = true;
                 layer.setStyle(selectedStyle);
                 parameters.i = layer.feature.properties[geo[parameters.dl].id];
@@ -1743,6 +1752,8 @@ if (mapConfig) {
             if (!L.Browser.ie && !L.Browser.opera) {
 	        	layer.bringToFront();
             }
+
+            selectedLayer = layer;
         }
 
         function onEachFeature(feature, layer) {
@@ -1804,7 +1815,8 @@ if (mapConfig) {
             var dataSet = data[region].filter(function(el) { return el.active; })[0],
                 geoLayer = $.geoLayers.filter(function(l) { return (l.type === "vector" && l.schema.name === region); })[0];
 
-            var serie = dataSet.resource.map(function(el) { return el[dataSet.column]; });
+            var serie = dataSet.resource.map(function(el) { return el[dataSet.column]; }),
+                bins, ranges;
             var gs = new geostats(serie);
 
             if (serie.length > 3) {
@@ -1814,17 +1826,38 @@ if (mapConfig) {
             } else {
                 dataSet.binsNum = 3;
             }
-            
-            bins = gs.getJenks(dataSet.binsNum);
 
-            var uniqBins = _.uniq(bins);
-            if (dataSet.binsNum > 3 && uniqBins.length < bins.length) {
-                dataSet.binsNum = uniqBins.length-1;
-                bins = gs.getJenks(dataSet.binsNum);
+            if (_.isArray(geoLayer.classification)) {
+                dataSet.binsNum = geoLayer.classification.length-1;
+                bins = gs.setClassManually(_.flatten([d3.min(serie), geoLayer.classification.slice(1,-1), d3.max(serie)]));
+                bins = bins.map(function(el) { return parseFloat(el) || el; });
+                ranges = gs.ranges;
+                ranges[0] = geoLayer.classification[0] + " - " + ranges[0].split(" - ")[1];
+                ranges[ranges.length-1] = ranges[ranges.length-1].split(" - ")[0] + " - " + geoLayer.classification[geoLayer.classification.length-1];
+            } else {
+                bins = gs['get'+geoLayer.classification](dataSet.binsNum);
+                var uniqBins = _.uniq(bins);
+                if (dataSet.binsNum > 3 && uniqBins.length < bins.length) {
+                    dataSet.binsNum = uniqBins.length-1;
+                    bins = gs['get'+geoLayer.classification](dataSet.binsNum);
+                }
+                bins = bins.map(function(el) { return parseFloat(el) || el; });
+                ranges = gs.ranges;
             }
 
-            dataSet.bins = bins.map(function(el) { return parseFloat(el) || el; });
-            dataSet.ranges = gs.ranges;
+
+            if (dataSet.precision) {
+                for (var i=1; i<bins.length-1; i++) {
+                    bins[i] = Math.round(bins[i]/dataSet.precision)*dataSet.precision;
+                }
+                bins = gs.setClassManually(bins);
+                ranges = gs.ranges;
+                ranges[0] = Math.floor(bins[0]/dataSet.precision)*dataSet.precision + " - " + ranges[0].split(" - ")[1];
+                ranges[ranges.length-1] = ranges[ranges.length-1].split(" - ")[0] + " - " + (Math.floor(bins[bins.length-1]/dataSet.precision)+1)*dataSet.precision;
+            }
+
+            dataSet.bins = bins;
+            dataSet.ranges = ranges;
             legend.update(region);
         }
 
