@@ -1819,12 +1819,15 @@ if (mapConfig) {
                 dataSet.binsNum = 3;
             }
             
-            bins = gs.getJenks(dataSet.binsNum);
-
-            var uniqBins = _.uniq(bins);
-            if (dataSet.binsNum > 3 && uniqBins.length < bins.length) {
-                dataSet.binsNum = uniqBins.length-1;
-                bins = gs.getJenks(dataSet.binsNum);
+            if (_.isArray(geoLayer.classification)) {
+                bins = gs.setClassManually(geoLayer.classification);
+            } else {
+                bins = gs['get'+geoLayer.classification](dataSet.binsNum);
+                var uniqBins = _.uniq(bins);
+                if (dataSet.binsNum > 3 && uniqBins.length < bins.length) {
+                    dataSet.binsNum = uniqBins.length-1;
+                    bins = gs['get'+geoLayer.classification](dataSet.binsNum);
+                }
             }
 
             dataSet.bins = bins.map(function(el) { return parseFloat(el) || el; });

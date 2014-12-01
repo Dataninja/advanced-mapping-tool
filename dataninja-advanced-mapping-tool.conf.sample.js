@@ -866,6 +866,10 @@ var mapConfig = {
 
             // Enable or not
             active: true,
+
+            // Binning algorithm, see https://github.com/simogeo/geostats (Classification)
+            // Supported names are the same of geostats functions without get prefix
+            classification: 'Jenks',
             
             /* Layer style, with three presets:
              * - default
@@ -945,6 +949,7 @@ var mapConfig = {
  *     - options [object matching http://leafletjs.com/reference.html#tilelayer-options structure]
  *   - vector [object]
  *     - active [bool]
+ *     - classification [string]
  *     - style [object]
  *       - default [object matching http://leafletjs.com/reference.html#geojson-options style structure]
  *       - highlight [object]
