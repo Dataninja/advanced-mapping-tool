@@ -361,21 +361,21 @@
 
 
 
-        /*** Description ***/
-        var description;
-        if (_.has($,'description') && $.description.active && parameters.md != 'widget') {
-            $.description.position = $.description.position || 'right';
-            d3.select('body').classed('description '+$.description.position, true);
-            if ($.description.position === 'top' || $.description.position === 'left') {
-                description = d3.select('body').insert('div','#map');
+        /*** Summary ***/
+        var summary;
+        if (_.has($,'summary') && $.summary.active && parameters.md != 'widget') {
+            $.summary.position = $.summary.position || 'right';
+            d3.select('body').classed('summary '+$.summary.position, true);
+            if ($.summary.position === 'top' || $.summary.position === 'left') {
+                summary = d3.select('body').insert('div','#map');
             } else {
-                description = d3.select('body').append('div');
+                summary = d3.select('body').append('div');
             }
-            description
-                .attr('id','map-description')
-                .attr("class","description "+$.description.position)
+            summary
+                .attr('id','map-summary')
+                .attr("class","summary "+$.summary.position)
                 .append('div')
-                .html($.description.content || '');
+                .html($.summary.content || '');
         }
         /*** ***/
 
@@ -391,7 +391,7 @@
                 };
             } else if (_.has($.infowindow,'position') && $.infowindow.position != 'inside') {
                 info = {};
-                d3.select('body').classed('description '+$.infowindow.position, true);
+                d3.select('body').classed('summary '+$.infowindow.position, true);
                 if ($.infowindow.position === 'top' || $.infowindow.position === 'left') {
                      info._div = d3.select('body').insert('div','#map').attr("class", "info external "+$.infowindow.position).node();
                 } else if ($.infowindow.position === 'right' || $.infowindow.position === 'bottom') {

@@ -109,7 +109,7 @@ var mapConfig = {
     },
 
     // External div for long text description
-    description: {
+    summary: {
 
         // Enable or not
         active: false,
@@ -1043,7 +1043,7 @@ var mapConfig = {
  *   - attribution [array]
  *     - [string]
  *     - ...
- * - description [object]
+ * - summary [object]
  *   - active [bool]
  *   - position [string]
  *   - content [string]
