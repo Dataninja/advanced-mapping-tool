@@ -1675,23 +1675,25 @@
                 geoLayer = $.geoLayers.filter(function(l) { return (l.type === 'thematic' && l.schema.name === region); })[0],
                 selectedStyle = geoLayer.style.selected;
 
-            if (!layer.feature.selected) {
-                if (selectedLayer) {
-                    selectedLayer.feature.selected = false;
-                    geojson.resetStyle(selectedLayer);
+            if (_.has(geoLayer,'infowindow') && geoLayer.infowindow) {
+                if (!layer.feature.selected) {
+                    if (selectedLayer) {
+                        selectedLayer.feature.selected = false;
+                        geojson.resetStyle(selectedLayer);
+                    }
+                    layer.feature.selected = true;
+                    layer.setStyle(selectedStyle);
+                    parameters.i = layer.feature.properties[geo[parameters.dl].id];
+                    if (embedControl && embedControl.isAdded) embedControl.removeFrom(map);
+                    info.update(layer.feature.properties);
+                }   
+            
+                if (!L.Browser.ie && !L.Browser.opera) {
+	            	layer.bringToFront();
                 }
-                layer.feature.selected = true;
-                layer.setStyle(selectedStyle);
-                parameters.i = layer.feature.properties[geo[parameters.dl].id];
-                if (embedControl && embedControl.isAdded) embedControl.removeFrom(map);
-                info.update(layer.feature.properties);
+    
+                selectedLayer = layer;
             }
-        
-            if (!L.Browser.ie && !L.Browser.opera) {
-	        	layer.bringToFront();
-            }
-
-            selectedLayer = layer;
         }
 
         function onEachFeature(feature, layer) {

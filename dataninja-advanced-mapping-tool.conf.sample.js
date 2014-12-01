@@ -888,6 +888,9 @@ var mapConfig = {
             // It can be also an array of bounds for manually class definition
             // Default value is 'Jenks'
             classification: 'Jenks',
+
+            // Infowindow on click can be disabled
+            infowindow: true,
             
             /* Layer style, with three presets:
              * - default
@@ -970,6 +973,7 @@ var mapConfig = {
  *   - thematic [object]
  *     - active [bool]
  *     - classification [string]
+ *     - infowindow [bool]
  *     - style [object]
  *       - default [object matching http://leafletjs.com/reference.html#geojson-options style structure]
  *       - highlight [object]
