@@ -639,6 +639,7 @@ var mapConfig = {
             active: false,
 
             // Geo layer name map shows after geocoding
+            // If missing or empty, only map view will be set (no layer change)
             layer: 'layer1',
 
             // Input text is shown only after mouseover on icon

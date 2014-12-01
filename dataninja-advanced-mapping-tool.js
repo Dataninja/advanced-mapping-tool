@@ -1547,12 +1547,12 @@ if (mapConfig) {
                                     first = new L.LatLng(bbox[0], bbox[2]),
                                     second = new L.LatLng(bbox[1], bbox[3]),
                                     bounds = new L.LatLngBounds([first, second]);
-                                delete parameters.i;
-                                if (embedControl && embedControl.isAdded) embedControl.removeFrom(map);
-    		    	            info.update();
-                                var e = document.createEvent('UIEvents');
-                                e.initUIEvent('click', true, true, window, 1);
-                                d3.select("#geomenu-ui #"+$.controls.geocoder.layer).node().dispatchEvent(e);
+                                if (_.has($.controls.geocoder,'layer') && $.controls.geocoder.layer) { 
+        		    	            info.update();
+                                    var e = document.createEvent('UIEvents');
+                                    e.initUIEvent('click', true, true, window, 1);
+                                    d3.select("#geomenu-ui #"+$.controls.geocoder.layer).node().dispatchEvent(e);
+                                }
                                 this._map.fitBounds(bounds, { maxZoom: $.controls.geocoder.zoom });
                             }
                         }
