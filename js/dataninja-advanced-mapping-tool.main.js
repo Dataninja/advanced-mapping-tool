@@ -146,7 +146,7 @@
         /*** Geo layers initialization ***/
         var defaultGeo = {}, geo = {}; // Geo layers enabled and used
         for (i=0; i<$.geoLayers.length; i++) {
-            if ($.geoLayers[i].type === 'vector') {
+            if ($.geoLayers[i].type === 'thematic') {
                 defaultGeo[$.geoLayers[i].schema.name] = {
                     id: $.geoLayers[i].schema.id,
                     label: $.geoLayers[i].schema.label,
@@ -1624,7 +1624,7 @@
         function style(feature) {
             //if ($.debug) console.log("styleFunction",arguments);
             var region = feature.properties._layer,
-                geoLayer = $.geoLayers.filter(function(l) { return (l.type === "vector" && l.schema.name === region); })[0],
+                geoLayer = $.geoLayers.filter(function(l) { return (l.type === 'thematic' && l.schema.name === region); })[0],
                 dataSet = data[region].filter(function(el) { return el.active; })[0],
                 currentStyle = _.clone(geoLayer.style.default);
             if (feature.selected) {
@@ -1645,7 +1645,7 @@
             var layer = e.target,
                 props = layer.feature.properties,
                 region = layer.feature.properties._layer,
-                geoLayer = $.geoLayers.filter(function(l) { return (l.type === "vector" && l.schema.name === region); })[0],
+                geoLayer = $.geoLayers.filter(function(l) { return (l.type === 'thematic' && l.schema.name === region); })[0],
                 dataSet = data[region].filter(function(el) { return el.active; })[0],
                 highlightStyle = geoLayer.style.highlight,
                 num = props.data[dataSet.name][dataSet.column];
@@ -1662,7 +1662,7 @@
             //if ($.debug) console.log("resetHighlightFunction",arguments);
             var layer = e.target,
                 region = layer.feature.properties._layer,
-                geoLayer = $.geoLayers.filter(function(l) { return (l.type === "vector" && l.schema.name === region); })[0],
+                geoLayer = $.geoLayers.filter(function(l) { return (l.type === 'thematic' && l.schema.name === region); })[0],
                 defaultStyle = geoLayer.style.default;
             if (!layer.feature.selected) geojson.resetStyle(layer);
             if (_.has($,'tooltip') && $.tooltip.active) tooltip.close();
@@ -1672,7 +1672,7 @@
             if ($.debug) console.log("openInfoWindowFunction",arguments);
             var layer = layer || e.target,
                 region = layer.feature.properties._layer,
-                geoLayer = $.geoLayers.filter(function(l) { return (l.type === "vector" && l.schema.name === region); })[0],
+                geoLayer = $.geoLayers.filter(function(l) { return (l.type === 'thematic' && l.schema.name === region); })[0],
                 selectedStyle = geoLayer.style.selected;
 
             if (!layer.feature.selected) {
@@ -1751,7 +1751,7 @@
             if ($.debug) console.log("binDataFunction",arguments);
 
             var dataSet = data[region].filter(function(el) { return el.active; })[0],
-                geoLayer = $.geoLayers.filter(function(l) { return (l.type === "vector" && l.schema.name === region); })[0];
+                geoLayer = $.geoLayers.filter(function(l) { return (l.type === 'thematic' && l.schema.name === region); })[0];
 
             var serie = dataSet.resource.map(function(el) { return el[dataSet.column]; }),
                 bins, ranges;
@@ -1806,7 +1806,7 @@
             
             if ($.debug) console.log("loadDataFunction",arguments);
             
-            var geoLayer = $.geoLayers.filter(function(l) { return (l.type === "vector" && l.schema.name === region); })[0],
+            var geoLayer = $.geoLayers.filter(function(l) { return (l.type === 'thematic' && l.schema.name === region); })[0],
                 dataSets = $.dataSets.filter(function(l) { return l.schema.layer === region; }),
                 geoPath, dataPath, q;
             

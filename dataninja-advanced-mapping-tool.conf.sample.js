@@ -184,7 +184,7 @@ var mapConfig = {
             format: '',
             
             // Inherits attributes from geoType named here
-            type: 'vector',
+            type: 'thematic',
 
             schema: {
 
@@ -876,8 +876,8 @@ var mapConfig = {
             }
         },
 
-        // Vector shapefile
-        vector: {
+        // Vector shapefile for thematic maps
+        thematic: {
 
             // Enable or not
             active: true,
@@ -966,7 +966,7 @@ var mapConfig = {
  *     - active [bool]
  *     - source [string matching geoSources attributes]
  *     - options [object matching http://leafletjs.com/reference.html#tilelayer-options structure]
- *   - vector [object]
+ *   - thematic [object]
  *     - active [bool]
  *     - classification [string]
  *     - style [object]
