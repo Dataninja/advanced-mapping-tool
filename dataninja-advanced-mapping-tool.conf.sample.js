@@ -581,6 +581,10 @@ var mapConfig = {
             // Enable or not
             active: true,
 
+            // Static url the control links to
+            // If missing or empty, it will be the dynamic url to the map status at the moment of the click
+            url: '',
+
             // Title on mouseover
             title: 'Open in new window', // ie. Open in new window
 
@@ -897,6 +901,7 @@ var mapConfig = {
  *     - offsetY ['auto' | int]
  *   - detach [object]
  *     - active [bool]
+ *     - url [string]
  *     - title [string]
  *     - image [string]
  *   - socialButtons [object]

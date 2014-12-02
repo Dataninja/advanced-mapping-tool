@@ -1268,7 +1268,7 @@ if (mapConfig) {
                 detach.onAdd = function(map) {
                     var a = L.DomUtil.create('a','detach '+parameters.md),
                         img = L.DomUtil.create('img','detach',a);
-                    a.setAttribute('href',Arg.url(parameters).replace(/&*md=[^&]*/,'').replace(/&{2,}/g,"&"));
+                    a.setAttribute('href', $.controls.detach.url || Arg.url(parameters).replace(/&*md=[^&]*/,'').replace(/&{2,}/g,"&"));
                     a.setAttribute('target','_blank');
                     a.setAttribute('title', $.controls.detach.title);
                     img.setAttribute('id','detach');
