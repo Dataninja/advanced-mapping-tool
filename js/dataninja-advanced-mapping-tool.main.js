@@ -410,6 +410,9 @@
                 d3.select(this._div)
                     .attr('id','infowindow')
                     .style('max-height', (parameters.md != 'widget' ? (head.screen.innerHeight-100)+'px' : null))
+                    .classed('empty', function() {
+                        return parameters.md === 'widget' ? !(_.has($.infowindow.content,'mobile') && $.infowindow.content.mobile) : !(_.has($.infowindow.content,'default') && $.infowindow.content.default);
+                    })
                     .on("mouseenter", function() {
                         map.scrollWheelZoom.disable();
                     })
@@ -424,7 +427,9 @@
                 var that = this;
                 this._div.innerHTML = '';
                 if (props) {
-                    d3.select(this._div).classed("closed", false);
+                    d3.select(this._div)
+                        .classed("closed", false)
+                        .classed("empty", false);
                     if (parameters.md === 'widget') map.dragging.disable();
                     var delim = agnes.rowDelimiter(),
                         today = new Date(),
@@ -643,7 +648,11 @@
 
                 } else { // if (props) 
                         
-                    d3.select(this._div).classed("closed", true);
+                    d3.select(this._div)
+                        .classed("closed", true)
+                        .classed('empty', function() {
+                            return parameters.md === 'widget' ? !(_.has($.infowindow.content,'mobile') && $.infowindow.content.mobile) : !(_.has($.infowindow.content,'default') && $.infowindow.content.default);
+                        });
                     if (selectedLayer) {
                         selectedLayer.feature.selected = false;
                         geojson.resetStyle(selectedLayer);

@@ -293,6 +293,10 @@ html, body, #map {
     list-style-position: inside;
 }
 
+.info.empty.closed {
+    display: none;
+}
+
 .info h4 {
 	margin: 0 0 5px;
 	color: #777;
