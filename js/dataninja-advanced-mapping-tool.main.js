@@ -254,7 +254,8 @@
                 ml: [string], // Livello caricato più alto: regioni, province, comuni -- MAX LAYER
                 tl: [string], // Livello a cui si riferisce t -- TERRITORY LAYER
                 t: [int], // Codice istat del territorio centrato e con infowindow aperta (si riferisce a tl) -- TERRITORY
-                i: [int] // Codice istat del territotio con infowindow aperta -- INFO
+                i: [int] // Codice istat del territotio con infowindow aperta -- INFO,
+                summary: [bool] // Se attiva, permette di nascondere la barra laterale
             }
         */
         
@@ -262,6 +263,7 @@
         parameters.ml = parameters.ls[0]; // Livello caricato più alto (PRIVATO)
         parameters.dl = parameters.dl || parameters.ml; // Livello visibile al caricamento
         parameters.md = parameters.md || (head.mobile ? 'widget' : ''); // Layout
+        parameters.summary = !_.isUndefined(parameters.summary) ? parameters.summary : true;
         d3.select('body').classed(parameters.md,true); // Tengo traccia del layout come classe del body
 
         if (parameters.t) { // Focus su un region (codice istat che si riferisce a tl)
@@ -363,7 +365,7 @@
 
         /*** Summary ***/
         var summary;
-        if (_.has($,'summary') && $.summary.active && parameters.md != 'widget') {
+        if (_.has($,'summary') && $.summary.active && parameters.md != 'widget' && parameters.summary) {
             $.summary.position = $.summary.position || 'right';
             d3.select('body').classed('summary '+$.summary.position, true);
             if ($.summary.position === 'top' || $.summary.position === 'left') {
