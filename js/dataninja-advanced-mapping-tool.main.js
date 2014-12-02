@@ -263,7 +263,6 @@
         parameters.ml = parameters.ls[0]; // Livello caricato più alto (PRIVATO)
         parameters.dl = parameters.dl || parameters.ml; // Livello visibile al caricamento
         parameters.md = parameters.md || (head.mobile ? 'widget' : ''); // Layout
-        parameters.summary = !_.isUndefined(parameters.summary) ? parameters.summary : true;
         d3.select('body').classed(parameters.md,true); // Tengo traccia del layout come classe del body
 
         if (parameters.t) { // Focus su un region (codice istat che si riferisce a tl)
@@ -278,6 +277,10 @@
             $.pointsSet.resourceId = parameters.mr.rid;
             parameters.mr.lat = parameters.mr.lat || 'lat';
             parameters.mr.lng = parameters.mr.lng || 'lng';
+        }
+
+        if (_.has($,'summary') && !_.isUndefined(parameters.summary)) {
+            $.summary.closed = !parameters.summary;
         }
                 
         if ($.debug) console.log("parameters",parameters);
@@ -359,26 +362,6 @@
         if ($.debug) console.log("attrib",attrib);
 
         attrib.addTo(map);        
-        /*** ***/
-
-
-
-        /*** Summary ***/
-        var summary;
-        if (_.has($,'summary') && $.summary.active && parameters.md != 'widget' && parameters.summary) {
-            $.summary.position = $.summary.position || 'right';
-            d3.select('body').classed('summary '+$.summary.position, true);
-            if ($.summary.position === 'top' || $.summary.position === 'left') {
-                summary = d3.select('body').insert('div','#map');
-            } else {
-                summary = d3.select('body').append('div');
-            }
-            summary
-                .attr('id','map-summary')
-                .attr("class","summary "+$.summary.position)
-                .append('div')
-                .html($.summary.content || '');
-        }
         /*** ***/
 
 
@@ -931,6 +914,60 @@
         
         if ($.debug) console.log("detach",detach);
 
+        /*** ***/
+
+
+
+        /*** Summary ***/
+        var summary, summaryControl;
+        if (_.has($,'summary') && $.summary.active && parameters.md != 'widget') {
+
+            $.summary.position = $.summary.position || 'right';
+            d3.select('body').classed('summary '+$.summary.position, true);
+
+            if ($.summary.position === 'top' || $.summary.position === 'left') {
+                summary = d3.select('body').insert('div','#map');
+            } else {
+                summary = d3.select('body').append('div');
+            }
+
+            summary
+                .attr('id','map-summary')
+                .attr("class","summary "+$.summary.position)
+                .append('div')
+                .html($.summary.content || '');
+
+            summaryControl = L.control({position: 'topright'});
+
+            if (_.has($.summary,'closed') && $.summary.closed) {
+                summaryControl.isAdded = false;
+                summary.style('display','none');
+                d3.select('body').classed('summary',false);
+            } else {
+                summaryControl.isAdded = true;
+                summary.style('display',null);
+                d3.select('body').classed('summary',true);
+            }
+
+            summaryControl.onAdd = function(map) {
+                var img = L.DomUtil.create('img', 'summary '+parameters.md),
+                    that = this;
+                img.setAttribute('src', $.summary.image);
+                img.setAttribute('title', $.summary.title);
+                d3.select(img).on('click', function() {
+                    d3.select('#map-summary').style('display',(that.isAdded ? 'none' : null));
+                    d3.select('body').classed('summary',!that.isAdded);
+                    that.isAdded = !that.isAdded;
+                });
+                return img;
+            };
+
+            summaryControl.addTo(map);
+
+        }
+        
+        if ($.debug) console.log("summaryControl",summaryControl);
+        
         /*** ***/
 
 

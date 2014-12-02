@@ -117,6 +117,15 @@ var mapConfig = {
         // Position respect to map
         position: 'right',
 
+        // Control image to open / close summary
+        image: 'icons/info.png',
+
+        // Title on control mouseover
+        title: 'Further informations',
+
+        // Initial status (can be overwritten by 'summary' get parameter)
+        closed: false,
+
         // HTML content of the description
         content: '<p></p>'
     },
@@ -1051,6 +1060,9 @@ var mapConfig = {
  * - summary [object]
  *   - active [bool]
  *   - position [string]
+ *   - image [string]
+ *   - title [string]
+ *   - closed [bool]
  *   - content [string]
  * - urlShortener [object]
  *   - active [bool]

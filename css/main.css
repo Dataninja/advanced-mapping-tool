@@ -362,6 +362,7 @@ html, body, #map {
 img.reset, 
 img.detach, 
 img.embed,
+img.summary,
 img.screenshot {
     height: 36px;
     cursor: pointer;
@@ -377,6 +378,7 @@ a.detach {
 img.reset:hover, 
 img.detach:hover, 
 img.embed:hover,
+img.summary:hover,
 img.screenshot:hover {
     background-color: whitesmoke;
 }
