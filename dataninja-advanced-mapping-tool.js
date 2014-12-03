@@ -1,4 +1,304 @@
 if (mapConfig) {
+    // Known sources of data with global setting inherited to datasets with 'source' parameter
+    mapConfig.dataSources = {
+
+        // Local or remote static file
+        file: {
+
+            // Domain without trailing slash (only for remote file)
+            domain: '',
+
+            // Relative or absolute path (with trailing slash)
+            path: '',
+
+            // Complete file name if single file (with extension)
+            filename: '',
+
+            // File format (used also as extension in file name template for multiple files)
+            format: '',
+
+            // URL generator based on region and a filter
+            url: function(region, filterKey, filterValue) {
+
+                /* Default file name template if filename is empty:
+                 * - region_filterKey-filterValue.format
+                 * If no filter:
+                 * - region.format
+                 */
+                return this.domain + 
+                    this.path + 
+                    (this.filename || (region + (filterKey && filterValue ? '_'+filterKey+'-'+filterValue : '') + "." + this.format));
+            },
+
+            // Callback function of ajax request for custom result transformation
+            // this is the dataSet object
+            transform: function(res) {
+                return res;
+            }
+        },
+
+        // Dkan API: see http://docs.getdkan.com/docs/dkan-documentation/dkan-api/datastore-api
+        dkan: {
+
+            // Domain without trailing slash
+            domain: '',
+
+            /* Relative or absolute path (ie. [prepath]/action/datastore/search.json)
+             * See http://docs.getdkan.com/docs/dkan-documentation/dkan-api/datastore-api#Datastore_API_URL_
+             */
+            path: '',
+
+            /* Request parameters for Dkan API
+             * See http://docs.getdkan.com/docs/dkan-documentation/dkan-api/datastore-api#Request_Parameters
+             */
+
+            // UID of the resource
+            resourceId: '',
+
+            // Limit returned items number in response
+            limit: 5000,
+
+            // Format of response (ie. json)
+            format: 'json',
+            
+            // URL generator based on region and a filter
+            url: function(region, filterKey, filterValue) {
+                return this.domain + this.path + 
+                    '?resource_id=' + this.resourceId +
+                    (filterKey && filterValue ? ('&filters[' + filterKey + ']=' + filterValue) : '') + 
+                    (this.limit ? '&limit=' + this.limit : '');
+            },
+            
+            /* Callback function of ajax request for custom result transformation
+             * this is the dataSet object
+             * See http://docs.getdkan.com/docs/dkan-documentation/dkan-api/datastore-api#Return_Values
+             */
+            transform: function(res) {
+                return res.result.records;
+            }
+        }
+    };
+}
+
+/*
+ * Map configuration complete structure:
+ *
+ * - dataSources [object]
+ *   - file [object]
+ *     - domain [string]
+ *     - path [string]
+ *     - filename [string]
+ *     - format [string]
+ *     - url [string] function ( [string], [string], [string | int] )
+ *     - transform [array] function ( [mixed] )
+ *   - dkan [object]
+ *     - domain [string]
+ *     - path [string]
+ *     - resourceId [string]
+ *     - limit [int > 0]
+ *     - format [string]
+ *     - url [string] function ( [string], [string], [string | int] )
+ *     - transform [array] function ( [object] )
+ */
+
+;if (mapConfig) {
+    // Known types of data with global setting inherited to datasets with 'type' parameter
+    mapConfig.dataTypes = {
+
+        /* Choropleth (also known as thematic map):
+         * regions are colored based on data values
+         */
+        choropleth: {
+
+            /* Fillcolor when based on data
+             * Palette names refer to colorbrewer2 lib
+             * See http://colorbrewer2.org/
+             */
+            palette: 'Reds',
+
+            // Rounding factor for binning bounds, in 10^n with n is an integer
+            // 0 means no rounding
+            precision: 0,
+
+            // Bins number for data -> color scale transformation
+            bins: 3
+        },
+
+        // Simple points with latitude and longitude shown as markers TODO
+        points: {}
+    };
+}
+
+/*
+ * Map configuration complete structure:
+ *
+ * - dataTypes [object]
+ *   - choropleth [object]
+ *     - palette [string]
+ *     - precision 10^[int]
+ *     - bins [int > 0]
+ *   - points [object]
+ */
+
+;if (mapConfig) {
+    // Known sources of geo shapes with global setting inherited to geolayers with 'source' parameter
+    mapConfig.geoSources = {
+
+        // Local or remote static file
+        file: {
+            
+            // Domain without trailing slash (only for remote file)
+            domain: '',
+            
+            // Relative or absolute path (with trailing slash)
+            path: '',
+            
+            /* File format (used as extension in file name template for multiple files)
+             * Geojson is the default format, see http://geojson.org/
+             */
+            format: 'geojson',
+            
+            // Complete file name if single file (with extension)
+            filename: '',
+
+            // File format (used as extension in file name template for multiple files)
+            url: function(region, filterKey, filterValue) {
+                return this.domain + 
+                    this.path + 
+                    (this.filename || (region + (filterKey && filterValue ? '_'+filterKey+'-'+filterValue : '') + "." + this.format));
+            },
+            
+            /* Callback function of ajax request for custom result transformation
+             * this is the dataSet object
+             * See http://geojson.org/
+             */
+            transform: function(res) {
+                return res;
+            }
+        },
+
+        /* Remote tiles served by a tile server, see http://en.wikipedia.org/wiki/Tile_Map_Service
+         * OSM Mapnik is the default server, see http://wiki.openstreetmap.org/wiki/Tile_servers
+         */
+        tileserver: {
+
+            // Template of the domain (ie. {s} will be replaced by a, b, c, ...)
+            domain: 'http://{s}.tile.openstreetmap.org',
+
+            // Template of the path to image (ie. xyz will be replaced by integers)
+            path: '/{z}/{x}/{y}.png',
+
+            // URL generator
+            url: function() {
+                return this.domain + this.path;
+            }
+        }
+    };
+}
+
+/*
+ * Map configuration complete structure:
+ *
+ * - geoSources [object]
+ *   - file [object]
+ *     - domain [string]
+ *     - path [string]
+ *     - format [string]
+ *     - url [string] function ( [string], [string], [string | int] )
+ *     - transform [array] function ( [mixed] )
+ *   - tileserver [object]
+ *     - domain [string]
+ *     - path [string]
+ *     - url [string] function ( )
+ */
+
+;if (mapConfig) {
+    // Known types of geolayers with global setting inherited to geolayers with 'type' parameter
+    mapConfig.geoTypes = {
+
+        /* Tile type served by a tile map service (defined in geoSources)
+         * See http://leafletjs.com/reference.html#tilelayer
+         */
+        tile: {
+
+            // Enable or not
+            active: true,
+
+            // Default source is a tile server defined in geoSources
+            source: 'tileserver',
+
+            // Same options supported by Leaflet API: http://leafletjs.com/reference.html#tilelayer-options
+            options: {
+                attribution: '',
+                opacity: 0.7
+            }
+        },
+
+        // Vector shapefile for thematic maps
+        thematic: {
+
+            // Enable or not
+            active: true,
+
+            // Binning algorithm, see https://github.com/simogeo/geostats (Classification)
+            // Supported names are the same of geostats functions without 'get' prefix
+            // It can be also an array of bounds for manually class definition
+            // Default value is 'Jenks'
+            classification: 'Jenks',
+
+            // Infowindow on click can be disabled
+            infowindow: true,
+            
+            /* Layer style, with three presets:
+             * - default
+             * - highlight
+             * - selected
+             * Attributes defined in the latest two override default settings
+             * See http://leafletjs.com/reference.html#geojson-options
+             */
+            style: {
+
+                // Default (on loading and reset)
+                default: {
+		        	weight: 0.5,
+			    	opacity: 1,
+			        color: 'white',
+    			    fillOpacity: 0.7,
+        			fillColor: 'none'
+                },
+
+                // Highlight (on mouseover)
+                highlight: {},
+                
+                // Selected (on click)
+                selected: {
+                    weight: 2,
+                    color: '#666' 
+                }
+            }
+        }
+    };
+}
+
+/*
+ * Map configuration complete structure:
+ *
+ * - geoTypes [object]
+ *   - tile [object]
+ *     - active [bool]
+ *     - source [string matching geoSources attributes]
+ *     - options [object matching http://leafletjs.com/reference.html#tilelayer-options structure]
+ *   - thematic [object]
+ *     - active [bool]
+ *     - classification [string]
+ *     - infowindow [bool]
+ *     - style [object]
+ *       - default [object matching http://leafletjs.com/reference.html#geojson-options style structure]
+ *       - highlight [object]
+ *       - selected [object]
+ */
+
+;if (mapConfig) {
     // Known types of visualization into the infowindow with global setting inherited to infowindow with 'view' parameter
     mapConfig.viewTypes = {
 
@@ -60,6 +360,14 @@ if (mapConfig) {
         }
     };
 }
+
+/*
+ * Map configuration complete structure:
+ *
+ * - viewTypes [object]
+ *   - table [string] function ( [object], [object] )
+ */
+
 ;(function($) {
 
     console.log("mapConfig",mapConfig);
@@ -208,10 +516,10 @@ if (mapConfig) {
         /*** Geo layers initialization ***/
         var defaultGeo = {}, geo = {}; // Geo layers enabled and used
         for (i=0; i<$.geoLayers.length; i++) {
-            if ($.geoLayers[i].type === 'vector') {
+            if ($.geoLayers[i].type === 'thematic') {
                 defaultGeo[$.geoLayers[i].schema.name] = {
                     id: $.geoLayers[i].schema.id,
-                    label: $.geoLayers[i].schema.label, // || $.geoLayers[i].schema.id,
+                    label: $.geoLayers[i].schema.label,
                     resource: null,
                     list: []
                 };
@@ -236,7 +544,7 @@ if (mapConfig) {
                 columns: (_.has(dataSet.schema,'menu') && dataSet.schema.menu.length ? dataSet.schema.menu.map(function(el) { return el.column; }) : null),
                 labels: (_.has(dataSet.schema,'menu') && dataSet.schema.menu.length ? dataSet.schema.menu.map(function(el) { return el.label || el.column; }) : null),
                 descriptions: (_.has(dataSet.schema,'menu') && dataSet.schema.menu.length ? dataSet.schema.menu.map(function(el) { return el.description || dataSet.schema.description || (el.label ? el.label + '>' + el.column : el.column); }) : null),
-                precisions: (_.has(dataSet.schema,'menu') && dataSet.schema.menu.length ? dataSet.schema.menu.map(function(el) { return el.precision || dataSet.precision || 0; }) : null),
+                precisions: (_.has(dataSet.schema,'menu') && dataSet.schema.menu.length ? dataSet.schema.menu.map(function(el) { return _.isNumber(el.precision) ? el.precision : (dataSet.schema.precision || 0); }) : null),
                 resourceId: dataSet.resourceId, // HMMM
                 palette: dataSet.palette || 'Reds',
                 transform: dataSet.transform || function(k,v) { return v; },
@@ -316,7 +624,8 @@ if (mapConfig) {
                 ml: [string], // Livello caricato più alto: regioni, province, comuni -- MAX LAYER
                 tl: [string], // Livello a cui si riferisce t -- TERRITORY LAYER
                 t: [int], // Codice istat del territorio centrato e con infowindow aperta (si riferisce a tl) -- TERRITORY
-                i: [int] // Codice istat del territotio con infowindow aperta -- INFO
+                i: [int] // Codice istat del territotio con infowindow aperta -- INFO,
+                summary: [bool] // Se attiva, permette di nascondere la barra laterale
             }
         */
         
@@ -338,6 +647,10 @@ if (mapConfig) {
             $.pointsSet.resourceId = parameters.mr.rid;
             parameters.mr.lat = parameters.mr.lat || 'lat';
             parameters.mr.lng = parameters.mr.lng || 'lng';
+        }
+
+        if (_.has($,'summary') && !_.isUndefined(parameters.summary)) {
+            $.summary.closed = !parameters.summary;
         }
                 
         if ($.debug) console.log("parameters",parameters);
@@ -423,26 +736,6 @@ if (mapConfig) {
 
 
 
-        /*** Description ***/
-        var description;
-        if (_.has($,'description') && $.description.active && parameters.md != 'widget') {
-            $.description.position = $.description.position || 'right';
-            d3.select('body').classed('description '+$.description.position, true);
-            if ($.description.position === 'top' || $.description.position === 'left') {
-                description = d3.select('body').insert('div','#map');
-            } else {
-                description = d3.select('body').append('div');
-            }
-            description
-                .attr('id','map-description')
-                .attr("class","description "+$.description.position)
-                .append('div')
-                .html($.description.content || '');
-        }
-        /*** ***/
-
-
-
         /*** Gestione dell'infowindow al click ***/
         var info;
         if (_.has($,'infowindow') && $.infowindow.active) {
@@ -453,7 +746,7 @@ if (mapConfig) {
                 };
             } else if (_.has($.infowindow,'position') && $.infowindow.position != 'inside') {
                 info = {};
-                d3.select('body').classed('description '+$.infowindow.position, true);
+                d3.select('body').classed('summary '+$.infowindow.position, true);
                 if ($.infowindow.position === 'top' || $.infowindow.position === 'left') {
                      info._div = d3.select('body').insert('div','#map').attr("class", "info external "+$.infowindow.position).node();
                 } else if ($.infowindow.position === 'right' || $.infowindow.position === 'bottom') {
@@ -472,6 +765,9 @@ if (mapConfig) {
                 d3.select(this._div)
                     .attr('id','infowindow')
                     .style('max-height', (parameters.md != 'widget' ? (head.screen.innerHeight-100)+'px' : null))
+                    .classed('empty', function() {
+                        return parameters.md === 'widget' ? !(_.has($.infowindow.content,'mobile') && $.infowindow.content.mobile) : !(_.has($.infowindow.content,'default') && $.infowindow.content.default);
+                    })
                     .on("mouseenter", function() {
                         map.scrollWheelZoom.disable();
                     })
@@ -486,7 +782,9 @@ if (mapConfig) {
                 var that = this;
                 this._div.innerHTML = '';
                 if (props) {
-                    d3.select(this._div).classed("closed", false);
+                    d3.select(this._div)
+                        .classed("closed", false)
+                        .classed("empty", false);
                     if (parameters.md === 'widget') map.dragging.disable();
                     var delim = agnes.rowDelimiter(),
                         today = new Date(),
@@ -705,7 +1003,11 @@ if (mapConfig) {
 
                 } else { // if (props) 
                         
-                    d3.select(this._div).classed("closed", true);
+                    d3.select(this._div)
+                        .classed("closed", true)
+                        .classed('empty', function() {
+                            return parameters.md === 'widget' ? !(_.has($.infowindow.content,'mobile') && $.infowindow.content.mobile) : !(_.has($.infowindow.content,'default') && $.infowindow.content.default);
+                        });
                     if (selectedLayer) {
                         selectedLayer.feature.selected = false;
                         geojson.resetStyle(selectedLayer);
@@ -966,7 +1268,7 @@ if (mapConfig) {
                 detach.onAdd = function(map) {
                     var a = L.DomUtil.create('a','detach '+parameters.md),
                         img = L.DomUtil.create('img','detach',a);
-                    a.setAttribute('href',Arg.url(parameters).replace(/&*md=[^&]*/,'').replace(/&{2,}/g,"&"));
+                    a.setAttribute('href', $.controls.detach.url || Arg.url(parameters).replace(/&*md=[^&]*/,'').replace(/&{2,}/g,"&"));
                     a.setAttribute('target','_blank');
                     a.setAttribute('title', $.controls.detach.title);
                     img.setAttribute('id','detach');
@@ -982,6 +1284,60 @@ if (mapConfig) {
         
         if ($.debug) console.log("detach",detach);
 
+        /*** ***/
+
+
+
+        /*** Summary ***/
+        var summary, summaryControl;
+        if (_.has($,'summary') && $.summary.active && parameters.md != 'widget') {
+
+            $.summary.position = $.summary.position || 'right';
+            d3.select('body').classed('summary '+$.summary.position, true);
+
+            if ($.summary.position === 'top' || $.summary.position === 'left') {
+                summary = d3.select('body').insert('div','#map');
+            } else {
+                summary = d3.select('body').append('div');
+            }
+
+            summary
+                .attr('id','map-summary')
+                .attr("class","summary "+$.summary.position)
+                .append('div')
+                .html($.summary.content || '');
+
+            summaryControl = L.control({position: 'topright'});
+
+            if (_.has($.summary,'closed') && $.summary.closed) {
+                summaryControl.isAdded = false;
+                summary.style('display','none');
+                d3.select('body').classed('summary',false);
+            } else {
+                summaryControl.isAdded = true;
+                summary.style('display',null);
+                d3.select('body').classed('summary',true);
+            }
+
+            summaryControl.onAdd = function(map) {
+                var img = L.DomUtil.create('img', 'summary '+parameters.md),
+                    that = this;
+                img.setAttribute('src', $.summary.image);
+                img.setAttribute('title', $.summary.title);
+                d3.select(img).on('click', function() {
+                    d3.select('#map-summary').style('display',(that.isAdded ? 'none' : null));
+                    d3.select('body').classed('summary',!that.isAdded);
+                    that.isAdded = !that.isAdded;
+                });
+                return img;
+            };
+
+            summaryControl.addTo(map);
+
+        }
+        
+        if ($.debug) console.log("summaryControl",summaryControl);
+        
         /*** ***/
 
 
@@ -1547,12 +1903,12 @@ if (mapConfig) {
                                     first = new L.LatLng(bbox[0], bbox[2]),
                                     second = new L.LatLng(bbox[1], bbox[3]),
                                     bounds = new L.LatLngBounds([first, second]);
-                                delete parameters.i;
-                                if (embedControl && embedControl.isAdded) embedControl.removeFrom(map);
-    		    	            info.update();
-                                var e = document.createEvent('UIEvents');
-                                e.initUIEvent('click', true, true, window, 1);
-                                d3.select("#geomenu-ui #"+$.controls.geocoder.layer).node().dispatchEvent(e);
+                                if (_.has($.controls.geocoder,'layer') && $.controls.geocoder.layer) { 
+        		    	            info.update();
+                                    var e = document.createEvent('UIEvents');
+                                    e.initUIEvent('click', true, true, window, 1);
+                                    d3.select("#geomenu-ui #"+$.controls.geocoder.layer).node().dispatchEvent(e);
+                                }
                                 this._map.fitBounds(bounds, { maxZoom: $.controls.geocoder.zoom });
                             }
                         }
@@ -1686,7 +2042,7 @@ if (mapConfig) {
         function style(feature) {
             //if ($.debug) console.log("styleFunction",arguments);
             var region = feature.properties._layer,
-                geoLayer = $.geoLayers.filter(function(l) { return (l.type === "vector" && l.schema.name === region); })[0],
+                geoLayer = $.geoLayers.filter(function(l) { return (l.type === 'thematic' && l.schema.name === region); })[0],
                 dataSet = data[region].filter(function(el) { return el.active; })[0],
                 currentStyle = _.clone(geoLayer.style.default);
             if (feature.selected) {
@@ -1700,23 +2056,23 @@ if (mapConfig) {
 
 
         /*** Gestione degli eventi ***/
-        var geojson, label = new L.Label();
+        var geojson, tooltip = new L.Label();
 
 	    function highlightFeature(e) {
             //if ($.debug) console.log("highlightFeatureFunction",arguments);
             var layer = e.target,
                 props = layer.feature.properties,
                 region = layer.feature.properties._layer,
-                geoLayer = $.geoLayers.filter(function(l) { return (l.type === "vector" && l.schema.name === region); })[0],
+                geoLayer = $.geoLayers.filter(function(l) { return (l.type === 'thematic' && l.schema.name === region); })[0],
                 dataSet = data[region].filter(function(el) { return el.active; })[0],
                 highlightStyle = geoLayer.style.highlight,
                 num = props.data[dataSet.name][dataSet.column];
                     
             if (!layer.feature.selected) layer.setStyle(highlightStyle);
-            if (_.has($,'label') && $.label.active) {
-                label.setContent((geo[region].label ? props[geo[region].label]+'<br>' : '') + dataSet.label + ': '+ dataSet.formatter(dataSet.column, num));
-                label.setLatLng(layer.getBounds().getCenter());
-                map.showLabel(label);
+            if (_.has($,'tooltip') && $.tooltip.active) {
+                tooltip.setContent((geo[region].label ? props[geo[region].label]+'<br>' : '') + dataSet.label + ': '+ dataSet.formatter(dataSet.column, num));
+                tooltip.setLatLng(layer.getBounds().getCenter());
+                map.showLabel(tooltip);
             }
 	    }
                 
@@ -1724,36 +2080,38 @@ if (mapConfig) {
             //if ($.debug) console.log("resetHighlightFunction",arguments);
             var layer = e.target,
                 region = layer.feature.properties._layer,
-                geoLayer = $.geoLayers.filter(function(l) { return (l.type === "vector" && l.schema.name === region); })[0],
+                geoLayer = $.geoLayers.filter(function(l) { return (l.type === 'thematic' && l.schema.name === region); })[0],
                 defaultStyle = geoLayer.style.default;
             if (!layer.feature.selected) geojson.resetStyle(layer);
-            if (_.has($,'label') && $.label.active) label.close();
+            if (_.has($,'tooltip') && $.tooltip.active) tooltip.close();
 	    }
 
 	    function openInfoWindow(e, layer) {
             if ($.debug) console.log("openInfoWindowFunction",arguments);
             var layer = layer || e.target,
                 region = layer.feature.properties._layer,
-                geoLayer = $.geoLayers.filter(function(l) { return (l.type === "vector" && l.schema.name === region); })[0],
+                geoLayer = $.geoLayers.filter(function(l) { return (l.type === 'thematic' && l.schema.name === region); })[0],
                 selectedStyle = geoLayer.style.selected;
 
-            if (!layer.feature.selected) {
-                if (selectedLayer) {
-                    selectedLayer.feature.selected = false;
-                    geojson.resetStyle(selectedLayer);
+            if (_.has(geoLayer,'infowindow') && geoLayer.infowindow) {
+                if (!layer.feature.selected) {
+                    if (selectedLayer) {
+                        selectedLayer.feature.selected = false;
+                        geojson.resetStyle(selectedLayer);
+                    }
+                    layer.feature.selected = true;
+                    layer.setStyle(selectedStyle);
+                    parameters.i = layer.feature.properties[geo[parameters.dl].id];
+                    if (embedControl && embedControl.isAdded) embedControl.removeFrom(map);
+                    info.update(layer.feature.properties);
+                }   
+            
+                if (!L.Browser.ie && !L.Browser.opera) {
+	            	layer.bringToFront();
                 }
-                layer.feature.selected = true;
-                layer.setStyle(selectedStyle);
-                parameters.i = layer.feature.properties[geo[parameters.dl].id];
-                if (embedControl && embedControl.isAdded) embedControl.removeFrom(map);
-                info.update(layer.feature.properties);
+    
+                selectedLayer = layer;
             }
-        
-            if (!L.Browser.ie && !L.Browser.opera) {
-	        	layer.bringToFront();
-            }
-
-            selectedLayer = layer;
         }
 
         function onEachFeature(feature, layer) {
@@ -1813,7 +2171,7 @@ if (mapConfig) {
             if ($.debug) console.log("binDataFunction",arguments);
 
             var dataSet = data[region].filter(function(el) { return el.active; })[0],
-                geoLayer = $.geoLayers.filter(function(l) { return (l.type === "vector" && l.schema.name === region); })[0];
+                geoLayer = $.geoLayers.filter(function(l) { return (l.type === 'thematic' && l.schema.name === region); })[0];
 
             var serie = dataSet.resource.map(function(el) { return el[dataSet.column]; }),
                 bins, ranges;
@@ -1868,7 +2226,7 @@ if (mapConfig) {
             
             if ($.debug) console.log("loadDataFunction",arguments);
             
-            var geoLayer = $.geoLayers.filter(function(l) { return (l.type === "vector" && l.schema.name === region); })[0],
+            var geoLayer = $.geoLayers.filter(function(l) { return (l.type === 'thematic' && l.schema.name === region); })[0],
                 dataSets = $.dataSets.filter(function(l) { return l.schema.layer === region; }),
                 geoPath, dataPath, q;
             

@@ -89,7 +89,7 @@ body.widget .leaflet-control-zoom-out {
     font-size: 16px;
 }
 
-div.description,
+div.summary,
 div.info.external {
     margin: 0;
     padding: 0;
@@ -100,38 +100,38 @@ div.info.external {
     background: white;
 }
 
-div.description > div {
+div.summary > div {
     padding-left: 1em;
     padding-right: 1em;
 }
 
-body.description.left #map,
-body.description.right #map {
+body.summary.left #map,
+body.summary.right #map {
     width: 75%;
     height: 100%;
 }
 
-body.description.left #map {
+body.summary.left #map {
     float: right;
 }
 
-body.description.right #map {
+body.summary.right #map {
     float: left;
 }
 
-body.description.top #map,
-body.description.bottom #map {
+body.summary.top #map,
+body.summary.bottom #map {
     width: 100%;
     height: 75%;
 }
 
-body.description.right .leaflet-control-attribution {
+body.summary.right .leaflet-control-attribution {
     right: initial;
     left: 0;
 }
 
-div.description.left,
-div.description.right,
+div.summary.left,
+div.summary.right,
 div.info.left,
 div.info.right {
     width: 25%;
@@ -141,22 +141,21 @@ div.info.right {
     overflow-y: auto;
 }
 
-div.description.left,
+div.summary.left,
 div.info.left {
     float: left;
 }
 
-div.description.right,
+div.summary.right,
 div.info.right {
     float: right;
 }
 
-div.description.top,
-div.description.bottom,
+div.summary.top,
+div.summary.bottom,
 div.info.top,
 div.info.bottom {
     width: 100%;
-    /*height: 25%;*/
     overflow: auto;
     overflow-x:auto;
     overflow-y: hidden;

@@ -293,6 +293,10 @@ html, body, #map {
     list-style-position: inside;
 }
 
+.info.empty.closed {
+    display: none;
+}
+
 .info h4 {
 	margin: 0 0 5px;
 	color: #777;
@@ -358,6 +362,7 @@ html, body, #map {
 img.reset, 
 img.detach, 
 img.embed,
+img.summary,
 img.screenshot {
     height: 36px;
     cursor: pointer;
@@ -373,6 +378,7 @@ a.detach {
 img.reset:hover, 
 img.detach:hover, 
 img.embed:hover,
+img.summary:hover,
 img.screenshot:hover {
     background-color: whitesmoke;
 }

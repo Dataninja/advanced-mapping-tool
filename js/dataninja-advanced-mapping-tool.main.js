@@ -146,10 +146,10 @@
         /*** Geo layers initialization ***/
         var defaultGeo = {}, geo = {}; // Geo layers enabled and used
         for (i=0; i<$.geoLayers.length; i++) {
-            if ($.geoLayers[i].type === 'vector') {
+            if ($.geoLayers[i].type === 'thematic') {
                 defaultGeo[$.geoLayers[i].schema.name] = {
                     id: $.geoLayers[i].schema.id,
-                    label: $.geoLayers[i].schema.label, // || $.geoLayers[i].schema.id,
+                    label: $.geoLayers[i].schema.label,
                     resource: null,
                     list: []
                 };
@@ -174,7 +174,7 @@
                 columns: (_.has(dataSet.schema,'menu') && dataSet.schema.menu.length ? dataSet.schema.menu.map(function(el) { return el.column; }) : null),
                 labels: (_.has(dataSet.schema,'menu') && dataSet.schema.menu.length ? dataSet.schema.menu.map(function(el) { return el.label || el.column; }) : null),
                 descriptions: (_.has(dataSet.schema,'menu') && dataSet.schema.menu.length ? dataSet.schema.menu.map(function(el) { return el.description || dataSet.schema.description || (el.label ? el.label + '>' + el.column : el.column); }) : null),
-                precisions: (_.has(dataSet.schema,'menu') && dataSet.schema.menu.length ? dataSet.schema.menu.map(function(el) { return el.precision || dataSet.precision || 0; }) : null),
+                precisions: (_.has(dataSet.schema,'menu') && dataSet.schema.menu.length ? dataSet.schema.menu.map(function(el) { return _.isNumber(el.precision) ? el.precision : (dataSet.schema.precision || 0); }) : null),
                 resourceId: dataSet.resourceId, // HMMM
                 palette: dataSet.palette || 'Reds',
                 transform: dataSet.transform || function(k,v) { return v; },
@@ -254,7 +254,8 @@
                 ml: [string], // Livello caricato più alto: regioni, province, comuni -- MAX LAYER
                 tl: [string], // Livello a cui si riferisce t -- TERRITORY LAYER
                 t: [int], // Codice istat del territorio centrato e con infowindow aperta (si riferisce a tl) -- TERRITORY
-                i: [int] // Codice istat del territotio con infowindow aperta -- INFO
+                i: [int] // Codice istat del territotio con infowindow aperta -- INFO,
+                summary: [bool] // Se attiva, permette di nascondere la barra laterale
             }
         */
         
@@ -276,6 +277,10 @@
             $.pointsSet.resourceId = parameters.mr.rid;
             parameters.mr.lat = parameters.mr.lat || 'lat';
             parameters.mr.lng = parameters.mr.lng || 'lng';
+        }
+
+        if (_.has($,'summary') && !_.isUndefined(parameters.summary)) {
+            $.summary.closed = !parameters.summary;
         }
                 
         if ($.debug) console.log("parameters",parameters);
@@ -361,26 +366,6 @@
 
 
 
-        /*** Description ***/
-        var description;
-        if (_.has($,'description') && $.description.active && parameters.md != 'widget') {
-            $.description.position = $.description.position || 'right';
-            d3.select('body').classed('description '+$.description.position, true);
-            if ($.description.position === 'top' || $.description.position === 'left') {
-                description = d3.select('body').insert('div','#map');
-            } else {
-                description = d3.select('body').append('div');
-            }
-            description
-                .attr('id','map-description')
-                .attr("class","description "+$.description.position)
-                .append('div')
-                .html($.description.content || '');
-        }
-        /*** ***/
-
-
-
         /*** Gestione dell'infowindow al click ***/
         var info;
         if (_.has($,'infowindow') && $.infowindow.active) {
@@ -391,7 +376,7 @@
                 };
             } else if (_.has($.infowindow,'position') && $.infowindow.position != 'inside') {
                 info = {};
-                d3.select('body').classed('description '+$.infowindow.position, true);
+                d3.select('body').classed('summary '+$.infowindow.position, true);
                 if ($.infowindow.position === 'top' || $.infowindow.position === 'left') {
                      info._div = d3.select('body').insert('div','#map').attr("class", "info external "+$.infowindow.position).node();
                 } else if ($.infowindow.position === 'right' || $.infowindow.position === 'bottom') {
@@ -410,6 +395,9 @@
                 d3.select(this._div)
                     .attr('id','infowindow')
                     .style('max-height', (parameters.md != 'widget' ? (head.screen.innerHeight-100)+'px' : null))
+                    .classed('empty', function() {
+                        return parameters.md === 'widget' ? !(_.has($.infowindow.content,'mobile') && $.infowindow.content.mobile) : !(_.has($.infowindow.content,'default') && $.infowindow.content.default);
+                    })
                     .on("mouseenter", function() {
                         map.scrollWheelZoom.disable();
                     })
@@ -424,7 +412,9 @@
                 var that = this;
                 this._div.innerHTML = '';
                 if (props) {
-                    d3.select(this._div).classed("closed", false);
+                    d3.select(this._div)
+                        .classed("closed", false)
+                        .classed("empty", false);
                     if (parameters.md === 'widget') map.dragging.disable();
                     var delim = agnes.rowDelimiter(),
                         today = new Date(),
@@ -643,7 +633,11 @@
 
                 } else { // if (props) 
                         
-                    d3.select(this._div).classed("closed", true);
+                    d3.select(this._div)
+                        .classed("closed", true)
+                        .classed('empty', function() {
+                            return parameters.md === 'widget' ? !(_.has($.infowindow.content,'mobile') && $.infowindow.content.mobile) : !(_.has($.infowindow.content,'default') && $.infowindow.content.default);
+                        });
                     if (selectedLayer) {
                         selectedLayer.feature.selected = false;
                         geojson.resetStyle(selectedLayer);
@@ -904,7 +898,7 @@
                 detach.onAdd = function(map) {
                     var a = L.DomUtil.create('a','detach '+parameters.md),
                         img = L.DomUtil.create('img','detach',a);
-                    a.setAttribute('href',Arg.url(parameters).replace(/&*md=[^&]*/,'').replace(/&{2,}/g,"&"));
+                    a.setAttribute('href', $.controls.detach.url || Arg.url(parameters).replace(/&*md=[^&]*/,'').replace(/&{2,}/g,"&"));
                     a.setAttribute('target','_blank');
                     a.setAttribute('title', $.controls.detach.title);
                     img.setAttribute('id','detach');
@@ -920,6 +914,60 @@
         
         if ($.debug) console.log("detach",detach);
 
+        /*** ***/
+
+
+
+        /*** Summary ***/
+        var summary, summaryControl;
+        if (_.has($,'summary') && $.summary.active && parameters.md != 'widget') {
+
+            $.summary.position = $.summary.position || 'right';
+            d3.select('body').classed('summary '+$.summary.position, true);
+
+            if ($.summary.position === 'top' || $.summary.position === 'left') {
+                summary = d3.select('body').insert('div','#map');
+            } else {
+                summary = d3.select('body').append('div');
+            }
+
+            summary
+                .attr('id','map-summary')
+                .attr("class","summary "+$.summary.position)
+                .append('div')
+                .html($.summary.content || '');
+
+            summaryControl = L.control({position: 'topright'});
+
+            if (_.has($.summary,'closed') && $.summary.closed) {
+                summaryControl.isAdded = false;
+                summary.style('display','none');
+                d3.select('body').classed('summary',false);
+            } else {
+                summaryControl.isAdded = true;
+                summary.style('display',null);
+                d3.select('body').classed('summary',true);
+            }
+
+            summaryControl.onAdd = function(map) {
+                var img = L.DomUtil.create('img', 'summary '+parameters.md),
+                    that = this;
+                img.setAttribute('src', $.summary.image);
+                img.setAttribute('title', $.summary.title);
+                d3.select(img).on('click', function() {
+                    d3.select('#map-summary').style('display',(that.isAdded ? 'none' : null));
+                    d3.select('body').classed('summary',!that.isAdded);
+                    that.isAdded = !that.isAdded;
+                });
+                return img;
+            };
+
+            summaryControl.addTo(map);
+
+        }
+        
+        if ($.debug) console.log("summaryControl",summaryControl);
+        
         /*** ***/
 
 
@@ -1485,12 +1533,12 @@
                                     first = new L.LatLng(bbox[0], bbox[2]),
                                     second = new L.LatLng(bbox[1], bbox[3]),
                                     bounds = new L.LatLngBounds([first, second]);
-                                delete parameters.i;
-                                if (embedControl && embedControl.isAdded) embedControl.removeFrom(map);
-    		    	            info.update();
-                                var e = document.createEvent('UIEvents');
-                                e.initUIEvent('click', true, true, window, 1);
-                                d3.select("#geomenu-ui #"+$.controls.geocoder.layer).node().dispatchEvent(e);
+                                if (_.has($.controls.geocoder,'layer') && $.controls.geocoder.layer) { 
+        		    	            info.update();
+                                    var e = document.createEvent('UIEvents');
+                                    e.initUIEvent('click', true, true, window, 1);
+                                    d3.select("#geomenu-ui #"+$.controls.geocoder.layer).node().dispatchEvent(e);
+                                }
                                 this._map.fitBounds(bounds, { maxZoom: $.controls.geocoder.zoom });
                             }
                         }
@@ -1624,7 +1672,7 @@
         function style(feature) {
             //if ($.debug) console.log("styleFunction",arguments);
             var region = feature.properties._layer,
-                geoLayer = $.geoLayers.filter(function(l) { return (l.type === "vector" && l.schema.name === region); })[0],
+                geoLayer = $.geoLayers.filter(function(l) { return (l.type === 'thematic' && l.schema.name === region); })[0],
                 dataSet = data[region].filter(function(el) { return el.active; })[0],
                 currentStyle = _.clone(geoLayer.style.default);
             if (feature.selected) {
@@ -1638,23 +1686,23 @@
 
 
         /*** Gestione degli eventi ***/
-        var geojson, label = new L.Label();
+        var geojson, tooltip = new L.Label();
 
 	    function highlightFeature(e) {
             //if ($.debug) console.log("highlightFeatureFunction",arguments);
             var layer = e.target,
                 props = layer.feature.properties,
                 region = layer.feature.properties._layer,
-                geoLayer = $.geoLayers.filter(function(l) { return (l.type === "vector" && l.schema.name === region); })[0],
+                geoLayer = $.geoLayers.filter(function(l) { return (l.type === 'thematic' && l.schema.name === region); })[0],
                 dataSet = data[region].filter(function(el) { return el.active; })[0],
                 highlightStyle = geoLayer.style.highlight,
                 num = props.data[dataSet.name][dataSet.column];
                     
             if (!layer.feature.selected) layer.setStyle(highlightStyle);
-            if (_.has($,'label') && $.label.active) {
-                label.setContent((geo[region].label ? props[geo[region].label]+'<br>' : '') + dataSet.label + ': '+ dataSet.formatter(dataSet.column, num));
-                label.setLatLng(layer.getBounds().getCenter());
-                map.showLabel(label);
+            if (_.has($,'tooltip') && $.tooltip.active) {
+                tooltip.setContent((geo[region].label ? props[geo[region].label]+'<br>' : '') + dataSet.label + ': '+ dataSet.formatter(dataSet.column, num));
+                tooltip.setLatLng(layer.getBounds().getCenter());
+                map.showLabel(tooltip);
             }
 	    }
                 
@@ -1662,36 +1710,38 @@
             //if ($.debug) console.log("resetHighlightFunction",arguments);
             var layer = e.target,
                 region = layer.feature.properties._layer,
-                geoLayer = $.geoLayers.filter(function(l) { return (l.type === "vector" && l.schema.name === region); })[0],
+                geoLayer = $.geoLayers.filter(function(l) { return (l.type === 'thematic' && l.schema.name === region); })[0],
                 defaultStyle = geoLayer.style.default;
             if (!layer.feature.selected) geojson.resetStyle(layer);
-            if (_.has($,'label') && $.label.active) label.close();
+            if (_.has($,'tooltip') && $.tooltip.active) tooltip.close();
 	    }
 
 	    function openInfoWindow(e, layer) {
             if ($.debug) console.log("openInfoWindowFunction",arguments);
             var layer = layer || e.target,
                 region = layer.feature.properties._layer,
-                geoLayer = $.geoLayers.filter(function(l) { return (l.type === "vector" && l.schema.name === region); })[0],
+                geoLayer = $.geoLayers.filter(function(l) { return (l.type === 'thematic' && l.schema.name === region); })[0],
                 selectedStyle = geoLayer.style.selected;
 
-            if (!layer.feature.selected) {
-                if (selectedLayer) {
-                    selectedLayer.feature.selected = false;
-                    geojson.resetStyle(selectedLayer);
+            if (_.has(geoLayer,'infowindow') && geoLayer.infowindow) {
+                if (!layer.feature.selected) {
+                    if (selectedLayer) {
+                        selectedLayer.feature.selected = false;
+                        geojson.resetStyle(selectedLayer);
+                    }
+                    layer.feature.selected = true;
+                    layer.setStyle(selectedStyle);
+                    parameters.i = layer.feature.properties[geo[parameters.dl].id];
+                    if (embedControl && embedControl.isAdded) embedControl.removeFrom(map);
+                    info.update(layer.feature.properties);
+                }   
+            
+                if (!L.Browser.ie && !L.Browser.opera) {
+	            	layer.bringToFront();
                 }
-                layer.feature.selected = true;
-                layer.setStyle(selectedStyle);
-                parameters.i = layer.feature.properties[geo[parameters.dl].id];
-                if (embedControl && embedControl.isAdded) embedControl.removeFrom(map);
-                info.update(layer.feature.properties);
+    
+                selectedLayer = layer;
             }
-        
-            if (!L.Browser.ie && !L.Browser.opera) {
-	        	layer.bringToFront();
-            }
-
-            selectedLayer = layer;
         }
 
         function onEachFeature(feature, layer) {
@@ -1751,7 +1801,7 @@
             if ($.debug) console.log("binDataFunction",arguments);
 
             var dataSet = data[region].filter(function(el) { return el.active; })[0],
-                geoLayer = $.geoLayers.filter(function(l) { return (l.type === "vector" && l.schema.name === region); })[0];
+                geoLayer = $.geoLayers.filter(function(l) { return (l.type === 'thematic' && l.schema.name === region); })[0];
 
             var serie = dataSet.resource.map(function(el) { return el[dataSet.column]; }),
                 bins, ranges;
@@ -1806,7 +1856,7 @@
             
             if ($.debug) console.log("loadDataFunction",arguments);
             
-            var geoLayer = $.geoLayers.filter(function(l) { return (l.type === "vector" && l.schema.name === region); })[0],
+            var geoLayer = $.geoLayers.filter(function(l) { return (l.type === 'thematic' && l.schema.name === region); })[0],
                 dataSets = $.dataSets.filter(function(l) { return l.schema.layer === region; }),
                 geoPath, dataPath, q;
             

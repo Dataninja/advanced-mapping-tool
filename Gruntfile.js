@@ -30,7 +30,14 @@ module.exports = function(grunt) {
                 dest: '<%= pkg.name %>.lib.js'
             },
             main: {
-                src: ['js/<%= pkg.name %>.views.js', 'js/<%= pkg.name %>.main.js'],
+                src: [
+                    'js/<%= pkg.name %>.datasources.js',
+                    'js/<%= pkg.name %>.datatypes.js',
+                    'js/<%= pkg.name %>.geosources.js',
+                    'js/<%= pkg.name %>.geotypes.js',
+                    'js/<%= pkg.name %>.views.js',
+                    'js/<%= pkg.name %>.main.js'
+                ],
                 dest: '<%= pkg.name %>.js'
             }
         },

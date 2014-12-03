@@ -60,3 +60,11 @@ if (mapConfig) {
         }
     };
 }
+
+/*
+ * Map configuration complete structure:
+ *
+ * - viewTypes [object]
+ *   - table [string] function ( [object], [object] )
+ */
+

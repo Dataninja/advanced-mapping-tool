@@ -109,7 +109,7 @@ var mapConfig = {
     },
 
     // External div for long text description
-    description: {
+    summary: {
 
         // Enable or not
         active: false,
@@ -117,17 +117,26 @@ var mapConfig = {
         // Position respect to map
         position: 'right',
 
+        // Control image to open / close summary
+        image: 'icons/info.png',
+
+        // Title on control mouseover
+        title: 'Further informations',
+
+        // Initial status (can be overwritten by 'summary' get parameter)
+        closed: false,
+
         // HTML content of the description
         content: '<p></p>'
     },
 
-    // Label control on mouse over regions in vectorial geolayers
-    label: {
+    // Tooltip control on mouse over regions in vectorial geolayers
+    tooltip: {
 
         // Enable or not
         active: true,
 
-        /* Default label has this structure:
+        /* Default tooltip content has this structure:
          * [REGION NAME]
          * [text]: [value]
          */
@@ -184,7 +193,7 @@ var mapConfig = {
             format: '',
             
             // Inherits attributes from geoType named here
-            type: 'vector',
+            type: 'thematic',
 
             schema: {
 
@@ -248,7 +257,10 @@ var mapConfig = {
                 // Legend description
                 description: '',
 
-                // Choroplethable columns with custom lable, description and bins number
+                // How much round binnig bounds
+                precision: 0,
+
+                // Choroplethable columns with custom label, description and bins number
                 menu: [
                     {
                         column: '',
@@ -572,6 +584,10 @@ var mapConfig = {
             // Enable or not
             active: true,
 
+            // Static url the control links to
+            // If missing or empty, it will be the dynamic url to the map status at the moment of the click
+            url: '',
+
             // Title on mouseover
             title: 'Open in new window', // ie. Open in new window
 
@@ -639,6 +655,7 @@ var mapConfig = {
             active: false,
 
             // Geo layer name map shows after geocoding
+            // If missing or empty, only map view will be set (no layer change)
             layer: 'layer1',
 
             // Input text is shown only after mouseover on icon
@@ -689,234 +706,6 @@ var mapConfig = {
                 }
             }
         }
-    },
-    
-    /*
-     * Global configuration
-     */
-
-    // Known sources of data with global setting inherited to datasets with 'source' parameter
-    dataSources: {
-
-        // Local or remote static file
-        file: {
-
-            // Domain without trailing slash (only for remote file)
-            domain: '',
-
-            // Relative or absolute path (with trailing slash)
-            path: '',
-
-            // Complete file name if single file (with extension)
-            filename: '',
-
-            // File format (used also as extension in file name template for multiple files)
-            format: '',
-
-            // URL generator based on region and a filter
-            url: function(region, filterKey, filterValue) {
-
-                /* Default file name template if filename is empty:
-                 * - region_filterKey-filterValue.format
-                 * If no filter:
-                 * - region.format
-                 */
-                return this.domain + 
-                    this.path + 
-                    (this.filename || (region + (filterKey && filterValue ? '_'+filterKey+'-'+filterValue : '') + "." + this.format));
-            },
-
-            // Callback function of ajax request for custom result transformation
-            // this is the dataSet object
-            transform: function(res) {
-                return res;
-            }
-        },
-
-        // Dkan API: see http://docs.getdkan.com/docs/dkan-documentation/dkan-api/datastore-api
-        dkan: {
-
-            // Domain without trailing slash
-            domain: '',
-
-            /* Relative or absolute path (ie. [prepath]/action/datastore/search.json)
-             * See http://docs.getdkan.com/docs/dkan-documentation/dkan-api/datastore-api#Datastore_API_URL_
-             */
-            path: '',
-
-            /* Request parameters for Dkan API
-             * See http://docs.getdkan.com/docs/dkan-documentation/dkan-api/datastore-api#Request_Parameters
-             */
-
-            // UID of the resource
-            resourceId: '',
-
-            // Limit returned items number in response
-            limit: 5000,
-
-            // Format of response (ie. json)
-            format: 'json',
-            
-            // URL generator based on region and a filter
-            url: function(region, filterKey, filterValue) {
-                return this.domain + this.path + 
-                    '?resource_id=' + this.resourceId +
-                    (filterKey && filterValue ? ('&filters[' + filterKey + ']=' + filterValue) : '') + 
-                    (this.limit ? '&limit=' + this.limit : '');
-            },
-            
-            /* Callback function of ajax request for custom result transformation
-             * this is the dataSet object
-             * See http://docs.getdkan.com/docs/dkan-documentation/dkan-api/datastore-api#Return_Values
-             */
-            transform: function(res) {
-                return res.result.records;
-            }
-        }
-    },
-
-    // Known types of data with global setting inherited to datasets with 'type' parameter
-    dataTypes: {
-
-        /* Choropleth (also known as thematic map):
-         * regions are colored based on data values
-         */
-        choropleth: {
-
-            /* Fillcolor when based on data
-             * Palette names refer to colorbrewer2 lib
-             * See http://colorbrewer2.org/
-             */
-            palette: 'Reds',
-
-            // Rounding factor for binning bounds, in 10^n with n is an integer
-            // 0 means no rounding
-            precision: 0,
-
-            // Bins number for data -> color scale transformation
-            bins: 3
-        },
-
-        // Simple points with latitude and longitude shown as markers TODO
-        points: {}
-    },
-
-    // Known sources of geo shapes with global setting inherited to geolayers with 'source' parameter
-    geoSources: {
-
-        // Local or remote static file
-        file: {
-            
-            // Domain without trailing slash (only for remote file)
-            domain: '',
-            
-            // Relative or absolute path (with trailing slash)
-            path: '',
-            
-            /* File format (used as extension in file name template for multiple files)
-             * Geojson is the default format, see http://geojson.org/
-             */
-            format: 'json',
-            
-            // Complete file name if single file (with extension)
-            filename: '',
-
-            // File format (used as extension in file name template for multiple files)
-            url: function(region, filterKey, filterValue) {
-                return this.domain + 
-                    this.path + 
-                    (this.filename || (region + (filterKey && filterValue ? '_'+filterKey+'-'+filterValue : '') + "." + this.format));
-            },
-            
-            /* Callback function of ajax request for custom result transformation
-             * this is the dataSet object
-             * See http://geojson.org/
-             */
-            transform: function(res) {
-                return res;
-            }
-        },
-
-        /* Remote tiles served by a tile server, see http://en.wikipedia.org/wiki/Tile_Map_Service
-         * OSM Mapnik is the default server, see http://wiki.openstreetmap.org/wiki/Tile_servers
-         */
-        tileserver: {
-
-            // Template of the domain (ie. {s} will be replaced by a, b, c, ...)
-            domain: 'http://{s}.tile.openstreetmap.org',
-
-            // Template of the path to image (ie. xyz will be replaced by integers)
-            path: '/{z}/{x}/{y}.png',
-
-            // URL generator
-            url: function() {
-                return this.domain + this.path;
-            }
-        }
-    },
-
-    // Known types of geolayers with global setting inherited to geolayers with 'type' parameter
-    geoTypes: {
-
-        /* Tile type served by a tile map service (defined in geoSources)
-         * See http://leafletjs.com/reference.html#tilelayer
-         */
-        tile: {
-
-            // Enable or not
-            active: true,
-
-            // Default source is a tile server defined in geoSources
-            source: 'tileserver',
-
-            // Same options supported by Leaflet API: http://leafletjs.com/reference.html#tilelayer-options
-            options: {
-                attribution: '',
-                opacity: 0.7
-            }
-        },
-
-        // Vector shapefile
-        vector: {
-
-            // Enable or not
-            active: true,
-
-            // Binning algorithm, see https://github.com/simogeo/geostats (Classification)
-            // Supported names are the same of geostats functions without 'get' prefix
-            // It can be also an array of bounds for manually class definition
-            // Default value is 'Jenks'
-            classification: 'Jenks',
-            
-            /* Layer style, with three presets:
-             * - default
-             * - highlight
-             * - selected
-             * Attributes defined in the latest two override default settings
-             * See http://leafletjs.com/reference.html#geojson-options
-             */
-            style: {
-
-                // Default (on loading and reset)
-                default: {
-		        	weight: 0.5,
-			    	opacity: 1,
-			        color: 'white',
-    			    fillOpacity: 0.7,
-        			fillColor: 'none'
-                },
-
-                // Highlight (on mouseover)
-                highlight: {},
-                
-                // Selected (on click)
-                selected: {
-                    weight: 2,
-                    color: '#666' 
-                }
-            }
-        }
-        // ...
     }
 };
 
@@ -928,53 +717,6 @@ var mapConfig = {
  * - analytics [object]
  *   - active [bool]
  *   - ua [string]
- * - dataSources [object]
- *   - file [object]
- *     - domain [string]
- *     - path [string]
- *     - filename [string]
- *     - format [string]
- *     - url [string] function ( [string], [string], [string | int] )
- *     - transform [array] function ( [mixed] )
- *   - dkan [object]
- *     - domain [string]
- *     - path [string]
- *     - resourceId [string]
- *     - limit [int > 0]
- *     - format [string]
- *     - url [string] function ( [string], [string], [string | int] )
- *     - transform [array] function ( [object] )
- * - dataTypes [object]
- *   - choropleth [object]
- *     - palette [string]
- *     - precision 10^[int]
- *     - bins [int > 0]
- *   - points [object]
- * - geoSources [object]
- *   - file [object]
- *     - domain [string]
- *     - path [string]
- *     - format [string]
- *     - url [string] function ( [string], [string], [string | int] )
- *     - transform [array] function ( [mixed] )
- *   - tileserver [object]
- *     - domain [string]
- *     - path [string]
- *     - url [string] function ( )
- * - geoTypes [object]
- *   - tile [object]
- *     - active [bool]
- *     - source [string matching geoSources attributes]
- *     - options [object matching http://leafletjs.com/reference.html#tilelayer-options structure]
- *   - vector [object]
- *     - active [bool]
- *     - classification [string]
- *     - style [object]
- *       - default [object matching http://leafletjs.com/reference.html#geojson-options style structure]
- *       - highlight [object]
- *       - selected [object]
- * - viewTypes [object]
- *   - table [string] function ( [object], [object] )
  * - dataSets [array]
  *   - [object]
  *     - active [bool]
@@ -986,6 +728,7 @@ var mapConfig = {
  *       - layer [string matching a geoLayer.name for joining]
  *       - id [string]
  *       - description [string]
+ *       - precision 10^[int]
  *       - menu [array]
  *         - [object]
  *           - column [string]
@@ -1043,9 +786,12 @@ var mapConfig = {
  *   - attribution [array]
  *     - [string]
  *     - ...
- * - description [object]
+ * - summary [object]
  *   - active [bool]
  *   - position [string]
+ *   - image [string]
+ *   - title [string]
+ *   - closed [bool]
  *   - content [string]
  * - urlShortener [object]
  *   - active [bool]
@@ -1107,7 +853,7 @@ var mapConfig = {
  *     - active [bool]
  *     - type [string matching viewTypes attributes]
  *     - (other attributes are inherited from geoSources and geoTypes and can be overrided)
- * - label [object]
+ * - tooltip [object]
  *   - active [bool]
  *   - text [string]
  * - legend [object]
@@ -1159,6 +905,7 @@ var mapConfig = {
  *     - offsetY ['auto' | int]
  *   - detach [object]
  *     - active [bool]
+ *     - url [string]
  *     - title [string]
  *     - image [string]
  *   - socialButtons [object]
