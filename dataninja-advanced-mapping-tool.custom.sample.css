@@ -1,2 +1,7 @@
-body {
+body,
+.leaflet-container {
+}
+
+.legend {
+    max-width: none;
 }

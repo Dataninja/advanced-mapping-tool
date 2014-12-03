@@ -257,7 +257,10 @@ var mapConfig = {
                 // Legend description
                 description: '',
 
-                // Choroplethable columns with custom lable, description and bins number
+                // How much round binnig bounds
+                precision: 0,
+
+                // Choroplethable columns with custom label, description and bins number
                 menu: [
                     {
                         column: '',
@@ -725,6 +728,7 @@ var mapConfig = {
  *       - layer [string matching a geoLayer.name for joining]
  *       - id [string]
  *       - description [string]
+ *       - precision 10^[int]
  *       - menu [array]
  *         - [object]
  *           - column [string]

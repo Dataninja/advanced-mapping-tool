@@ -174,7 +174,7 @@
                 columns: (_.has(dataSet.schema,'menu') && dataSet.schema.menu.length ? dataSet.schema.menu.map(function(el) { return el.column; }) : null),
                 labels: (_.has(dataSet.schema,'menu') && dataSet.schema.menu.length ? dataSet.schema.menu.map(function(el) { return el.label || el.column; }) : null),
                 descriptions: (_.has(dataSet.schema,'menu') && dataSet.schema.menu.length ? dataSet.schema.menu.map(function(el) { return el.description || dataSet.schema.description || (el.label ? el.label + '>' + el.column : el.column); }) : null),
-                precisions: (_.has(dataSet.schema,'menu') && dataSet.schema.menu.length ? dataSet.schema.menu.map(function(el) { return el.precision || dataSet.precision || 0; }) : null),
+                precisions: (_.has(dataSet.schema,'menu') && dataSet.schema.menu.length ? dataSet.schema.menu.map(function(el) { return _.isNumber(el.precision) ? el.precision : (dataSet.schema.precision || 0); }) : null),
                 resourceId: dataSet.resourceId, // HMMM
                 palette: dataSet.palette || 'Reds',
                 transform: dataSet.transform || function(k,v) { return v; },
