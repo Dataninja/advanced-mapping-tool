@@ -206,11 +206,11 @@
             // Parsing function for dataset columns
             if (_.isString(dataSet.parse)) {
                 var parseFn = window[dataSet.parse];
-                defaultData[dataSet.schema.name].parse = function(k,v) { return parseFn(v) || v; };
+                defaultData[dataSet.schema.name].parse = function(k,v) { var val = parseFn(v); return _.isNumber(val) && !_.isNaN(val) ? val : v; };
             } else if (_.isFunction(dataSet.parse)) {
                 defaultData[dataSet.schema.name].parse = dataSet.parse;
             } else {
-                defaultData[dataSet.schema.name].parse = function(k,v) { return parseInt(v) || parseFloat(v) || v; };
+                defaultData[dataSet.schema.name].parse = function(k,v) { var val = parseFloat(v); return _.isNumber(val) && !_.isNaN(val) ? val : v; };
             }
             
             // Formatter function for dataset columns
@@ -1817,19 +1817,17 @@
 
             if (_.isArray(geoLayer.classification)) {
                 dataSet.binsNum = geoLayer.classification.length-1;
-                bins = gs.setClassManually(_.flatten([d3.min(serie), geoLayer.classification.slice(1,-1), d3.max(serie)]));
-                bins = bins.map(function(el) { return parseFloat(el) || el; });
+                bins = gs.setClassManually(_.flatten([d3.min(serie), geoLayer.classification.slice(1,-1), d3.max(serie)])).map(function(el) { return parseFloat(el) || el; });
                 ranges = gs.ranges;
                 ranges[0] = geoLayer.classification[0] + " - " + ranges[0].split(" - ")[1];
                 ranges[ranges.length-1] = ranges[ranges.length-1].split(" - ")[0] + " - " + geoLayer.classification[geoLayer.classification.length-1];
             } else {
-                bins = gs['get'+geoLayer.classification](dataSet.binsNum);
+                bins = gs['get'+geoLayer.classification](dataSet.binsNum).map(function(el) { return parseFloat(el) || el; });
                 var uniqBins = _.uniq(bins);
                 if (dataSet.binsNum > 3 && uniqBins.length < bins.length) {
                     dataSet.binsNum = uniqBins.length-1;
-                    bins = gs['get'+geoLayer.classification](dataSet.binsNum);
+                    bins = gs['get'+geoLayer.classification](dataSet.binsNum).map(function(el) { return parseFloat(el) || el; });
                 }
-                bins = bins.map(function(el) { return parseFloat(el) || el; });
                 ranges = gs.ranges;
             }
 
@@ -1838,7 +1836,7 @@
                 for (var i=1; i<bins.length-1; i++) {
                     bins[i] = Math.round(bins[i]/dataSet.precision)*dataSet.precision;
                 }
-                bins = gs.setClassManually(bins);
+                bins = gs.setClassManually(_.flatten([d3.min(serie), bins.slice(1,-1), d3.max(serie)])).map(function(el) { var val = parseFloat(el); return _.isNumber(val) && !_.isNaN(val) ? val : el; });
                 ranges = gs.ranges;
                 ranges[0] = Math.floor(bins[0]/dataSet.precision)*dataSet.precision + " - " + ranges[0].split(" - ")[1];
                 ranges[ranges.length-1] = ranges[ranges.length-1].split(" - ")[0] + " - " + (Math.floor(bins[bins.length-1]/dataSet.precision)+1)*dataSet.precision;
