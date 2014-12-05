@@ -17,6 +17,18 @@ module.exports = function(grunt) {
                 flatten: true,
                 filter: 'isFile'
             },
+            pages: {
+                expand: true,
+                cwd: '.',
+                src: [
+                    '<%= pkg.name %>.lib.min.js',
+                    '<%= pkg.name %>.min.js',
+                    '<%= pkg.name %>.min.css'
+                ],
+                dest: 'demo/',
+                flatten: true,
+                filter: 'isFile'
+            }
         },
         concat: {
             options: {
@@ -101,5 +113,5 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-contrib-jshint');
 
     grunt.registerTask('jshint', ['jshint']);
-    grunt.registerTask('default', [/*'jshint',*/ 'copy', 'concat', 'uglify', 'cssmin', 'string-replace']);
+    grunt.registerTask('default', [/*'jshint',*/ 'copy:main', 'concat', 'uglify', 'cssmin', 'string-replace', 'copy:pages']);
 }
