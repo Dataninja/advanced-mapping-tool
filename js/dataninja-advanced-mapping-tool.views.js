@@ -27,7 +27,7 @@ if (mapConfig) {
                 formatter = formatter || function(k,v) { return (_.isNumber(v) ? (d3.format(",d")(v) || d3.format(",.2f")(v)) : v); },
                 group = '',
                 tbody = '',
-                k;
+                k, g = 0;
 
             _.defaults(options, defaultOptions);
 
@@ -42,11 +42,12 @@ if (mapConfig) {
                                     isSecondLevel = _.has(options.groups,k);
                                 
                                 if (isSecondLevel && options.groups[k] != group) {
+                                    g++;
                                     group = options.groups[k];
-                                    tbody += '<tr class="first-level group"><td colspan="2">'+group+'</td></tr>';
+                                    tbody += '<tr class="first-level group g'+g+'"><td colspan="2">'+group+'</td></tr>';
                                 }
                                 
-                                tbody += '<tr class="'+(isSecondLevel ? 'second-level' : 'first-level')+'">' + 
+                                tbody += '<tr class="'+(isSecondLevel ? 'second-level hidden g'+g : 'first-level')+'">' + 
                                     '<td class="table-key">' + (isBold ? '<b>'+k+'</b>' : k) + '</td>' +
                                     '<td class="table-value">' + (isBold ? '<b>'+val+'</b>' : val) + '</td>' +
                                     '</tr>';

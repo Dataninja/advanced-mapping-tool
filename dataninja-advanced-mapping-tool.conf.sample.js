@@ -237,7 +237,9 @@ var mapConfig = {
             // Inherits attributes from dataType named here
             type: 'choropleth',
             bins: 7,
+            precision: 0,
             palette: 'Reds',
+
             
             schema: {
                 
@@ -255,9 +257,6 @@ var mapConfig = {
 
                 // Legend description
                 description: '',
-
-                // How much round binnig bounds
-                precision: 0,
 
                 // Choroplethable columns with custom label, description and bins number
                 menu: [

@@ -116,7 +116,7 @@ if (mapConfig) {
              */
             palette: 'Reds',
 
-            // Rounding factor for binning bounds, in 10^n with n is an integer
+            // Rounding factor for binning bounds, in 10^n with n is an integer (positive or negative)
             // 0 means no rounding
             precision: 0,
 
@@ -326,7 +326,7 @@ if (mapConfig) {
                 formatter = formatter || function(k,v) { return (_.isNumber(v) ? (d3.format(",d")(v) || d3.format(",.2f")(v)) : v); },
                 group = '',
                 tbody = '',
-                k;
+                k, g = 0;
 
             _.defaults(options, defaultOptions);
 
@@ -341,11 +341,12 @@ if (mapConfig) {
                                     isSecondLevel = _.has(options.groups,k);
                                 
                                 if (isSecondLevel && options.groups[k] != group) {
+                                    g++;
                                     group = options.groups[k];
-                                    tbody += '<tr class="first-level group"><td colspan="2">'+group+'</td></tr>';
+                                    tbody += '<tr class="first-level group g'+g+'"><td colspan="2">'+group+'</td></tr>';
                                 }
                                 
-                                tbody += '<tr class="'+(isSecondLevel ? 'second-level' : 'first-level')+'">' + 
+                                tbody += '<tr class="'+(isSecondLevel ? 'second-level hidden g'+g : 'first-level')+'">' + 
                                     '<td class="table-key">' + (isBold ? '<b>'+k+'</b>' : k) + '</td>' +
                                     '<td class="table-value">' + (isBold ? '<b>'+val+'</b>' : val) + '</td>' +
                                     '</tr>';
@@ -543,7 +544,7 @@ if (mapConfig) {
                 columns: (_.has(dataSet.schema,'menu') && dataSet.schema.menu.length ? dataSet.schema.menu.map(function(el) { return el.column; }) : null),
                 labels: (_.has(dataSet.schema,'menu') && dataSet.schema.menu.length ? dataSet.schema.menu.map(function(el) { return el.label || el.column; }) : null),
                 descriptions: (_.has(dataSet.schema,'menu') && dataSet.schema.menu.length ? dataSet.schema.menu.map(function(el) { return el.description || dataSet.schema.description || (el.label ? el.label + '>' + el.column : el.column); }) : null),
-                precisions: (_.has(dataSet.schema,'menu') && dataSet.schema.menu.length ? dataSet.schema.menu.map(function(el) { return _.isNumber(el.precision) ? el.precision : (dataSet.schema.precision || 0); }) : null),
+                precisions: (_.has(dataSet.schema,'menu') && dataSet.schema.menu.length ? dataSet.schema.menu.map(function(el) { return _.isNumber(el.precision) ? el.precision : (dataSet.precision || 0); }) : null),
                 resourceId: dataSet.resourceId, // HMMM
                 palette: dataSet.palette || 'Reds',
                 transform: dataSet.transform || function(k,v) { return v; },
@@ -913,6 +914,13 @@ if (mapConfig) {
                     this._div.innerHTML += '<table class="zebra">' + thead + tbody + tfoot + '</table>';
 
                     if ($.debug) console.log("Table", this._div.innerHTML);
+
+                    d3.selectAll("tr.first-level.group")
+                        .on("click", function(d,i) {
+                            d3.select(this)
+                                .classed("open", !d3.select(this).classed("open"));
+                            d3.selectAll("tr.second-level.g"+(i+1)).classed("hidden", function() { return !d3.select(this).classed("hidden"); });
+                        });
 
                     if (_.has($.infowindow,'shareButtons') && $.infowindow.shareButtons.active && _.has($,'urlShortener') && $.urlShortener.active) {
                         dtnj.shorten(btnEncUrl, $.urlShortener.prefix+md5(btnUrl), function(data) {
