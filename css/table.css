@@ -73,9 +73,21 @@ table {
 }
 
 .zebra tbody tr.second-level > td.table-key {
-    text-indent: 1em;
+    padding-left: 1.5em;
+}
+
+.zebra tbody tr.second-level.hidden {
+    display: none;
 }
 
 .zebra tbody tr.group > td {
-    text-decoration: underline;
+    cursor: pointer;
+}
+
+.zebra tbody tr.group > td:after {
+    content: " (+)";
+}
+
+.zebra tbody tr.group.open > td:after {
+    content: " (-)";
 }

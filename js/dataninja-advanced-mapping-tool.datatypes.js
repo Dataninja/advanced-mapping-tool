@@ -13,7 +13,7 @@ if (mapConfig) {
              */
             palette: 'Reds',
 
-            // Rounding factor for binning bounds, in 10^n with n is an integer
+            // Rounding factor for binning bounds, in 10^n with n is an integer (positive or negative)
             // 0 means no rounding
             precision: 0,
 

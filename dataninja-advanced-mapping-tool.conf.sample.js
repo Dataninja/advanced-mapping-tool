@@ -131,16 +131,15 @@ var mapConfig = {
     },
 
     // Tooltip control on mouse over regions in vectorial geolayers
+    /* Default tooltip content has this structure:
+     * [REGION NAME]
+     * [key]: [value]
+    */
     tooltip: {
 
         // Enable or not
-        active: true,
+        active: true
 
-        /* Default tooltip content has this structure:
-         * [REGION NAME]
-         * [text]: [value]
-         */
-        text: ''
     },
 
     // Legend control
@@ -238,7 +237,9 @@ var mapConfig = {
             // Inherits attributes from dataType named here
             type: 'choropleth',
             bins: 7,
+            precision: 0,
             palette: 'Reds',
+
             
             schema: {
                 
@@ -256,9 +257,6 @@ var mapConfig = {
 
                 // Legend description
                 description: '',
-
-                // How much round binnig bounds
-                precision: 0,
 
                 // Choroplethable columns with custom label, description and bins number
                 menu: [
@@ -326,6 +324,7 @@ var mapConfig = {
             // Enable or not
             active: false,
             license: 'Creative Commons Attribution <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank">CC-BY 4.0 International</a>.',
+            image: 'icons/download.png',
             files: [
                 {
 
@@ -348,8 +347,8 @@ var mapConfig = {
                     // Title for download icon
                     title: '',
 
-                    // Download icon
-                    image: 'icons/download.png'
+                    // Download icon for this specific resource
+                    //image: 'icons/download.png'
                 }
                 // ...
             ]

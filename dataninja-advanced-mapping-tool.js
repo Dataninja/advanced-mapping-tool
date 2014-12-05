@@ -116,7 +116,7 @@ if (mapConfig) {
              */
             palette: 'Reds',
 
-            // Rounding factor for binning bounds, in 10^n with n is an integer
+            // Rounding factor for binning bounds, in 10^n with n is an integer (positive or negative)
             // 0 means no rounding
             precision: 0,
 
@@ -307,7 +307,7 @@ if (mapConfig) {
          */
         table: function(data, options, formatter, groups) {
             if (!data) return '';
-
+            
             /* Default options can be overrided (include and exclude filters are evaluated in this order):
              * - formatter string defines how to format numbers in printing
              * - include array has data keys to include
@@ -320,15 +320,16 @@ if (mapConfig) {
                     exclude: [],
                     bold: function(k,v) { return false; },
                     filter: function(k,v) { return true; },
-                    groups: groups || {}
                 },
                 options = options || {},
-                formatter = formatter || function(k,v) { return (_.isNumber(v) ? (d3.format(",d")(v) || d3.format(",.2f")(v)) : v); },
                 group = '',
                 tbody = '',
-                k;
+                k, g = 0;
 
             _.defaults(options, defaultOptions);
+                    
+            options.groups = groups || {};
+            options.formatter = formatter || function(k,v) { return (_.isNumber(v) ? (d3.format(",d")(v) || d3.format(",.2f")(v)) : v); };
 
             for (k in data) {
                 if (_.has(data,k)) {
@@ -336,16 +337,17 @@ if (mapConfig) {
                         if (!options.exclude.length || !(_.contains(options.exclude,k))) {
                             if (options.filter(k,data[k])) {
                                 
-                                var val = formatter(k,data[k]),
+                                var val = options.formatter(k,data[k]),
                                     isBold = options.bold(k,data[k]),
                                     isSecondLevel = _.has(options.groups,k);
                                 
                                 if (isSecondLevel && options.groups[k] != group) {
+                                    g++;
                                     group = options.groups[k];
-                                    tbody += '<tr class="first-level group"><td colspan="2">'+group+'</td></tr>';
+                                    tbody += '<tr class="first-level group g'+g+'"><td colspan="2">'+group+'</td></tr>';
                                 }
-                                
-                                tbody += '<tr class="'+(isSecondLevel ? 'second-level' : 'first-level')+'">' + 
+
+                                tbody += '<tr class="'+(isSecondLevel ? 'second-level hidden g'+g : 'first-level')+'">' + 
                                     '<td class="table-key">' + (isBold ? '<b>'+k+'</b>' : k) + '</td>' +
                                     '<td class="table-value">' + (isBold ? '<b>'+val+'</b>' : val) + '</td>' +
                                     '</tr>';
@@ -543,7 +545,7 @@ if (mapConfig) {
                 columns: (_.has(dataSet.schema,'menu') && dataSet.schema.menu.length ? dataSet.schema.menu.map(function(el) { return el.column; }) : null),
                 labels: (_.has(dataSet.schema,'menu') && dataSet.schema.menu.length ? dataSet.schema.menu.map(function(el) { return el.label || el.column; }) : null),
                 descriptions: (_.has(dataSet.schema,'menu') && dataSet.schema.menu.length ? dataSet.schema.menu.map(function(el) { return el.description || dataSet.schema.description || (el.label ? el.label + '>' + el.column : el.column); }) : null),
-                precisions: (_.has(dataSet.schema,'menu') && dataSet.schema.menu.length ? dataSet.schema.menu.map(function(el) { return _.isNumber(el.precision) ? el.precision : (dataSet.schema.precision || 0); }) : null),
+                precisions: (_.has(dataSet.schema,'menu') && dataSet.schema.menu.length ? dataSet.schema.menu.map(function(el) { return _.isNumber(el.precision) ? el.precision : (dataSet.precision || 0); }) : null),
                 resourceId: dataSet.resourceId, // HMMM
                 palette: dataSet.palette || 'Reds',
                 transform: dataSet.transform || function(k,v) { return v; },
@@ -860,7 +862,7 @@ if (mapConfig) {
                                         '" class="dnl" href="'+($.infowindow.downloads.files[i].filename ? $.infowindow.downloads.files[i].url() : '#')+'" title="' + 
                                         $.infowindow.downloads.files[i].title + 
                                         '"><img src="' + 
-                                        $.infowindow.downloads.files[i].image + 
+                                        ($.infowindow.downloads.files[i].image || $.infowindow.downloads.image) + 
                                         '" /></a>'
                                     );
                                 }
@@ -883,7 +885,7 @@ if (mapConfig) {
                         '</tr>' : '') + 
                         '</thead>';
 
-                    if ($.debug) console.log("Table header",thead);
+                    //if ($.debug) console.log("Table header",thead);
 
                     var tfoot;
                     if (_.has($.infowindow,'downloads') && $.infowindow.downloads.active) {
@@ -896,7 +898,7 @@ if (mapConfig) {
                         tfoot = '<tfoot></tfoot>';
                     }
                     
-                    if ($.debug) console.log("Table footer",tfoot);
+                    //if ($.debug) console.log("Table footer",tfoot);
 
                     var tbody;
                     if (_.has($.infowindow,'view') && $.infowindow.view.active && _.has($.viewTypes,$.infowindow.view.type)) {
@@ -908,11 +910,18 @@ if (mapConfig) {
                         tbody = '<tbody></tbody>';
                     }
                     
-                    if ($.debug) console.log("Table body",tbody);
+                    //if ($.debug) console.log("Table body",tbody);
 
                     this._div.innerHTML += '<table class="zebra">' + thead + tbody + tfoot + '</table>';
 
-                    if ($.debug) console.log("Table", this._div.innerHTML);
+                    //if ($.debug) console.log("Table", this._div.innerHTML);
+
+                    d3.selectAll("tr.first-level.group")
+                        .on("click", function(d,i) {
+                            d3.select(this)
+                                .classed("open", !d3.select(this).classed("open"));
+                            d3.selectAll("tr.second-level.g"+(i+1)).classed("hidden", function() { return !d3.select(this).classed("hidden"); });
+                        });
 
                     if (_.has($.infowindow,'shareButtons') && $.infowindow.shareButtons.active && _.has($,'urlShortener') && $.urlShortener.active) {
                         dtnj.shorten(btnEncUrl, $.urlShortener.prefix+md5(btnUrl), function(data) {

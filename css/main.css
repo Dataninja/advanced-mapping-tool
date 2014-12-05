@@ -305,7 +305,7 @@ html, body, #map {
 .info a.ssb img, 
 .info a.dnl img, 
 .info a#close-cross img {
-    width: 20px;
+    height: 20px;
 }
 
 .info a#close-cross {
