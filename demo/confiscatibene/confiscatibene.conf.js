@@ -409,8 +409,8 @@ var mapConfig = {
         clusters: true,
 
         // Icons used for markers
-        icon: 'icons/marker-icon.png',
-        shadow: 'icons/marker-shadow.png'
+        icon: '../icons/marker-icon.png',
+        shadow: '../icons/marker-shadow.png'
     },
 
     // Info window appears on click on a region
@@ -596,7 +596,7 @@ var mapConfig = {
             title: 'Reset',
 
             // Image
-            image: 'icons/reset.png'
+            image: '../icons/reset.png'
         },
 
         // Embed options
@@ -609,7 +609,7 @@ var mapConfig = {
             title: 'Embed this map',
 
             // Image
-            image: 'icons/embed.png',
+            image: '../icons/embed.png',
 
             // The permalink (long form)
             permalink: true,
@@ -637,7 +637,7 @@ var mapConfig = {
                 filename: 'confiscatibene_map.svg',
 
                 // Icon of the control
-                image: 'icons/svg.png'
+                image: '../icons/svg.png'
             }
         },
 
@@ -651,7 +651,7 @@ var mapConfig = {
             title: 'Take a screenshot',
 
             // Icon of the control
-            image: 'icons/screenshot.png',
+            image: '../icons/screenshot.png',
 
             // File name for downloaded image
             filename: 'confiscatibene_map.png',
@@ -667,7 +667,7 @@ var mapConfig = {
             title: 'Open in new window', // ie. Open in new window
 
             // Image
-            image: 'icons/detach.png', // ie. icons/detach.png
+            image: '../icons/detach.png', // ie. icons/detach.png
         },
 
         // Social buttons: like, tweet, +1
