@@ -324,6 +324,7 @@ var mapConfig = {
             // Enable or not
             active: false,
             license: 'Creative Commons Attribution <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank">CC-BY 4.0 International</a>.',
+            image: 'icons/download.png',
             files: [
                 {
 
@@ -346,8 +347,8 @@ var mapConfig = {
                     // Title for download icon
                     title: '',
 
-                    // Download icon
-                    image: 'icons/download.png'
+                    // Download icon for this specific resource
+                    //image: 'icons/download.png'
                 }
                 // ...
             ]

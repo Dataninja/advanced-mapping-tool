@@ -862,7 +862,7 @@ if (mapConfig) {
                                         '" class="dnl" href="'+($.infowindow.downloads.files[i].filename ? $.infowindow.downloads.files[i].url() : '#')+'" title="' + 
                                         $.infowindow.downloads.files[i].title + 
                                         '"><img src="' + 
-                                        $.infowindow.downloads.files[i].image + 
+                                        ($.infowindow.downloads.files[i].image || $.infowindow.downloads.image) + 
                                         '" /></a>'
                                     );
                                 }
