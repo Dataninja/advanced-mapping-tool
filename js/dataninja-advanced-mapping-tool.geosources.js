@@ -27,7 +27,6 @@ if (mapConfig) {
             },
             
             /* Callback function of ajax request for custom result transformation
-             * this is the dataSet object
              * See http://geojson.org/
              */
             transform: function(res) {

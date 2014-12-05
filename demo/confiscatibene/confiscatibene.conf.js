@@ -6,7 +6,7 @@
 var mapConfig = {
 
     // Debug mode activation with logs in console
-    debug: false,
+    debug: true,
 
     // Language code in ISO 639-1:2002 format (see http://en.wikipedia.org/wiki/List_of_ISO_639-1_codes)
     language: 'it',
@@ -168,7 +168,6 @@ var mapConfig = {
             source: 'file',
             path: 'geo/',
             filename: '',
-            format: 'json',
             
             // Inherits attributes from geoType named here
             type: 'thematic',
@@ -193,7 +192,6 @@ var mapConfig = {
             source: 'file',
             path: 'geo/',
             filename: '',
-            format: 'json',
 
             type: 'thematic',
 
@@ -209,7 +207,6 @@ var mapConfig = {
             source: 'file',
             path: 'geo/',
             filename: '',
-            format: 'json',
             
             type: 'thematic',
 

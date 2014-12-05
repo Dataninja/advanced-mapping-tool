@@ -23,11 +23,11 @@ module.exports = function(grunt) {
                 src: [
                     '<%= pkg.name %>.lib.min.js',
                     '<%= pkg.name %>.min.js',
-                    '<%= pkg.name %>.min.css'
+                    '<%= pkg.name %>.js',
+                    '<%= pkg.name %>.min.css',
+                    'icons/*'
                 ],
-                dest: 'demo/',
-                flatten: true,
-                filter: 'isFile'
+                dest: 'demo/'
             }
         },
         concat: {
