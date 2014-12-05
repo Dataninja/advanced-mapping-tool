@@ -3,6 +3,7 @@ node_modules/
 tmp/
 demo/welfarebo/
 demo/donnechecontano/
+demo/idrorischio/
 /*.conf.js
 /*.custom.css
 index.html
