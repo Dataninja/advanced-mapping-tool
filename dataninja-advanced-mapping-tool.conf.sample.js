@@ -131,16 +131,15 @@ var mapConfig = {
     },
 
     // Tooltip control on mouse over regions in vectorial geolayers
+    /* Default tooltip content has this structure:
+     * [REGION NAME]
+     * [key]: [value]
+    */
     tooltip: {
 
         // Enable or not
-        active: true,
+        active: true
 
-        /* Default tooltip content has this structure:
-         * [REGION NAME]
-         * [text]: [value]
-         */
-        text: ''
     },
 
     // Legend control

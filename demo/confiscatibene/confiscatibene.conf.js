@@ -122,16 +122,15 @@ var mapConfig = {
     },
 
     // Label control on mouse over regions in vectorial geolayers
+    /* Default label has this structure:
+     * [REGION NAME]
+     * [key]: [value]
+     */
     tooltip: {
 
         // Enable or not
         active: true,
 
-        /* Default label has this structure:
-         * [REGION NAME]
-         * [text]: [value]
-         */
-        text: 'Beni confiscati'
     },
 
     // Legend control
