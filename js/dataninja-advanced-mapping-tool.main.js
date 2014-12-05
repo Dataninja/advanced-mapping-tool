@@ -514,7 +514,7 @@
                         '</tr>' : '') + 
                         '</thead>';
 
-                    if ($.debug) console.log("Table header",thead);
+                    //if ($.debug) console.log("Table header",thead);
 
                     var tfoot;
                     if (_.has($.infowindow,'downloads') && $.infowindow.downloads.active) {
@@ -527,7 +527,7 @@
                         tfoot = '<tfoot></tfoot>';
                     }
                     
-                    if ($.debug) console.log("Table footer",tfoot);
+                    //if ($.debug) console.log("Table footer",tfoot);
 
                     var tbody;
                     if (_.has($.infowindow,'view') && $.infowindow.view.active && _.has($.viewTypes,$.infowindow.view.type)) {
@@ -539,11 +539,11 @@
                         tbody = '<tbody></tbody>';
                     }
                     
-                    if ($.debug) console.log("Table body",tbody);
+                    //if ($.debug) console.log("Table body",tbody);
 
                     this._div.innerHTML += '<table class="zebra">' + thead + tbody + tfoot + '</table>';
 
-                    if ($.debug) console.log("Table", this._div.innerHTML);
+                    //if ($.debug) console.log("Table", this._div.innerHTML);
 
                     d3.selectAll("tr.first-level.group")
                         .on("click", function(d,i) {

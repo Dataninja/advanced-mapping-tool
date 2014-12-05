@@ -307,7 +307,7 @@ if (mapConfig) {
          */
         table: function(data, options, formatter, groups) {
             if (!data) return '';
-
+            
             /* Default options can be overrided (include and exclude filters are evaluated in this order):
              * - formatter string defines how to format numbers in printing
              * - include array has data keys to include
@@ -320,15 +320,16 @@ if (mapConfig) {
                     exclude: [],
                     bold: function(k,v) { return false; },
                     filter: function(k,v) { return true; },
-                    groups: groups || {}
                 },
                 options = options || {},
-                formatter = formatter || function(k,v) { return (_.isNumber(v) ? (d3.format(",d")(v) || d3.format(",.2f")(v)) : v); },
                 group = '',
                 tbody = '',
                 k, g = 0;
 
             _.defaults(options, defaultOptions);
+                    
+            options.groups = groups || {};
+            options.formatter = formatter || function(k,v) { return (_.isNumber(v) ? (d3.format(",d")(v) || d3.format(",.2f")(v)) : v); };
 
             for (k in data) {
                 if (_.has(data,k)) {
@@ -336,7 +337,7 @@ if (mapConfig) {
                         if (!options.exclude.length || !(_.contains(options.exclude,k))) {
                             if (options.filter(k,data[k])) {
                                 
-                                var val = formatter(k,data[k]),
+                                var val = options.formatter(k,data[k]),
                                     isBold = options.bold(k,data[k]),
                                     isSecondLevel = _.has(options.groups,k);
                                 
@@ -345,7 +346,7 @@ if (mapConfig) {
                                     group = options.groups[k];
                                     tbody += '<tr class="first-level group g'+g+'"><td colspan="2">'+group+'</td></tr>';
                                 }
-                                
+
                                 tbody += '<tr class="'+(isSecondLevel ? 'second-level hidden g'+g : 'first-level')+'">' + 
                                     '<td class="table-key">' + (isBold ? '<b>'+k+'</b>' : k) + '</td>' +
                                     '<td class="table-value">' + (isBold ? '<b>'+val+'</b>' : val) + '</td>' +
@@ -884,7 +885,7 @@ if (mapConfig) {
                         '</tr>' : '') + 
                         '</thead>';
 
-                    if ($.debug) console.log("Table header",thead);
+                    //if ($.debug) console.log("Table header",thead);
 
                     var tfoot;
                     if (_.has($.infowindow,'downloads') && $.infowindow.downloads.active) {
@@ -897,7 +898,7 @@ if (mapConfig) {
                         tfoot = '<tfoot></tfoot>';
                     }
                     
-                    if ($.debug) console.log("Table footer",tfoot);
+                    //if ($.debug) console.log("Table footer",tfoot);
 
                     var tbody;
                     if (_.has($.infowindow,'view') && $.infowindow.view.active && _.has($.viewTypes,$.infowindow.view.type)) {
@@ -909,11 +910,11 @@ if (mapConfig) {
                         tbody = '<tbody></tbody>';
                     }
                     
-                    if ($.debug) console.log("Table body",tbody);
+                    //if ($.debug) console.log("Table body",tbody);
 
                     this._div.innerHTML += '<table class="zebra">' + thead + tbody + tfoot + '</table>';
 
-                    if ($.debug) console.log("Table", this._div.innerHTML);
+                    //if ($.debug) console.log("Table", this._div.innerHTML);
 
                     d3.selectAll("tr.first-level.group")
                         .on("click", function(d,i) {
