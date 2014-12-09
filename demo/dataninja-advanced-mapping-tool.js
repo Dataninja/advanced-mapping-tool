@@ -1017,7 +1017,8 @@ if (mapConfig) {
                             return parameters.md === 'widget' ? !(_.has($.infowindow.content,'mobile') && $.infowindow.content.mobile) : !(_.has($.infowindow.content,'default') && $.infowindow.content.default);
                         });
                     if (selectedLayer) {
-                        selectedLayer.feature.selected = false;
+                        selectedLayer.feature._selected = false;
+                        delete selectedLayer.feature._position;
                         geojson.resetStyle(selectedLayer);
                         selectedLayer = undefined;
                     }
@@ -2053,7 +2054,7 @@ if (mapConfig) {
                 geoLayer = $.geoLayers.filter(function(l) { return (l.type === 'thematic' && l.schema.name === region); })[0],
                 dataSet = data[region].filter(function(el) { return el.active; })[0],
                 currentStyle = _.clone(geoLayer.style.default);
-            if (feature.selected) {
+            if (feature._selected) {
                 _.extend(currentStyle,geoLayer.style.selected);
             }
             currentStyle.fillColor = (_.has(feature.properties.data,dataSet.name) ? getColor(feature.properties.data[dataSet.name][dataSet.column], dataSet.bins, dataSet.palette) : 'transparent');
@@ -2076,7 +2077,7 @@ if (mapConfig) {
                 highlightStyle = geoLayer.style.highlight,
                 num = props.data[dataSet.name][dataSet.column];
                     
-            if (!layer.feature.selected) layer.setStyle(highlightStyle);
+            if (!layer.feature._selected) layer.setStyle(highlightStyle);
             if (_.has($,'tooltip') && $.tooltip.active) {
                 tooltip.setContent((geo[region].label ? props[geo[region].label]+'<br>' : '') + dataSet.label + ': '+ dataSet.formatter(dataSet.column, num));
                 tooltip.setLatLng(layer.getBounds().getCenter());
@@ -2090,7 +2091,7 @@ if (mapConfig) {
                 region = layer.feature.properties._layer,
                 geoLayer = $.geoLayers.filter(function(l) { return (l.type === 'thematic' && l.schema.name === region); })[0],
                 defaultStyle = geoLayer.style.default;
-            if (!layer.feature.selected) geojson.resetStyle(layer);
+            if (!layer.feature._selected) geojson.resetStyle(layer);
             if (_.has($,'tooltip') && $.tooltip.active) tooltip.close();
 	    }
 
@@ -2102,12 +2103,13 @@ if (mapConfig) {
                 selectedStyle = geoLayer.style.selected;
 
             if (_.has(geoLayer,'infowindow') && geoLayer.infowindow) {
-                if (!layer.feature.selected) {
+                if (!layer.feature._selected) {
                     if (selectedLayer) {
-                        selectedLayer.feature.selected = false;
+                        selectedLayer.feature._selected = false;
                         geojson.resetStyle(selectedLayer);
                     }
-                    layer.feature.selected = true;
+                    layer.feature._selected = true;
+                    layer.feature._position = _.indexOf(_.keys(geojson._layers),''+layer._leaflet_id);
                     layer.setStyle(selectedStyle);
                     parameters.i = layer.feature.properties[geo[parameters.dl].id];
                     if (embedControl && embedControl.isAdded) embedControl.removeFrom(map);
@@ -2294,6 +2296,12 @@ if (mapConfig) {
             } else {
                 binData(region);
                 geojson.addData(geo[region].resource);
+                if (selectedLayer) {
+                    selectedLayer = geojson._layers[_.keys(geojson._layers)[selectedLayer.feature._position]];
+                    if (!L.Browser.ie && !L.Browser.opera) {
+	                	selectedLayer.bringToFront();
+                    }
+                }
                 delete parameters.i;
                 if (embedControl && embedControl.isAdded) embedControl.removeFrom(map);
                 legend.update(region);
