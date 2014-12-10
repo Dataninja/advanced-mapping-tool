@@ -247,6 +247,10 @@ if (mapConfig) {
 
             // Infowindow on click can be disabled
             infowindow: true,
+
+            // Fixed zoom on display
+            // If missing or zero, there is no restriction on zoom control
+            zoom: 0,
             
             /* Layer style, with three presets:
              * - default
@@ -771,9 +775,11 @@ if (mapConfig) {
                     })
                     .on("mouseenter", function() {
                         map.scrollWheelZoom.disable();
+                        map.doubleClickZoom.disable();
                     })
                     .on("mouseleave", function() {
                         if (_.has($.map.zoom,'scrollWheel') && $.map.zoom.scrollWheel) map.scrollWheelZoom.enable();
+                        map.doubleClickZoom.enable();
                     });
         	    this.update();
                 return this._div;
@@ -1497,6 +1503,18 @@ if (mapConfig) {
           
         geoMenu.onChange = function(region) {
             if ($.debug) console.log("geoMenuOnChange", arguments, region);
+                
+            var geoLayer = $.geoLayers.filter(function(l) { return (l.type === 'thematic' && l.schema.name === region); })[0];
+
+            if (geoLayer.zoom) {
+                map.setZoom(geoLayer.zoom);
+                map.options.maxZoom = geoLayer.zoom;
+                map.options.minZoom = geoLayer.zoom;
+            } else {
+                map.options.maxZoom = $.map.zoom.max || null;
+                map.options.minZoom = $.map.zoom.min || null;
+            }
+
             data[region][0].active = true;
             for (var i=0; i<data[region].length; i++) {
                 if (i != 0) data[region][i].active = false;

@@ -34,6 +34,10 @@ if (mapConfig) {
 
             // Infowindow on click can be disabled
             infowindow: true,
+
+            // Fixed zoom on display
+            // If missing or zero, there is no restriction on zoom control
+            zoom: 0,
             
             /* Layer style, with three presets:
              * - default
