@@ -801,11 +801,12 @@ if (mapConfig) {
                         filterKey = dataSet.id,
                         filterValue = props[geo[region].id],
                         buttons = [], btnTitle, btnUrl, btnPlace,
-                        dnlBtn = [];
+                        dnlBtn = [],
+                        globalImagePath = (_.isString($.infowindow.path) ? $.infowindow.path : 'icons/');
                     
                     if (_.has($.infowindow,'shareButtons') && $.infowindow.shareButtons.active) {
 
-                        var imagePath = (_.isString($.infowindow.shareButtons.path) ? $.infowindow.shareButtons.path : 'icons/');
+                        var shareImagePath = (_.isString($.infowindow.shareButtons.path) ? $.infowindow.shareButtons.path : globalImagePath);
                         
                         btnTitle = $.infowindow.shareButtons.title + (region == 'regioni' ? ' in ' : ' a ') + props[geo[region].label];
                         btnUrl = 'http://' + location.hostname + Arg.url(parameters).replace(/&*md=[^&]*/,'').replace(/&{2,}/g,"&");
@@ -821,38 +822,38 @@ if (mapConfig) {
                                 '&via=' + $.infowindow.shareButtons.twitter.via + 
                                 '&text=' + 
                                 encodeURIComponent((_.isFunction($.infowindow.shareButtons.twitter.text) ? $.infowindow.shareButtons.twitter.text(props.data[dataSet.name]) : btnPlace + ' - ' + $.infowindow.shareButtons.twitter.text)) + 
-                                '" target="_blank" title="'+btnTitle+' su Twitter"><img src="'+imagePath+($.infowindow.shareButtons.twitter.image || 'twitter.png')+'" id="ssb-twitter"></a>'
+                                '" target="_blank" title="'+btnTitle+' su Twitter"><img src="'+shareImagePath+($.infowindow.shareButtons.twitter.image || 'twitter.png')+'" id="ssb-twitter"></a>'
                             );
                         }
 
                         if (_.has($.infowindow.shareButtons,'facebook') && $.infowindow.shareButtons.facebook.active) {
                             buttons.push('<a class="ssb" href="http://www.facebook.com/sharer.php?u=' + btnEncUrl + 
-                                '" target="_blank" title="'+btnTitle+' su Facebook"><img src="'+imagePath+($.infowindow.shareButtons.facebook.image || 'facebook.png')+'" id="ssb-facebook"></a>'
+                                '" target="_blank" title="'+btnTitle+' su Facebook"><img src="'+shareImagePath+($.infowindow.shareButtons.facebook.image || 'facebook.png')+'" id="ssb-facebook"></a>'
                             );
                         }
 
                         if (_.has($.infowindow.shareButtons,'gplus') && $.infowindow.shareButtons.gplus.active) {
                             buttons.push('<a class="ssb" href="https://plus.google.com/share?url=' + btnEncUrl + 
-                                '" target="_blank" title="'+btnTitle+' su Google Plus"><img src="'+imagePath+($.infowindow.shareButtons.gplus.image || 'gplus.png')+'" id="ssb-gplus"></a>'
+                                '" target="_blank" title="'+btnTitle+' su Google Plus"><img src="'+shareImagePath+($.infowindow.shareButtons.gplus.image || 'gplus.png')+'" id="ssb-gplus"></a>'
                             );
                         }
 
                         if (_.has($.infowindow.shareButtons,'linkedin') && $.infowindow.shareButtons.linkedin.active) {
                             buttons.push('<a class="ssb" href="http://www.linkedin.com/shareArticle?mini=true&url=' + btnEncUrl + 
-                                '" target="_blank" title="'+btnTitle+' su LinkedIn"><img src="'+imagePath+($.infowindow.shareButtons.linkedin.image || 'linkedin.png')+'" id="ssb-linkedin"></a>'
+                                '" target="_blank" title="'+btnTitle+' su LinkedIn"><img src="'+shareImagePath+($.infowindow.shareButtons.linkedin.image || 'linkedin.png')+'" id="ssb-linkedin"></a>'
                             );
                         }
 
                         if (_.has($.infowindow.shareButtons,'email') && $.infowindow.shareButtons.email.active) {
                             buttons.push('<a class="ssb" href="mailto:?Subject=' + encodeURIComponent((_.isFunction($.infowindow.shareButtons.email.subject) ? $.infowindow.shareButtons.email.subject(props.data[dataSet.name]) : $.infowindow.shareButtons.email.subject + ' | ' + btnPlace)) + 
                                 '&Body=' + encodeURIComponent((_.isFunction($.infowindow.shareButtons.email.body) ? $.infowindow.shareButtons.email.body(props.data[dataSet.name],btnEncUrl) : btnPlace + ' - ' + $.infowindow.shareButtons.email.body + ': ' + btnUrl)) + 
-                                '" target="_blank" title="'+btnTitle+' per email"><img src="'+imagePath+($.infowindow.shareButtons.email.image || 'email.png')+'" id="ssb-email"></a>'
+                                '" target="_blank" title="'+btnTitle+' per email"><img src="'+shareImagePath+($.infowindow.shareButtons.email.image || 'email.png')+'" id="ssb-email"></a>'
                             );
                         }
 
                         if (_.has($.infowindow.shareButtons,'permalink') && $.infowindow.shareButtons.permalink.active) {
                             buttons.push('<a class="ssb" href="' + btnUrl + 
-                                '" target="_blank" title="Permalink"><img src="'+imagePath+($.infowindow.shareButtons.permalink.image || 'link.png')+'" id="ssb-link"></a>'
+                                '" target="_blank" title="Permalink"><img src="'+shareImagePath+($.infowindow.shareButtons.permalink.image || 'link.png')+'" id="ssb-link"></a>'
                             );
                         }
                     }
@@ -860,6 +861,7 @@ if (mapConfig) {
                     if ($.debug) console.log("shareButtons",buttons);
 
                     if (_.has($.infowindow,'downloads') && $.infowindow.downloads.active) {
+                        var dwnlImagePath = (_.isString($.infowindow.downloads.path) ? $.infowindow.downloads.path : globalImagePath);
                         for (i=0; i<$.infowindow.downloads.files.length; i++) {
                             if ($.infowindow.downloads.files[i].active) {
                                 if (!$.infowindow.downloads.files[i].datasets || !$.infowindow.downloads.files[i].datasets.length || _.contains($.infowindow.downloads.files[i].datasets,dataSet.name)) {
@@ -868,7 +870,7 @@ if (mapConfig) {
                                         '" class="dnl" href="'+($.infowindow.downloads.files[i].filename ? $.infowindow.downloads.files[i].url() : '#')+'" title="' + 
                                         $.infowindow.downloads.files[i].title + 
                                         '"><img src="' + 
-                                        ($.infowindow.downloads.files[i].image || $.infowindow.downloads.image) + 
+                                        dwnlImagePath + ($.infowindow.downloads.files[i].image || $.infowindow.downloads.image || 'download.png') + 
                                         '" /></a>'
                                     );
                                 }
@@ -883,7 +885,7 @@ if (mapConfig) {
                         '<th colspan="2">' + 
                         (dnlBtn.length ? '<span id="sdnlBtn">'+dnlBtn.join("&nbsp;")+'</span>' + '&nbsp;&nbsp;' : '') + 
                         (buttons.length ? '<span id="sshrBtn">'+buttons.join("&nbsp;")+'</span>' : '') + 
-                        '<a id="close-cross" href="#" title="Chiudi"><img src="icons/close.png" /></a>' + 
+                        '<a id="close-cross" href="#" title="Chiudi"><img src="'+globalImagePath+($.infowindow.image || 'close.png')+'" /></a>' + 
                         '</th>' + 
                         '</tr>' + 
                         (geo[region].label ? '<tr>' + 
@@ -2100,7 +2102,7 @@ if (mapConfig) {
                 num = props.data[dataSet.name][dataSet.column];
                     
             if (!layer.feature._selected) layer.setStyle(highlightStyle);
-            if (_.has($,'tooltip') && $.tooltip.active) {
+            if (_.has($,'tooltip') && $.tooltip.active && (!_.has(geoLayer,'tooltip') || geoLayer.tooltip)) {
                 tooltip.setContent((geo[region].label ? props[geo[region].label]+'<br>' : '') + dataSet.label + ': '+ dataSet.formatter(dataSet.column, num));
                 tooltip.setLatLng(layer.getBounds().getCenter());
                 map.showLabel(tooltip);
