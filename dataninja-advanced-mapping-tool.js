@@ -637,7 +637,7 @@ if (mapConfig) {
         parameters.ls = parameters.ls || d3.keys(defaultGeo); // Livelli caricati (default: tutti)
         parameters.ml = parameters.ls[0]; // Livello caricato più alto (PRIVATO)
         parameters.dl = parameters.dl || parameters.ml; // Livello visibile al caricamento
-        parameters.md = parameters.md || (head.mobile ? 'widget' : ''); // Layout
+        parameters.md = parameters.md || (L.Browser.mobile && head.screen.innerWidth < 800 ? 'widget' : ''); // Layout
         d3.select('body').classed(parameters.md,true); // Tengo traccia del layout come classe del body
 
         if (parameters.t) { // Focus su un region (codice istat che si riferisce a tl)
@@ -1999,6 +1999,9 @@ if (mapConfig) {
                 d3.select(div).append('p')
                     .attr('id','devutil-zoom')
                     .text('Zoom level: '+map.getZoom());
+                d3.select(div).append('p')
+                    .attr('id','devutil-screen')
+                    .text('Screen size: ' + head.screen.innerWidth + ' x ' + head.screen.innerHeight);
 
                 d3.select(div)
                     .on("mouseenter", function() {
