@@ -17,7 +17,7 @@ module.exports = function(grunt) {
                 flatten: true,
                 filter: 'isFile'
             },
-            pages: {
+            demo: {
                 expand: true,
                 cwd: '.',
                 src: [
@@ -113,5 +113,7 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-contrib-jshint');
 
     grunt.registerTask('jshint', ['jshint']);
-    grunt.registerTask('default', [/*'jshint',*/ 'copy:main', 'concat', 'uglify', 'cssmin', 'string-replace', 'copy:pages']);
+    grunt.registerTask('default', [/*'jshint',*/ 'copy:main', 'concat', 'uglify', 'cssmin', 'string-replace', 'copy:demo']);
+    grunt.registerTask('test', [/*'jshint',*/ 'copy:main', 'concat', 'copy:demo']);
+
 }

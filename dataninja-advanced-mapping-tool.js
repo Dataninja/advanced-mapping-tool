@@ -247,6 +247,10 @@ if (mapConfig) {
 
             // Infowindow on click can be disabled
             infowindow: true,
+
+            // Fixed zoom on display
+            // If missing or zero, there is no restriction on zoom control
+            zoom: 0,
             
             /* Layer style, with three presets:
              * - default
@@ -771,9 +775,11 @@ if (mapConfig) {
                     })
                     .on("mouseenter", function() {
                         map.scrollWheelZoom.disable();
+                        map.doubleClickZoom.disable();
                     })
                     .on("mouseleave", function() {
                         if (_.has($.map.zoom,'scrollWheel') && $.map.zoom.scrollWheel) map.scrollWheelZoom.enable();
+                        map.doubleClickZoom.enable();
                     });
         	    this.update();
                 return this._div;
@@ -795,11 +801,12 @@ if (mapConfig) {
                         filterKey = dataSet.id,
                         filterValue = props[geo[region].id],
                         buttons = [], btnTitle, btnUrl, btnPlace,
-                        dnlBtn = [];
+                        dnlBtn = [],
+                        globalImagePath = (_.isString($.infowindow.path) ? $.infowindow.path : 'icons/');
                     
                     if (_.has($.infowindow,'shareButtons') && $.infowindow.shareButtons.active) {
 
-                        var imagePath = (_.isString($.infowindow.shareButtons.path) ? $.infowindow.shareButtons.path : 'icons/');
+                        var shareImagePath = (_.isString($.infowindow.shareButtons.path) ? $.infowindow.shareButtons.path : globalImagePath);
                         
                         btnTitle = $.infowindow.shareButtons.title + (region == 'regioni' ? ' in ' : ' a ') + props[geo[region].label];
                         btnUrl = 'http://' + location.hostname + Arg.url(parameters).replace(/&*md=[^&]*/,'').replace(/&{2,}/g,"&");
@@ -815,38 +822,38 @@ if (mapConfig) {
                                 '&via=' + $.infowindow.shareButtons.twitter.via + 
                                 '&text=' + 
                                 encodeURIComponent((_.isFunction($.infowindow.shareButtons.twitter.text) ? $.infowindow.shareButtons.twitter.text(props.data[dataSet.name]) : btnPlace + ' - ' + $.infowindow.shareButtons.twitter.text)) + 
-                                '" target="_blank" title="'+btnTitle+' su Twitter"><img src="'+imagePath+($.infowindow.shareButtons.twitter.image || 'twitter.png')+'" id="ssb-twitter"></a>'
+                                '" target="_blank" title="'+btnTitle+' su Twitter"><img src="'+shareImagePath+($.infowindow.shareButtons.twitter.image || 'twitter.png')+'" id="ssb-twitter"></a>'
                             );
                         }
 
                         if (_.has($.infowindow.shareButtons,'facebook') && $.infowindow.shareButtons.facebook.active) {
                             buttons.push('<a class="ssb" href="http://www.facebook.com/sharer.php?u=' + btnEncUrl + 
-                                '" target="_blank" title="'+btnTitle+' su Facebook"><img src="'+imagePath+($.infowindow.shareButtons.facebook.image || 'facebook.png')+'" id="ssb-facebook"></a>'
+                                '" target="_blank" title="'+btnTitle+' su Facebook"><img src="'+shareImagePath+($.infowindow.shareButtons.facebook.image || 'facebook.png')+'" id="ssb-facebook"></a>'
                             );
                         }
 
                         if (_.has($.infowindow.shareButtons,'gplus') && $.infowindow.shareButtons.gplus.active) {
                             buttons.push('<a class="ssb" href="https://plus.google.com/share?url=' + btnEncUrl + 
-                                '" target="_blank" title="'+btnTitle+' su Google Plus"><img src="'+imagePath+($.infowindow.shareButtons.gplus.image || 'gplus.png')+'" id="ssb-gplus"></a>'
+                                '" target="_blank" title="'+btnTitle+' su Google Plus"><img src="'+shareImagePath+($.infowindow.shareButtons.gplus.image || 'gplus.png')+'" id="ssb-gplus"></a>'
                             );
                         }
 
                         if (_.has($.infowindow.shareButtons,'linkedin') && $.infowindow.shareButtons.linkedin.active) {
                             buttons.push('<a class="ssb" href="http://www.linkedin.com/shareArticle?mini=true&url=' + btnEncUrl + 
-                                '" target="_blank" title="'+btnTitle+' su LinkedIn"><img src="'+imagePath+($.infowindow.shareButtons.linkedin.image || 'linkedin.png')+'" id="ssb-linkedin"></a>'
+                                '" target="_blank" title="'+btnTitle+' su LinkedIn"><img src="'+shareImagePath+($.infowindow.shareButtons.linkedin.image || 'linkedin.png')+'" id="ssb-linkedin"></a>'
                             );
                         }
 
                         if (_.has($.infowindow.shareButtons,'email') && $.infowindow.shareButtons.email.active) {
                             buttons.push('<a class="ssb" href="mailto:?Subject=' + encodeURIComponent((_.isFunction($.infowindow.shareButtons.email.subject) ? $.infowindow.shareButtons.email.subject(props.data[dataSet.name]) : $.infowindow.shareButtons.email.subject + ' | ' + btnPlace)) + 
                                 '&Body=' + encodeURIComponent((_.isFunction($.infowindow.shareButtons.email.body) ? $.infowindow.shareButtons.email.body(props.data[dataSet.name],btnEncUrl) : btnPlace + ' - ' + $.infowindow.shareButtons.email.body + ': ' + btnUrl)) + 
-                                '" target="_blank" title="'+btnTitle+' per email"><img src="'+imagePath+($.infowindow.shareButtons.email.image || 'email.png')+'" id="ssb-email"></a>'
+                                '" target="_blank" title="'+btnTitle+' per email"><img src="'+shareImagePath+($.infowindow.shareButtons.email.image || 'email.png')+'" id="ssb-email"></a>'
                             );
                         }
 
                         if (_.has($.infowindow.shareButtons,'permalink') && $.infowindow.shareButtons.permalink.active) {
                             buttons.push('<a class="ssb" href="' + btnUrl + 
-                                '" target="_blank" title="Permalink"><img src="'+imagePath+($.infowindow.shareButtons.permalink.image || 'link.png')+'" id="ssb-link"></a>'
+                                '" target="_blank" title="Permalink"><img src="'+shareImagePath+($.infowindow.shareButtons.permalink.image || 'link.png')+'" id="ssb-link"></a>'
                             );
                         }
                     }
@@ -854,6 +861,7 @@ if (mapConfig) {
                     if ($.debug) console.log("shareButtons",buttons);
 
                     if (_.has($.infowindow,'downloads') && $.infowindow.downloads.active) {
+                        var dwnlImagePath = (_.isString($.infowindow.downloads.path) ? $.infowindow.downloads.path : globalImagePath);
                         for (i=0; i<$.infowindow.downloads.files.length; i++) {
                             if ($.infowindow.downloads.files[i].active) {
                                 if (!$.infowindow.downloads.files[i].datasets || !$.infowindow.downloads.files[i].datasets.length || _.contains($.infowindow.downloads.files[i].datasets,dataSet.name)) {
@@ -862,7 +870,7 @@ if (mapConfig) {
                                         '" class="dnl" href="'+($.infowindow.downloads.files[i].filename ? $.infowindow.downloads.files[i].url() : '#')+'" title="' + 
                                         $.infowindow.downloads.files[i].title + 
                                         '"><img src="' + 
-                                        ($.infowindow.downloads.files[i].image || $.infowindow.downloads.image) + 
+                                        dwnlImagePath + ($.infowindow.downloads.files[i].image || $.infowindow.downloads.image || 'download.png') + 
                                         '" /></a>'
                                     );
                                 }
@@ -877,7 +885,7 @@ if (mapConfig) {
                         '<th colspan="2">' + 
                         (dnlBtn.length ? '<span id="sdnlBtn">'+dnlBtn.join("&nbsp;")+'</span>' + '&nbsp;&nbsp;' : '') + 
                         (buttons.length ? '<span id="sshrBtn">'+buttons.join("&nbsp;")+'</span>' : '') + 
-                        '<a id="close-cross" href="#" title="Chiudi"><img src="icons/close.png" /></a>' + 
+                        '<a id="close-cross" href="#" title="Chiudi"><img src="'+globalImagePath+($.infowindow.image || 'close.png')+'" /></a>' + 
                         '</th>' + 
                         '</tr>' + 
                         (geo[region].label ? '<tr>' + 
@@ -1041,6 +1049,68 @@ if (mapConfig) {
 
         /*** ***/
 
+        
+        
+        /*** Funzione di ricerca del luogo ***/
+        var osmGeocoder;
+        if (_.has($.controls,'geocoder') && $.controls.geocoder.active) {
+            if (parameters.md != 'widget') {
+                osmGeocoder = new L.Control.OSMGeocoder(
+                    { 
+                        collapsed: $.controls.geocoder.collapsed, 
+                        position: 'topright',
+                        text: $.controls.geocoder.title,
+                        bounds: mapBounds,
+                        email: $.controls.geocoder.email,
+                        type: 'city',
+                        callback: function (results) {
+                            if ($.debug) console.log("osmGeocoderResults",results);
+                            if (results.length) {
+                                var bbox = results[0].boundingbox,
+                                    first = new L.LatLng(bbox[0], bbox[2]),
+                                    second = new L.LatLng(bbox[1], bbox[3]),
+                                    bounds = new L.LatLngBounds([first, second]);
+                                if (_.has($.controls.geocoder,'layer') && $.controls.geocoder.layer) { 
+        		    	            info.update();
+                                    var e = document.createEvent('UIEvents');
+                                    e.initUIEvent('click', true, true, window, 1);
+                                    d3.select("#geomenu-ui #"+$.controls.geocoder.layer).node().dispatchEvent(e);
+                                }
+                                this._map.fitBounds(bounds, { maxZoom: $.controls.geocoder.zoom || null });
+                            }
+                        }
+                    }
+                );
+                    
+                map.addControl(osmGeocoder);
+
+                if (_.has($.controls.geocoder,'autocomplete') && $.controls.geocoder.autocomplete.active) {
+                    osmGeocoder._completely = completely(osmGeocoder._input);
+                    
+                    osmGeocoder._completely.onChange = function (text) {
+                        osmGeocoder._completely.startFrom = text.lastIndexOf(' ')+1;
+                        osmGeocoder._completely.repaint();
+                    };
+
+                    osmGeocoder._completely.input.maxLength = 50; // limit the max number of characters in the input text
+                    
+                    var acFile = $.controls.geocoder.autocomplete.url.call($.controls.geocoder.autocomplete, parameters.t || undefined);
+                    d3[$.controls.geocoder.autocomplete.format](acFile, function(err,res) {
+                        defaultGeo[$.controls.geocoder.layer].list = $.controls.geocoder.autocomplete.transform.call($.controls.geocoder.autocomplete,res);
+                        osmGeocoder._completely.options = defaultGeo[$.controls.geocoder.layer]
+                            .list.map(function(el) { 
+                                return el[geo[$.controls.geocoder.layer].label]; 
+                            });
+                    });
+                }
+            }
+        }
+        
+        if ($.debug) console.log("osmGeocoder",osmGeocoder);
+        /*** ***/
+
+
+
         /*** Fullscreen ***/
         var fullscreen;
         if (_.has($.controls,'fullscreen') && $.controls.fullscreen.active) {
@@ -1052,6 +1122,8 @@ if (mapConfig) {
         if ($.debug) console.log("fullscreen",fullscreen);
 
         /*** ***/
+
+
 
         /*** Logo ***/
         var logo;
@@ -1497,6 +1569,18 @@ if (mapConfig) {
           
         geoMenu.onChange = function(region) {
             if ($.debug) console.log("geoMenuOnChange", arguments, region);
+                
+            var geoLayer = $.geoLayers.filter(function(l) { return (l.type === 'thematic' && l.schema.name === region); })[0];
+
+            if (geoLayer.zoom) {
+                map.setZoom(geoLayer.zoom);
+                map.options.maxZoom = geoLayer.zoom;
+                map.options.minZoom = geoLayer.zoom;
+            } else {
+                map.options.maxZoom = $.map.zoom.max || null;
+                map.options.minZoom = $.map.zoom.min || null;
+            }
+
             data[region][0].active = true;
             for (var i=0; i<data[region].length; i++) {
                 if (i != 0) data[region][i].active = false;
@@ -1893,66 +1977,6 @@ if (mapConfig) {
 
 
 
-        /*** Funzione di ricerca del luogo ***/
-        var osmGeocoder;
-        if (_.has($.controls,'geocoder') && $.controls.geocoder.active) {
-            if (parameters.md != 'widget') {
-                osmGeocoder = new L.Control.OSMGeocoder(
-                    { 
-                        collapsed: $.controls.geocoder.collapsed, 
-                        position: 'topleft',
-                        text: $.controls.geocoder.title,
-                        bounds: mapBounds,
-                        email: $.controls.geocoder.email,
-                        type: 'city',
-                        callback: function (results) {
-                            if ($.debug) console.log("osmGeocoderResults",results);
-                            if (results.length) {
-                                var bbox = results[0].boundingbox,
-                                    first = new L.LatLng(bbox[0], bbox[2]),
-                                    second = new L.LatLng(bbox[1], bbox[3]),
-                                    bounds = new L.LatLngBounds([first, second]);
-                                if (_.has($.controls.geocoder,'layer') && $.controls.geocoder.layer) { 
-        		    	            info.update();
-                                    var e = document.createEvent('UIEvents');
-                                    e.initUIEvent('click', true, true, window, 1);
-                                    d3.select("#geomenu-ui #"+$.controls.geocoder.layer).node().dispatchEvent(e);
-                                }
-                                this._map.fitBounds(bounds, { maxZoom: $.controls.geocoder.zoom });
-                            }
-                        }
-                    }
-                );
-                    
-                map.addControl(osmGeocoder);
-
-                if (_.has($.controls.geocoder,'autocomplete') && $.controls.geocoder.autocomplete.active) {
-                    osmGeocoder._completely = completely(osmGeocoder._input);
-                    
-                    osmGeocoder._completely.onChange = function (text) {
-                        osmGeocoder._completely.startFrom = text.lastIndexOf(' ')+1;
-                        osmGeocoder._completely.repaint();
-                    };
-
-                    osmGeocoder._completely.input.maxLength = 50; // limit the max number of characters in the input text
-                    
-                    var acFile = $.controls.geocoder.autocomplete.url.call($.controls.geocoder.autocomplete, parameters.t || undefined);
-                    d3[$.controls.geocoder.autocomplete.format](acFile, function(err,res) {
-                        defaultGeo[$.controls.geocoder.layer].list = $.controls.geocoder.autocomplete.transform.call($.controls.geocoder.autocomplete,res);
-                        osmGeocoder._completely.options = defaultGeo[$.controls.geocoder.layer]
-                            .list.map(function(el) { 
-                                return el[geo[$.controls.geocoder.layer].label]; 
-                            });
-                    });
-                }
-            }
-        }
-        
-        if ($.debug) console.log("osmGeocoder",osmGeocoder);
-        /*** ***/
-
-
-
         /*** Dev utility ***/
         var devUtil;
         if ($.debug) {
@@ -2078,7 +2102,7 @@ if (mapConfig) {
                 num = props.data[dataSet.name][dataSet.column];
                     
             if (!layer.feature._selected) layer.setStyle(highlightStyle);
-            if (_.has($,'tooltip') && $.tooltip.active) {
+            if (_.has($,'tooltip') && $.tooltip.active && (!_.has(geoLayer,'tooltip') || geoLayer.tooltip)) {
                 tooltip.setContent((geo[region].label ? props[geo[region].label]+'<br>' : '') + dataSet.label + ': '+ dataSet.formatter(dataSet.column, num));
                 tooltip.setLatLng(layer.getBounds().getCenter());
                 map.showLabel(tooltip);

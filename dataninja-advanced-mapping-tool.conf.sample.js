@@ -308,6 +308,15 @@ var mapConfig = {
         // Position respect to map (default 'inside', bottom-right corner)
         position: 'inside',
 
+        // Common path for all icons
+        // If missing, it will be 'icons/'
+        // If empty, you can use absolute path for every icon or different relative paths
+        //path: 'icons/',
+
+        // Close icon
+        // If missing or empty, it will be close.png
+        image: '',
+
         // Default content when no region is selected
         content: {
 
@@ -323,8 +332,19 @@ var mapConfig = {
 
             // Enable or not
             active: false,
+
+            // License of downloadable datasets
             license: 'Creative Commons Attribution <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank">CC-BY 4.0 International</a>.',
-            image: 'icons/download.png',
+            
+            // Common path for all downloads icons
+            // If missing, it will be global path set for infowindow
+            // If empty, you can use absolute path for every icon or different relative paths
+            //path: 'icons/',
+
+            // Same icon for all downloads
+            // If missing or empty, it will be download.png
+            image: '',
+
             files: [
                 {
 
@@ -348,7 +368,7 @@ var mapConfig = {
                     title: '',
 
                     // Download icon for this specific resource
-                    //image: 'icons/download.png'
+                    //image: 'download.png'
                 }
                 // ...
             ]
@@ -368,9 +388,9 @@ var mapConfig = {
             url: '',
 
             // Common path for all icons
-            // If missing, it will be 'icons/'
+            // If missing, it will be global path set for infowindow
             // If empty, you can use absolute path for every icon or different relative paths
-            path: 'icons/',
+            //path: 'icons/',
 
             // Twitter share icon
             twitter: {
