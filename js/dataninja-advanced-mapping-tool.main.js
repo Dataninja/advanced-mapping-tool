@@ -672,6 +672,68 @@
 
         /*** ***/
 
+        
+        
+        /*** Funzione di ricerca del luogo ***/
+        var osmGeocoder;
+        if (_.has($.controls,'geocoder') && $.controls.geocoder.active) {
+            if (parameters.md != 'widget') {
+                osmGeocoder = new L.Control.OSMGeocoder(
+                    { 
+                        collapsed: $.controls.geocoder.collapsed, 
+                        position: 'topright',
+                        text: $.controls.geocoder.title,
+                        bounds: mapBounds,
+                        email: $.controls.geocoder.email,
+                        type: 'city',
+                        callback: function (results) {
+                            if ($.debug) console.log("osmGeocoderResults",results);
+                            if (results.length) {
+                                var bbox = results[0].boundingbox,
+                                    first = new L.LatLng(bbox[0], bbox[2]),
+                                    second = new L.LatLng(bbox[1], bbox[3]),
+                                    bounds = new L.LatLngBounds([first, second]);
+                                if (_.has($.controls.geocoder,'layer') && $.controls.geocoder.layer) { 
+        		    	            info.update();
+                                    var e = document.createEvent('UIEvents');
+                                    e.initUIEvent('click', true, true, window, 1);
+                                    d3.select("#geomenu-ui #"+$.controls.geocoder.layer).node().dispatchEvent(e);
+                                }
+                                this._map.fitBounds(bounds, { maxZoom: $.controls.geocoder.zoom || null });
+                            }
+                        }
+                    }
+                );
+                    
+                map.addControl(osmGeocoder);
+
+                if (_.has($.controls.geocoder,'autocomplete') && $.controls.geocoder.autocomplete.active) {
+                    osmGeocoder._completely = completely(osmGeocoder._input);
+                    
+                    osmGeocoder._completely.onChange = function (text) {
+                        osmGeocoder._completely.startFrom = text.lastIndexOf(' ')+1;
+                        osmGeocoder._completely.repaint();
+                    };
+
+                    osmGeocoder._completely.input.maxLength = 50; // limit the max number of characters in the input text
+                    
+                    var acFile = $.controls.geocoder.autocomplete.url.call($.controls.geocoder.autocomplete, parameters.t || undefined);
+                    d3[$.controls.geocoder.autocomplete.format](acFile, function(err,res) {
+                        defaultGeo[$.controls.geocoder.layer].list = $.controls.geocoder.autocomplete.transform.call($.controls.geocoder.autocomplete,res);
+                        osmGeocoder._completely.options = defaultGeo[$.controls.geocoder.layer]
+                            .list.map(function(el) { 
+                                return el[geo[$.controls.geocoder.layer].label]; 
+                            });
+                    });
+                }
+            }
+        }
+        
+        if ($.debug) console.log("osmGeocoder",osmGeocoder);
+        /*** ***/
+
+
+
         /*** Fullscreen ***/
         var fullscreen;
         if (_.has($.controls,'fullscreen') && $.controls.fullscreen.active) {
@@ -683,6 +745,8 @@
         if ($.debug) console.log("fullscreen",fullscreen);
 
         /*** ***/
+
+
 
         /*** Logo ***/
         var logo;
@@ -1533,66 +1597,6 @@
         dataMenu.addTo(map);
         varMenu.addTo(map);
         geoMenu.onChange(menuGeoLayers[0].schema.name);
-
-
-
-        /*** Funzione di ricerca del luogo ***/
-        var osmGeocoder;
-        if (_.has($.controls,'geocoder') && $.controls.geocoder.active) {
-            if (parameters.md != 'widget') {
-                osmGeocoder = new L.Control.OSMGeocoder(
-                    { 
-                        collapsed: $.controls.geocoder.collapsed, 
-                        position: 'topleft',
-                        text: $.controls.geocoder.title,
-                        bounds: mapBounds,
-                        email: $.controls.geocoder.email,
-                        type: 'city',
-                        callback: function (results) {
-                            if ($.debug) console.log("osmGeocoderResults",results);
-                            if (results.length) {
-                                var bbox = results[0].boundingbox,
-                                    first = new L.LatLng(bbox[0], bbox[2]),
-                                    second = new L.LatLng(bbox[1], bbox[3]),
-                                    bounds = new L.LatLngBounds([first, second]);
-                                if (_.has($.controls.geocoder,'layer') && $.controls.geocoder.layer) { 
-        		    	            info.update();
-                                    var e = document.createEvent('UIEvents');
-                                    e.initUIEvent('click', true, true, window, 1);
-                                    d3.select("#geomenu-ui #"+$.controls.geocoder.layer).node().dispatchEvent(e);
-                                }
-                                this._map.fitBounds(bounds, { maxZoom: $.controls.geocoder.zoom });
-                            }
-                        }
-                    }
-                );
-                    
-                map.addControl(osmGeocoder);
-
-                if (_.has($.controls.geocoder,'autocomplete') && $.controls.geocoder.autocomplete.active) {
-                    osmGeocoder._completely = completely(osmGeocoder._input);
-                    
-                    osmGeocoder._completely.onChange = function (text) {
-                        osmGeocoder._completely.startFrom = text.lastIndexOf(' ')+1;
-                        osmGeocoder._completely.repaint();
-                    };
-
-                    osmGeocoder._completely.input.maxLength = 50; // limit the max number of characters in the input text
-                    
-                    var acFile = $.controls.geocoder.autocomplete.url.call($.controls.geocoder.autocomplete, parameters.t || undefined);
-                    d3[$.controls.geocoder.autocomplete.format](acFile, function(err,res) {
-                        defaultGeo[$.controls.geocoder.layer].list = $.controls.geocoder.autocomplete.transform.call($.controls.geocoder.autocomplete,res);
-                        osmGeocoder._completely.options = defaultGeo[$.controls.geocoder.layer]
-                            .list.map(function(el) { 
-                                return el[geo[$.controls.geocoder.layer].label]; 
-                            });
-                    });
-                }
-            }
-        }
-        
-        if ($.debug) console.log("osmGeocoder",osmGeocoder);
-        /*** ***/
 
 
 
