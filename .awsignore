@@ -1,9 +1,9 @@
 demo/\*
 .git\*
 shapes/\*
-sample\*
-.zip
-.old
+\*sample\*
+\*.zip
+\*.old
 node_modules/\*
 bower_components/\*
 tmp/\*
