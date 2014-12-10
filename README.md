@@ -21,7 +21,9 @@ Edit the configuration file dataninja-advanced-mapping-tool.conf.js accordingly 
 
 View the map browsing to index.html.
 
-You can download the final application to work offline zipping it: `zip -r map.zip . -x \*demo\* -x \*.git\*`.
+You can download the final application to work offline zipping it: `zip -r map.zip . -x@.zipignore`,
+or you can upload it to an [AWS S3 bucket](http://aws.amazon.com/cli/), if you have a working [aws-cli](https://github.com/aws/aws-cli): 
+`bash -f -c 'aws s3 sync . s3://[BUCKET]/[PATH]/ --recursive --exclude $(xargs -a .awsignore | sed "s/ / --exclude /g")'`.
 
 ## For development
 
