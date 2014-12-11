@@ -202,10 +202,10 @@ var mapConfig = {
                 // Menu label for layer entry
                 menu: 'layer1',
 
-                // Key of id values used for join
+                // Key of id values used for joining
                 id: '',
 
-                // Key of label values used for label
+                // Key of label values used for tooltip
                 label: ''
             }
         }

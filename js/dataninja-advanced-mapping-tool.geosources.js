@@ -19,16 +19,14 @@ if (mapConfig) {
             // Complete file name if single file (with extension)
             filename: '',
 
-            // File format (used as extension in file name template for multiple files)
+            // URL generator
             url: function(region, filterKey, filterValue) {
                 return this.domain + 
                     this.path + 
                     (this.filename || (region + (filterKey && filterValue ? '_'+filterKey+'-'+filterValue : '') + "." + this.format));
             },
             
-            /* Callback function of ajax request for custom result transformation
-             * See http://geojson.org/
-             */
+            // Callback function of ajax request for custom result transformation
             transform: function(res) {
                 return res;
             }
