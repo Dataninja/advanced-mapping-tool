@@ -45,12 +45,12 @@ if (mapConfig) {
                                 if (isSecondLevel && options.groups[k] != group) {
                                     g++;
                                     group = options.groups[k];
-                                    tbody += '<tr class="first-level group g'+g+'"><td colspan="2">'+group+'</td></tr>';
+                                    tbody += '<tr class="first-level group g'+g+'"><td colspan="2"><span>'+group+'</span></td></tr>';
                                 }
 
                                 tbody += '<tr class="'+(isSecondLevel ? 'second-level hidden g'+g : 'first-level')+'">' + 
-                                    '<td class="table-key">' + (isBold ? '<b>'+k+'</b>' : k) + '</td>' +
-                                    '<td class="table-value">' + (isBold ? '<b>'+val+'</b>' : val) + '</td>' +
+                                    '<td class="table-key"><span>' + (isBold ? '<b>'+k+'</b>' : k) + '</span></td>' +
+                                    '<td class="table-value"><span>' + (isBold ? '<b>'+val+'</b>' : val) + '</span></td>' +
                                     '</tr>';
                             }
                         }
