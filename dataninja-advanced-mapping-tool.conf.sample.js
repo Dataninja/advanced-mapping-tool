@@ -225,6 +225,11 @@ var mapConfig = {
             transform: function(res) {
                 return res;
             },
+
+            // Custom parse function name from string to number
+            // If missing, formatting is performing by parseInt(v) || parseFloat(v) || v
+            // You can also define a custom function (k,v) { return v; }
+            //parse: 'parseFloat',
            
             // Format specifier for d3.format(), see https://github.com/mbostock/d3/wiki/Formatting#d3_format
             // For string template, see http://docs.python.org/release/3.1.3/library/string.html#formatspec
@@ -232,7 +237,6 @@ var mapConfig = {
             formatter: function(k,v) {
                 return '';
             }, 
-
 
             // Inherits attributes from dataType named here
             type: 'choropleth',
@@ -273,12 +277,7 @@ var mapConfig = {
                 // Columns aggregation
                 groups: {}
                 
-            },
-
-            // Custom parse function name from string to number
-            // If missing, formatting is performing by parseInt(v) || parseFloat(v) || v
-            // You can also define a custom function (k,v) { return v; }
-            //parse: 'parseFloat'
+            }
         }
     ],
 
