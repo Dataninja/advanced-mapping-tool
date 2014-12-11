@@ -114,6 +114,6 @@ module.exports = function(grunt) {
 
     grunt.registerTask('jshint', ['jshint']);
     grunt.registerTask('default', [/*'jshint',*/ 'copy:main', 'concat', 'uglify', 'cssmin', 'string-replace', 'copy:demo']);
-    grunt.registerTask('test', [/*'jshint',*/ 'copy:main', 'concat', 'copy:demo']);
+    grunt.registerTask('test', [/*'jshint',*/ 'copy:main', 'concat', 'cssmin', 'string-replace', 'copy:demo']);
 
 }

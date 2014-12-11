@@ -72,8 +72,11 @@ table {
     border-radius: 0 0 6px 6px
 }
 
-.zebra tbody tr.second-level > td.table-key {
-    padding-left: 1.5em;
+.zebra tbody tr.second-level > td.table-key:before {
+    content: "|-- ";
+    font-family: monospace;
+    font-size: smaller;
+    visibility: hidden;
 }
 
 .zebra tbody tr.second-level.hidden {
@@ -84,10 +87,18 @@ table {
     cursor: pointer;
 }
 
-.zebra tbody tr.group > td:after {
-    content: " (+)";
+.zebra tbody tr.group > td:before {
+    content: "[+] ";
+    font-family: monospace;
+    font-size: smaller;
 }
 
-.zebra tbody tr.group.open > td:after {
-    content: " (-)";
+.zebra tbody tr.group.open > td:before {
+    content: "[-] ";
 }
+
+.zebra tbody tr.group > td:hover > span,
+.zebra tbody tr.group.open > td > span {
+    text-decoration: underline;
+}
+
