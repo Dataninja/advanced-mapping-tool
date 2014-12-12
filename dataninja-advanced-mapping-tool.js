@@ -318,6 +318,8 @@ if (mapConfig) {
          */
         table: function(data, options, formatter, groups) {
             if (!data) return '';
+
+            if (mapConfig.debug) console.log('views',arguments);
             
             /* Default options can be overrided (include and exclude filters are evaluated in this order):
              * - formatter string defines how to format numbers in printing
@@ -575,10 +577,10 @@ if (mapConfig) {
             defaultData[dataSet.schema.name].binsNum = defaultData[dataSet.schema.name].binsNums[0];
 
             // Columns grouping
-            if (_.has(dataSet,'groups') && !_.isEmpty(dataSet.groups)) {
-                for (k in dataSet.groups) {
-                    if (_.has(dataSet.groups,k) && !_.isEmpty(dataSet.groups[k])) {
-                        _.each(dataSet.groups[k], function(el) {
+            if (_.has(dataSet.schema,'groups') && !_.isEmpty(dataSet.schema.groups)) {
+                for (k in dataSet.schema.groups) {
+                    if (_.has(dataSet.schema.groups,k) && !_.isEmpty(dataSet.schema.groups[k])) {
+                        _.each(dataSet.schema.groups[k], function(el) {
                             defaultData[dataSet.schema.name].groups[el] = k;
                         });
                     }
