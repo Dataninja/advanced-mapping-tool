@@ -1877,12 +1877,13 @@ if (mapConfig) {
                 index = index || 0,
                 dataSet = data[region][index],
                 items = [],
+                firstActive = true,
                 group = '';
 
-            for (var i=0; i<dataSet.labels.length; i++) {
-                if (_.has(dataSet.groups,dataSet.labels[i])) {
-                    if (dataSet.groups[dataSet.labels[i]] != group) {
-                        group = dataSet.groups[dataSet.labels[i]];
+            for (var i=0; i<dataSet.columns.length; i++) {
+                if (_.has(dataSet.groups,dataSet.columns[i])) {
+                    if (dataSet.groups[dataSet.columns[i]] != group) {
+                        group = dataSet.groups[dataSet.columns[i]];
                         items.push({ label: group, enabled: false, level: 'first-level' });
                     }
                     items.push({ label: dataSet.labels[i], descr: dataSet.descriptions[i], enabled: true, level: 'second-level' });
@@ -1903,10 +1904,16 @@ if (mapConfig) {
                     .attr("class", function(d,index) {
                         var classText = '';
                         if (index === 0) {
-                            classText = 'first-item active';
+                            classText = 'first-item';
                         } else if (index === items.length-1) {
                             classText = 'last-item';
                         }
+
+                        if (firstActive && d.enabled) {
+                            firstActive = false;
+                            classText += ' active';
+                        }
+
                         return classText + ' ' +
                             d.level + ' ' + 
                             (d.enabled ? 'enabled' : 'disabled'); 
