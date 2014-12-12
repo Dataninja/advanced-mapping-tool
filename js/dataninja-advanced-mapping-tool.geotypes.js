@@ -35,6 +35,9 @@ if (mapConfig) {
             // Infowindow on click can be disabled
             infowindow: true,
 
+            // Tooltip on mouseover can be disabled
+            tooltip: true,
+
             // Fixed zoom on display
             // If missing or zero, there is no restriction on zoom control
             zoom: 0,
@@ -82,6 +85,8 @@ if (mapConfig) {
  *     - active [bool]
  *     - classification [string]
  *     - infowindow [bool]
+ *     - tooltip [bool]
+ *     - zoom [int>0]
  *     - style [object]
  *       - default [object matching http://leafletjs.com/reference.html#geojson-options style structure]
  *       - highlight [object]

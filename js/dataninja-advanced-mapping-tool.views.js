@@ -8,6 +8,8 @@ if (mapConfig) {
          */
         table: function(data, options, formatter, groups) {
             if (!data) return '';
+
+            if (mapConfig.debug) console.log('views',arguments);
             
             /* Default options can be overrided (include and exclude filters are evaluated in this order):
              * - formatter string defines how to format numbers in printing

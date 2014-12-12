@@ -2,6 +2,9 @@ if (mapConfig) {
     // Known sources of data with global setting inherited to datasets with 'source' parameter
     mapConfig.dataSources = {
 
+        // Dataset embedded in the geo layer (no joining with external data)
+        shape: {},
+
         // Local or remote static file
         file: {
 
@@ -84,6 +87,7 @@ if (mapConfig) {
  * Map configuration complete structure:
  *
  * - dataSources [object]
+ *   - shape [empty object]
  *   - file [object]
  *     - domain [string]
  *     - path [string]
