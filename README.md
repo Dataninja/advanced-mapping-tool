@@ -231,7 +231,7 @@ Global inherited configurations:
 ## Datasets
 
 An array of objects descriping datasets available to the user. Two important attributes define the typology of layers: 
-**type** (only *choropleth* is supported at the moment) and **source** (*file* and *dkan* string values are supported).
+**type** (only *choropleth* is supported at the moment) and **source** (*shape*, *file* and *dkan* string values are supported).
 Their specific attributes and options are inherited by the dataset and can be overrided.
 
 You can customize three functions that act to the loaded dataset in reading and writing phases.
@@ -300,9 +300,14 @@ Global inherited configurations:
 
 ### Dataset sources
 
+#### shape
+
+No external files, data are embedded in the geo layer features' properties.
+No inherited configurations.
+
 #### file
 
-Equal to the geographic file source definition. See the *Geographic sources* > *file* section.
+See the *Geographic sources* > *file* section.
 
 #### dkan
 
