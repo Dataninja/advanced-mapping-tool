@@ -2091,7 +2091,7 @@ if (mapConfig) {
             if (feature._selected) {
                 _.extend(currentStyle,geoLayer.style.selected);
             }
-            currentStyle.fillColor = (_.has(feature.properties.data,dataSet.name) ? getColor(feature.properties.data[dataSet.name][dataSet.column], dataSet.bins, dataSet.palette) : 'transparent');
+            currentStyle.fillColor = (_.has(feature.properties._data,dataSet.name) ? getColor(feature.properties._data[dataSet.name][dataSet.column], dataSet.bins, dataSet.palette) : 'transparent');
 	    	return currentStyle;
     	}
         /*** ***/
@@ -2184,15 +2184,15 @@ if (mapConfig) {
             var geoID, dataID;
             for (var i=0; i<geo[region].resource.length; i++) { // Ciclo sui territori del layer
                 geoID = geo[region].resource[i].properties[geo[region].id];
-                geo[region].resource[i].properties.data = {};
+                geo[region].resource[i].properties._data = {};
                 for (var h=0; h<data[region].length; h++) { // Ciclo sui dataset associati al layer
                     data[region][h].active = !h;
                     if (!data[region][h].id) {
                         data[region][h].resource.push(_.clone(geo[region].resource[i].properties));
-                        geo[region].resource[i].properties.data[data[region][h].name] = data[region][h].resource[i];
-                        for (var k in geo[region].resource[i].properties.data[data[region][h].name]) {
-                            if (_.has(geo[region].resource[i].properties.data[data[region][h].name],k)) {
-                                geo[region].resource[i].properties.data[data[region][h].name][k] = data[region][h].parse(k,geo[region].resource[i].properties.data[data[region][h].name][k]);
+                        geo[region].resource[i].properties._data[data[region][h].name] = data[region][h].resource[i];
+                        for (var k in geo[region].resource[i].properties._data[data[region][h].name]) {
+                            if (_.has(geo[region].resource[i].properties._data[data[region][h].name],k)) {
+                                geo[region].resource[i].properties._data[data[region][h].name][k] = data[region][h].parse(k,geo[region].resource[i].properties._data[data[region][h].name][k]);
                             }
                         }
                         geo[region].resource[i].properties._layer = region;
@@ -2200,10 +2200,10 @@ if (mapConfig) {
                         for (var j=0; j<data[region][h].resource.length; j++) { // Ciclo sulle righe del dataset
                             var dataID = data[region][h].resource[j][data[region][h].id];
                             if (dataID == geoID) {
-                                geo[region].resource[i].properties.data[data[region][h].name] = data[region][h].resource[j];
-                                for (var k in geo[region].resource[i].properties.data[data[region][h].name]) {
-                                    if (_.has(geo[region].resource[i].properties.data[data[region][h].name],k)) {
-                                        geo[region].resource[i].properties.data[data[region][h].name][k] = data[region][h].parse(k,geo[region].resource[i].properties.data[data[region][h].name][k]);
+                                geo[region].resource[i].properties._data[data[region][h].name] = data[region][h].resource[j];
+                                for (var k in geo[region].resource[i].properties._data[data[region][h].name]) {
+                                    if (_.has(geo[region].resource[i].properties._data[data[region][h].name],k)) {
+                                        geo[region].resource[i].properties._data[data[region][h].name][k] = data[region][h].parse(k,geo[region].resource[i].properties._data[data[region][h].name][k]);
                                     }
                                 }
                                 geo[region].resource[i].properties._layer = region;
@@ -2211,7 +2211,7 @@ if (mapConfig) {
                         }
                     }
                 }
-                if (!d3.keys(geo[region].resource[i].properties.data).length) {
+                if (!d3.keys(geo[region].resource[i].properties._data).length) {
                     geo[region].resource.splice(i,1);
                     i--;
                 }
