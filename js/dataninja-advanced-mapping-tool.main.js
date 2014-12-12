@@ -446,7 +446,7 @@
                             buttons.push('<a class="ssb" href="http://twitter.com/share?url=' + btnEncUrl + 
                                 '&via=' + $.infowindow.shareButtons.twitter.via + 
                                 '&text=' + 
-                                encodeURIComponent((_.isFunction($.infowindow.shareButtons.twitter.text) ? $.infowindow.shareButtons.twitter.text(props.data[dataSet.name]) : btnPlace + ' - ' + $.infowindow.shareButtons.twitter.text)) + 
+                                encodeURIComponent((_.isFunction($.infowindow.shareButtons.twitter.text) ? $.infowindow.shareButtons.twitter.text(props._data[dataSet.name]) : btnPlace + ' - ' + $.infowindow.shareButtons.twitter.text)) + 
                                 '" target="_blank" title="'+btnTitle+' su Twitter"><img src="'+shareImagePath+($.infowindow.shareButtons.twitter.image || 'twitter.png')+'" id="ssb-twitter"></a>'
                             );
                         }
@@ -470,8 +470,8 @@
                         }
 
                         if (_.has($.infowindow.shareButtons,'email') && $.infowindow.shareButtons.email.active) {
-                            buttons.push('<a class="ssb" href="mailto:?Subject=' + encodeURIComponent((_.isFunction($.infowindow.shareButtons.email.subject) ? $.infowindow.shareButtons.email.subject(props.data[dataSet.name]) : $.infowindow.shareButtons.email.subject + ' | ' + btnPlace)) + 
-                                '&Body=' + encodeURIComponent((_.isFunction($.infowindow.shareButtons.email.body) ? $.infowindow.shareButtons.email.body(props.data[dataSet.name],btnEncUrl) : btnPlace + ' - ' + $.infowindow.shareButtons.email.body + ': ' + btnUrl)) + 
+                            buttons.push('<a class="ssb" href="mailto:?Subject=' + encodeURIComponent((_.isFunction($.infowindow.shareButtons.email.subject) ? $.infowindow.shareButtons.email.subject(props._data[dataSet.name]) : $.infowindow.shareButtons.email.subject + ' | ' + btnPlace)) + 
+                                '&Body=' + encodeURIComponent((_.isFunction($.infowindow.shareButtons.email.body) ? $.infowindow.shareButtons.email.body(props._data[dataSet.name],btnEncUrl) : btnPlace + ' - ' + $.infowindow.shareButtons.email.body + ': ' + btnUrl)) + 
                                 '" target="_blank" title="'+btnTitle+' per email"><img src="'+shareImagePath+($.infowindow.shareButtons.email.image || 'email.png')+'" id="ssb-email"></a>'
                             );
                         }
@@ -535,7 +535,7 @@
 
                     var tbody;
                     if (_.has($.infowindow,'view') && $.infowindow.view.active && _.has($.viewTypes,$.infowindow.view.type)) {
-                        tbody = $.viewTypes[$.infowindow.view.type](props.data[dataSet.name], $.infowindow.view.options, dataSet.formatter, dataSet.groups);
+                        tbody = $.viewTypes[$.infowindow.view.type](props._data[dataSet.name], $.infowindow.view.options, dataSet.formatter, dataSet.groups);
                         if (!(tbody.search('<tbody>') > -1)) {
                             tbody = '<tbody>' + tbody + '</tbody>';
                         }
@@ -1727,7 +1727,7 @@
                 geoLayer = $.geoLayers.filter(function(l) { return (l.type === 'thematic' && l.schema.name === region); })[0],
                 dataSet = data[region].filter(function(el) { return el.active; })[0],
                 highlightStyle = geoLayer.style.highlight,
-                num = props.data[dataSet.name][dataSet.column];
+                num = props._data[dataSet.name][dataSet.column];
                     
             if (!layer.feature._selected) layer.setStyle(highlightStyle);
             if (_.has($,'tooltip') && $.tooltip.active && (!_.has(geoLayer,'tooltip') || geoLayer.tooltip)) {
