@@ -150,7 +150,7 @@
                 defaultGeo[$.geoLayers[i].schema.name] = {
                     id: $.geoLayers[i].schema.id,
                     label: $.geoLayers[i].schema.label,
-                    resource: null,
+                    resource: [],
                     list: []
                 };
             }
@@ -169,7 +169,7 @@
             defaultData[dataSet.schema.name] = {
                 name: dataSet.schema.name || _.uniqueId('dataset-'),
                 layer: dataSet.schema.layer,
-                id: dataSet.schema.id,
+                id: (dataSet.source != 'shape' ? dataSet.schema.id || undefined : undefined),
                 groups: {},
                 columns: (_.has(dataSet.schema,'menu') && dataSet.schema.menu.length ? dataSet.schema.menu.map(function(el) { return el.column; }) : null),
                 labels: (_.has(dataSet.schema,'menu') && dataSet.schema.menu.length ? dataSet.schema.menu.map(function(el) { return el.label || el.column; }) : null),
@@ -178,7 +178,7 @@
                 resourceId: dataSet.resourceId, // HMMM
                 palette: dataSet.palette || 'Reds',
                 transform: dataSet.transform || function(k,v) { return v; },
-                resource: null,
+                resource: [],
                 binsNums: (_.has(dataSet.schema,'menu') && dataSet.schema.menu.length ? dataSet.schema.menu.map(function(el) { return el.bins || dataSet.bins; }) : null),
                 bins: [],
                 ranges: [],
@@ -446,7 +446,7 @@
                             buttons.push('<a class="ssb" href="http://twitter.com/share?url=' + btnEncUrl + 
                                 '&via=' + $.infowindow.shareButtons.twitter.via + 
                                 '&text=' + 
-                                encodeURIComponent((_.isFunction($.infowindow.shareButtons.twitter.text) ? $.infowindow.shareButtons.twitter.text(props.data[dataSet.name]) : btnPlace + ' - ' + $.infowindow.shareButtons.twitter.text)) + 
+                                encodeURIComponent((_.isFunction($.infowindow.shareButtons.twitter.text) ? $.infowindow.shareButtons.twitter.text(props._data[dataSet.name]) : btnPlace + ' - ' + $.infowindow.shareButtons.twitter.text)) + 
                                 '" target="_blank" title="'+btnTitle+' su Twitter"><img src="'+shareImagePath+($.infowindow.shareButtons.twitter.image || 'twitter.png')+'" id="ssb-twitter"></a>'
                             );
                         }
@@ -470,8 +470,8 @@
                         }
 
                         if (_.has($.infowindow.shareButtons,'email') && $.infowindow.shareButtons.email.active) {
-                            buttons.push('<a class="ssb" href="mailto:?Subject=' + encodeURIComponent((_.isFunction($.infowindow.shareButtons.email.subject) ? $.infowindow.shareButtons.email.subject(props.data[dataSet.name]) : $.infowindow.shareButtons.email.subject + ' | ' + btnPlace)) + 
-                                '&Body=' + encodeURIComponent((_.isFunction($.infowindow.shareButtons.email.body) ? $.infowindow.shareButtons.email.body(props.data[dataSet.name],btnEncUrl) : btnPlace + ' - ' + $.infowindow.shareButtons.email.body + ': ' + btnUrl)) + 
+                            buttons.push('<a class="ssb" href="mailto:?Subject=' + encodeURIComponent((_.isFunction($.infowindow.shareButtons.email.subject) ? $.infowindow.shareButtons.email.subject(props._data[dataSet.name]) : $.infowindow.shareButtons.email.subject + ' | ' + btnPlace)) + 
+                                '&Body=' + encodeURIComponent((_.isFunction($.infowindow.shareButtons.email.body) ? $.infowindow.shareButtons.email.body(props._data[dataSet.name],btnEncUrl) : btnPlace + ' - ' + $.infowindow.shareButtons.email.body + ': ' + btnUrl)) + 
                                 '" target="_blank" title="'+btnTitle+' per email"><img src="'+shareImagePath+($.infowindow.shareButtons.email.image || 'email.png')+'" id="ssb-email"></a>'
                             );
                         }
@@ -535,7 +535,7 @@
 
                     var tbody;
                     if (_.has($.infowindow,'view') && $.infowindow.view.active && _.has($.viewTypes,$.infowindow.view.type)) {
-                        tbody = $.viewTypes[$.infowindow.view.type](props.data[dataSet.name], $.infowindow.view.options, dataSet.formatter, dataSet.groups);
+                        tbody = $.viewTypes[$.infowindow.view.type](props._data[dataSet.name], $.infowindow.view.options, dataSet.formatter, dataSet.groups);
                         if (!(tbody.search('<tbody>') > -1)) {
                             tbody = '<tbody>' + tbody + '</tbody>';
                         }
@@ -1709,7 +1709,7 @@
             if (feature._selected) {
                 _.extend(currentStyle,geoLayer.style.selected);
             }
-            currentStyle.fillColor = (_.has(feature.properties.data,dataSet.name) ? getColor(feature.properties.data[dataSet.name][dataSet.column], dataSet.bins, dataSet.palette) : 'transparent');
+            currentStyle.fillColor = (_.has(feature.properties._data,dataSet.name) ? getColor(feature.properties._data[dataSet.name][dataSet.column], dataSet.bins, dataSet.palette) : 'transparent');
 	    	return currentStyle;
     	}
         /*** ***/
@@ -1727,7 +1727,7 @@
                 geoLayer = $.geoLayers.filter(function(l) { return (l.type === 'thematic' && l.schema.name === region); })[0],
                 dataSet = data[region].filter(function(el) { return el.active; })[0],
                 highlightStyle = geoLayer.style.highlight,
-                num = props.data[dataSet.name][dataSet.column];
+                num = props._data[dataSet.name][dataSet.column];
                     
             if (!layer.feature._selected) layer.setStyle(highlightStyle);
             if (_.has($,'tooltip') && $.tooltip.active && (!_.has(geoLayer,'tooltip') || geoLayer.tooltip)) {
@@ -1802,23 +1802,34 @@
             var geoID, dataID;
             for (var i=0; i<geo[region].resource.length; i++) { // Ciclo sui territori del layer
                 geoID = geo[region].resource[i].properties[geo[region].id];
-                geo[region].resource[i].properties.data = {};
+                geo[region].resource[i].properties._data = {};
                 for (var h=0; h<data[region].length; h++) { // Ciclo sui dataset associati al layer
                     data[region][h].active = !h;
-                    for (var j=0; j<data[region][h].resource.length; j++) { // Ciclo sulle righe del dataset
-                        var dataID = data[region][h].resource[j][data[region][h].id];
-                        if (dataID == geoID) {
-                            geo[region].resource[i].properties.data[data[region][h].name] = data[region][h].resource[j];
-                            for (var k in geo[region].resource[i].properties.data[data[region][h].name]) {
-                                if (_.has(geo[region].resource[i].properties.data[data[region][h].name],k)) {
-                                    geo[region].resource[i].properties.data[data[region][h].name][k] = data[region][h].parse(k,geo[region].resource[i].properties.data[data[region][h].name][k]);
-                                }
+                    if (!data[region][h].id) {
+                        data[region][h].resource.push(_.clone(geo[region].resource[i].properties));
+                        geo[region].resource[i].properties._data[data[region][h].name] = data[region][h].resource[i];
+                        for (var k in geo[region].resource[i].properties._data[data[region][h].name]) {
+                            if (_.has(geo[region].resource[i].properties._data[data[region][h].name],k)) {
+                                geo[region].resource[i].properties._data[data[region][h].name][k] = data[region][h].parse(k,geo[region].resource[i].properties._data[data[region][h].name][k]);
                             }
-                            geo[region].resource[i].properties._layer = region;
+                        }
+                        geo[region].resource[i].properties._layer = region;
+                    } else {
+                        for (var j=0; j<data[region][h].resource.length; j++) { // Ciclo sulle righe del dataset
+                            var dataID = data[region][h].resource[j][data[region][h].id];
+                            if (dataID == geoID) {
+                                geo[region].resource[i].properties._data[data[region][h].name] = data[region][h].resource[j];
+                                for (var k in geo[region].resource[i].properties._data[data[region][h].name]) {
+                                    if (_.has(geo[region].resource[i].properties._data[data[region][h].name],k)) {
+                                        geo[region].resource[i].properties._data[data[region][h].name][k] = data[region][h].parse(k,geo[region].resource[i].properties._data[data[region][h].name][k]);
+                                    }
+                                }
+                                geo[region].resource[i].properties._layer = region;
+                            }
                         }
                     }
                 }
-                if (!d3.keys(geo[region].resource[i].properties.data).length) {
+                if (!d3.keys(geo[region].resource[i].properties._data).length) {
                     geo[region].resource.splice(i,1);
                     i--;
                 }
@@ -1896,7 +1907,7 @@
             if ($.debug) console.log("geoLayer",geoLayer);
             if ($.debug) console.log("dataSets",dataSets);
 
-            if (!geo[region].resource) { 
+            if (!geo[region].resource.length) { 
                 
                 map.spin(true);
                 
@@ -1907,9 +1918,11 @@
                 if ($.debug) console.log("geoPath",geoPath);
                 
                 for (var i=0; i<dataSets.length; i++) {
-                    dataPath = dataSets[i].url.call(dataSets[i], region, (parameters.t ? defaultData[parameters.tl].id : undefined), parameters.t || undefined); // CHECK!
-                    q.defer(d3[dataSets[i].format], dataPath); // Dati -> Loop with condition
-                    if ($.debug) console.log("dataPath", i, dataPath);
+                    if (dataSets[i].source != 'shape') {
+                        dataPath = dataSets[i].url.call(dataSets[i], region, (parameters.t ? defaultData[parameters.tl].id : undefined), parameters.t || undefined); // CHECK!
+                        q.defer(d3[dataSets[i].format], dataPath); // Dati -> Loop with condition
+                        if ($.debug) console.log("dataPath", i, dataPath);
+                    }
                 }
 
                 q.await(function(err, geojs) { // Access results by arguments
