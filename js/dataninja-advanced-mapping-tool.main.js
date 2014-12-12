@@ -150,7 +150,7 @@
                 defaultGeo[$.geoLayers[i].schema.name] = {
                     id: $.geoLayers[i].schema.id,
                     label: $.geoLayers[i].schema.label,
-                    resource: null,
+                    resource: [],
                     list: []
                 };
             }
@@ -169,7 +169,7 @@
             defaultData[dataSet.schema.name] = {
                 name: dataSet.schema.name || _.uniqueId('dataset-'),
                 layer: dataSet.schema.layer,
-                id: dataSet.schema.id,
+                id: (dataSet.source != 'shape' ? dataSet.schema.id || undefined : undefined),
                 groups: {},
                 columns: (_.has(dataSet.schema,'menu') && dataSet.schema.menu.length ? dataSet.schema.menu.map(function(el) { return el.column; }) : null),
                 labels: (_.has(dataSet.schema,'menu') && dataSet.schema.menu.length ? dataSet.schema.menu.map(function(el) { return el.label || el.column; }) : null),
@@ -178,7 +178,7 @@
                 resourceId: dataSet.resourceId, // HMMM
                 palette: dataSet.palette || 'Reds',
                 transform: dataSet.transform || function(k,v) { return v; },
-                resource: null,
+                resource: [],
                 binsNums: (_.has(dataSet.schema,'menu') && dataSet.schema.menu.length ? dataSet.schema.menu.map(function(el) { return el.bins || dataSet.bins; }) : null),
                 bins: [],
                 ranges: [],
@@ -1805,16 +1805,27 @@
                 geo[region].resource[i].properties.data = {};
                 for (var h=0; h<data[region].length; h++) { // Ciclo sui dataset associati al layer
                     data[region][h].active = !h;
-                    for (var j=0; j<data[region][h].resource.length; j++) { // Ciclo sulle righe del dataset
-                        var dataID = data[region][h].resource[j][data[region][h].id];
-                        if (dataID == geoID) {
-                            geo[region].resource[i].properties.data[data[region][h].name] = data[region][h].resource[j];
-                            for (var k in geo[region].resource[i].properties.data[data[region][h].name]) {
-                                if (_.has(geo[region].resource[i].properties.data[data[region][h].name],k)) {
-                                    geo[region].resource[i].properties.data[data[region][h].name][k] = data[region][h].parse(k,geo[region].resource[i].properties.data[data[region][h].name][k]);
-                                }
+                    if (!data[region][h].id) {
+                        data[region][h].resource.push(_.clone(geo[region].resource[i].properties));
+                        geo[region].resource[i].properties.data[data[region][h].name] = data[region][h].resource[i];
+                        for (var k in geo[region].resource[i].properties.data[data[region][h].name]) {
+                            if (_.has(geo[region].resource[i].properties.data[data[region][h].name],k)) {
+                                geo[region].resource[i].properties.data[data[region][h].name][k] = data[region][h].parse(k,geo[region].resource[i].properties.data[data[region][h].name][k]);
                             }
-                            geo[region].resource[i].properties._layer = region;
+                        }
+                        geo[region].resource[i].properties._layer = region;
+                    } else {
+                        for (var j=0; j<data[region][h].resource.length; j++) { // Ciclo sulle righe del dataset
+                            var dataID = data[region][h].resource[j][data[region][h].id];
+                            if (dataID == geoID) {
+                                geo[region].resource[i].properties.data[data[region][h].name] = data[region][h].resource[j];
+                                for (var k in geo[region].resource[i].properties.data[data[region][h].name]) {
+                                    if (_.has(geo[region].resource[i].properties.data[data[region][h].name],k)) {
+                                        geo[region].resource[i].properties.data[data[region][h].name][k] = data[region][h].parse(k,geo[region].resource[i].properties.data[data[region][h].name][k]);
+                                    }
+                                }
+                                geo[region].resource[i].properties._layer = region;
+                            }
                         }
                     }
                 }
@@ -1896,7 +1907,7 @@
             if ($.debug) console.log("geoLayer",geoLayer);
             if ($.debug) console.log("dataSets",dataSets);
 
-            if (!geo[region].resource) { 
+            if (!geo[region].resource.length) { 
                 
                 map.spin(true);
                 
@@ -1907,9 +1918,11 @@
                 if ($.debug) console.log("geoPath",geoPath);
                 
                 for (var i=0; i<dataSets.length; i++) {
-                    dataPath = dataSets[i].url.call(dataSets[i], region, (parameters.t ? defaultData[parameters.tl].id : undefined), parameters.t || undefined); // CHECK!
-                    q.defer(d3[dataSets[i].format], dataPath); // Dati -> Loop with condition
-                    if ($.debug) console.log("dataPath", i, dataPath);
+                    if (dataSets[i].source != 'shape') {
+                        dataPath = dataSets[i].url.call(dataSets[i], region, (parameters.t ? defaultData[parameters.tl].id : undefined), parameters.t || undefined); // CHECK!
+                        q.defer(d3[dataSets[i].format], dataPath); // Dati -> Loop with condition
+                        if ($.debug) console.log("dataPath", i, dataPath);
+                    }
                 }
 
                 q.await(function(err, geojs) { // Access results by arguments
